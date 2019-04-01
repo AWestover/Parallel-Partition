@@ -1,4 +1,5 @@
 /*
+ *
  * Runs timing (and correctness) tests on the partition functions in partition.cc/h
  */
 
@@ -19,6 +20,7 @@
 #include <string>
 #include "partition.h"
 #include "libc_partition.h"
+#include "cache_friendly_partition.h"
 
 
 using namespace std;
@@ -112,6 +114,16 @@ int64_t test_partition(int64_t in_place, uint64_t n, bool more_succ, uint64_t nu
     gettimeofday(&tp, NULL);
     long int ms1 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
     high_span_partition(array, n, 50);
+    gettimeofday(&tp, NULL);
+    long int ms2 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    answer = ms2 - ms1;
+  }
+  if(in_place == 4) {
+	gettimeofday(&tp, NULL);
+    long int ms1 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+	cout << "arrived at line 124" << endl;
+	cout << "n= " << n << endl;
+    groupedPartition(array, n, 50);
     gettimeofday(&tp, NULL);
     long int ms2 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
     answer = ms2 - ms1;
@@ -226,11 +238,13 @@ void parallel_partition_tests() {
       <<endl<<"{a={mark=o,draw=blue}}]"<<endl;
   
   
-  for (int64_t i = 0; i <= 3; i++) {
+  // ALEK ALEK edditted this
+  for (int64_t i = 4; i <= 4; i++) {
     if (i == 0) cout<<"%% In-Place"<<endl;
     if (i == 1) cout<<"%% In-Place Prefix-Sum"<<endl;
     if (i == 2) cout<<"%% Out-of-Place"<<endl;
     if (i == 3) cout<<"%% High-Span"<<endl;
+	if (i == 4) cout<<"%% Cache-Friendly"<<endl;
     cout<<"\\addplot coordinates {";
     for (int64_t num_cores = 1; num_cores <= NUM_THREADS_DEFAULT; num_cores++) {
       double millisecs = test_partition_multiple_trials(i, MAX_INPUT_SIZE, NUM_TRIALS, false, num_cores);
@@ -623,7 +637,9 @@ void bandwidth_bound_tests() {
 }
 
 int main() {
-  srand (time(NULL)); // initialize random seed
+  srand(12);
+  // ALEK ALEK ALEK 
+  // srand (time(NULL)); // initialize random seed
   // BLOCK_SIZE needs to be a power of two:
   assert(((BLOCK_SIZE - 1) & BLOCK_SIZE) == 0);
   // cout<<test_partition(-1, (1 << 28), false, NUM_THREADS_DEFAULT)<<endl;
@@ -641,6 +657,7 @@ int main() {
   // run_parallel_partition_for_cache_misses (0, (1 << 28), false);
   //return 0;
   
+  test_partition(4, (1<<18), false, NUM_THREADS_DEFAULT);
   // We begin by running tests of correctness on the functions
   test_prefix_sum();
   test_libc_quicksort((1<<20));
@@ -651,11 +668,14 @@ int main() {
   test_partition(0, 141123, true, NUM_THREADS_DEFAULT); // This is the case where the value of more_succ changes which case of the code is run
   test_partition(1, 141123, false, NUM_THREADS_DEFAULT);
   test_partition(2, 141123, false, NUM_THREADS_DEFAULT);
+  test_partition(4, 141123, false, NUM_THREADS_DEFAULT);
+  test_partition(3, 141123, false, NUM_THREADS_DEFAULT);
+
 #ifdef USE_CILK
   parallel_partition_tests(); // Run the parallel tests!
   parallel_partition_tests_two(); // Run the parallel tests!
   parallel_sort_tests(); 
-  bandwidth_bound_tests();
+  //bandwidth_bound_tests();
 #endif
 #ifdef RUN_SERIAL
   serial_partition_tests(); // Run the serial tests!
