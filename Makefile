@@ -14,3 +14,4 @@ main.o: main.cc params.h
 	$(CC)  -c  main.cc $(CFLAGS)
 clean:
 	rm -f main *.o
+	rm -rf main.dSYM

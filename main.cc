@@ -121,8 +121,8 @@ int64_t test_partition(int64_t in_place, uint64_t n, bool more_succ, uint64_t nu
   if(in_place == 4) {
 	gettimeofday(&tp, NULL);
     long int ms1 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-	cout << "arrived at line 124" << endl;
-	cout << "n= " << n << endl;
+	//cout << "arrived at line 124" << endl;
+	//cout << "n= " << n << endl;
     groupedPartition(array, n, 50);
     gettimeofday(&tp, NULL);
     long int ms2 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
@@ -637,7 +637,7 @@ void bandwidth_bound_tests() {
 }
 
 int main() {
-  srand(12);
+  srand(705);
   // ALEK ALEK ALEK 
   // srand (time(NULL)); // initialize random seed
   // BLOCK_SIZE needs to be a power of two:

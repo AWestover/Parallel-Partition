@@ -122,6 +122,10 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 		// need to partition A from (s*b)*numGroups (ie sb(n/(sb))) to n
 		// assumption: there aren't that many that hang over the edge
 		// so we can probably just take care of them by sticking them after vmin
+		//
+		//
+		// BUG BUG BUG BUG BUG BUG
+		/*
 		for (int64_t i = s*b*numGroups; i < n; ++i) {
 			if(A[i] <= pivotVal){
 				while(A[vmin] <= pivotVal) {
@@ -134,6 +138,29 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 		}
 		if(A[vmin]<=pivotVal)
 			vmin += 1;
+		*/
+
+		// Question: should I be worried about infinite loops with this? What if it repeatedly pushes vmax up a bunch? does numGroups coarseness thing fix this?
+		int64_t leftOverStart = s*b*numGroups;
+		int64_t leftOverSize = n - leftOverStart;
+		int64_t successorPartitionSize = leftOverStart - vmax;
+		if (leftOverSize < successorPartitionSize) { // llllllllll ?????????? hhhhhhhhhhhhhhhhhhhhhhh  ???? swap the ?s with the early hs
+			for(int64_t i = 0; i < leftOverSize; i++){
+				int64_t tmp = A[leftOverStart + i];
+				A[leftOverStart + i] = A[vmax];
+				A[vmax] = tmp; 
+				vmax += 1;
+			}
+		}
+		else { // llllllllll ?????????? hhhh ???????? swap hs with the back of the extra section
+			for(int64_t i = 0; i < successorPartitionSize; i++){
+				int64_t tmp = A[n - 1 - i];
+				A[n - 1 - i] = A[vmax];
+				A[vmax] = tmp; 
+				vmax += 1;
+			}
+			vmax = n - 1 - successorPartitionSize; /// HEY ALEK MAKE SURE THIS IS RIGHT, it is like 12 right now so this might be off by 1 or something
+		}
 
 		// solve the smaller subproblem, which starts at vmin, and has size vmax - vmin
 		int64_t middle = vmin + groupedPartitionRecursive(A+vmin, vmax-vmin, pivotVal, computeS(vmax-vmin, delta), logB, delta);
