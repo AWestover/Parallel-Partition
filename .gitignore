@@ -1,0 +1,6 @@
+*.o
+*.out
+*.aux
+*.log
+main.dSYM/
+*.pyc
