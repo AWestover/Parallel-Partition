@@ -121,8 +121,6 @@ int64_t test_partition(int64_t in_place, uint64_t n, bool more_succ, uint64_t nu
   if(in_place == 4) {
 	gettimeofday(&tp, NULL);
     long int ms1 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-	//cout << "arrived at line 124" << endl;
-	//cout << "n= " << n << endl;
     groupedPartition(array, n, 50);
     gettimeofday(&tp, NULL);
     long int ms2 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
@@ -238,8 +236,7 @@ void parallel_partition_tests() {
       <<endl<<"{a={mark=o,draw=blue}}]"<<endl;
   
   
-  // ALEK ALEK edditted this
-  for (int64_t i = 4; i <= 4; i++) {
+  for (int64_t i = 0; i <= 4; i++) {
     if (i == 0) cout<<"%% In-Place"<<endl;
     if (i == 1) cout<<"%% In-Place Prefix-Sum"<<endl;
     if (i == 2) cout<<"%% Out-of-Place"<<endl;
@@ -287,12 +284,13 @@ void parallel_partition_tests_two() {
       <<endl<<"scatter/classes=%"
       <<endl<<"{a={mark=o,draw=blue}}]"<<endl;
   vector<double> baselines(100, 0);
-  for (int64_t i = -1; i <= 3; i+=1) {
+  for (int64_t i = -1; i <= 4; i+=1) {
     if (i == -1) cout<<"%% Serial Baseline"<<endl<<"%% baselines in ms: ";
     if (i == 0) cout<<"%% In-Place"<<endl;
     if (i == 1) cout<<"%% In-Place Prefix-Sum"<<endl;
     if (i == 2) cout<<"%% Out-of-Place"<<endl;
     if (i == 3) cout<<"%% High-Span"<<endl;
+	if (i == 4) cout<<"%% Cache-Friendly"<<endl;
     cout<<"\\addplot coordinates {";
     for (int64_t input_size_log = 23; ((uint64_t)1 << input_size_log) <= MAX_INPUT_SIZE; input_size_log++) {
       int64_t input_size = (1 << input_size_log);
@@ -340,12 +338,13 @@ void serial_partition_tests() {
       <<endl<<"{a={mark=o,draw=blue}}]"<<endl;
 
   vector<double> baselines(100, 0);
-  for (int64_t i = -1; i <= 3; i++) {
+  for (int64_t i = -1; i <= 4; i++) {
     if (i == -1) cout<<"%% Serial Baseline"<<endl<<"%% baselines in ms: ";
     if (i == 0) cout<<"%% In-Place"<<endl;
     if (i == 1) cout<<"%% In-Place Prefix-Sum"<<endl;
     if (i == 2) cout<<"%% Out-of-Place"<<endl;
     if (i == 3) cout<<"%% High-Span"<<endl;
+	if (i == 4) cout<<"%% Cache-Friendly"<<endl;
     cout<<"\\addplot coordinates {";
     for (int64_t input_size_log = 23; ((uint64_t)1 << input_size_log) <= MAX_INPUT_SIZE; input_size_log++) {
       int64_t input_size = (1 << input_size_log);
@@ -629,6 +628,8 @@ void bandwidth_bound_tests() {
     av_best_speedup /= NUM_TRIALS;
     cout << "(" << num_cores <<", "<< av_best_speedup <<")";
   }
+
+  // ALEK ALEK ALEK: do we need to do something here for my method?
   
   
   cout<<"};"<<endl;
@@ -637,9 +638,7 @@ void bandwidth_bound_tests() {
 }
 
 int main() {
-  srand(705);
-  // ALEK ALEK ALEK 
-  // srand (time(NULL)); // initialize random seed
+  srand (time(NULL)); // initialize random seed
   // BLOCK_SIZE needs to be a power of two:
   assert(((BLOCK_SIZE - 1) & BLOCK_SIZE) == 0);
   // cout<<test_partition(-1, (1 << 28), false, NUM_THREADS_DEFAULT)<<endl;
@@ -657,7 +656,6 @@ int main() {
   // run_parallel_partition_for_cache_misses (0, (1 << 28), false);
   //return 0;
   
-  test_partition(4, (1<<18), false, NUM_THREADS_DEFAULT);
   // We begin by running tests of correctness on the functions
   test_prefix_sum();
   test_libc_quicksort((1<<20));
@@ -668,14 +666,18 @@ int main() {
   test_partition(0, 141123, true, NUM_THREADS_DEFAULT); // This is the case where the value of more_succ changes which case of the code is run
   test_partition(1, 141123, false, NUM_THREADS_DEFAULT);
   test_partition(2, 141123, false, NUM_THREADS_DEFAULT);
-  test_partition(4, 141123, false, NUM_THREADS_DEFAULT);
   test_partition(3, 141123, false, NUM_THREADS_DEFAULT);
+  test_partition(4, 141123, false, NUM_THREADS_DEFAULT);
+  cout << "ran the tests " << endl;
 
 #ifdef USE_CILK
+  cout << "starting parallel test 1" << endl;
   parallel_partition_tests(); // Run the parallel tests!
+  cout << "starting parallel test 2" << endl;
   parallel_partition_tests_two(); // Run the parallel tests!
   parallel_sort_tests(); 
-  //bandwidth_bound_tests();
+  // ALEK ALEK ALEK 
+  // bandwidth_bound_tests();
 #endif
 #ifdef RUN_SERIAL
   serial_partition_tests(); // Run the serial tests!

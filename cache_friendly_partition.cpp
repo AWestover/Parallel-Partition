@@ -120,25 +120,6 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 
 		// here is a bit of edge case cleanup
 		// need to partition A from (s*b)*numGroups (ie sb(n/(sb))) to n
-		// assumption: there aren't that many that hang over the edge
-		// so we can probably just take care of them by sticking them after vmin
-		//
-		//
-		// BUG BUG BUG BUG BUG BUG
-		/*
-		for (int64_t i = s*b*numGroups; i < n; ++i) {
-			if(A[i] <= pivotVal){
-				while(A[vmin] <= pivotVal) {
-					vmin += 1;
-				}
-				int64_t tmp = A[i];
-				A[i] = A[vmin];
-				A[vmin] = tmp;
-			}
-		}
-		if(A[vmin]<=pivotVal)
-			vmin += 1;
-		*/
 
 		// Question: should I be worried about infinite loops with this? What if it repeatedly pushes vmax up a bunch? does numGroups coarseness thing fix this?
 		int64_t leftOverStart = s*b*numGroups;
@@ -159,7 +140,8 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 				A[vmax] = tmp; 
 				vmax += 1;
 			}
-			vmax = n - 1 - successorPartitionSize; /// HEY ALEK MAKE SURE THIS IS RIGHT, it is like 12 right now so this might be off by 1 or something
+			vmax = n - successorPartitionSize; 		
+			assert (vmax < n);
 		}
 
 		// solve the smaller subproblem, which starts at vmin, and has size vmax - vmin
