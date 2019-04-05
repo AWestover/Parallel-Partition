@@ -2,6 +2,7 @@
 // this is the version of the code where I recurse on the same program.
 // parallel partition program
 
+#include "params.h"
 #include <stdio.h>
 #include <stdint.h> // we are sorting int64_t
 #include <stdlib.h>
@@ -9,6 +10,8 @@
 #include <math.h>
 #include <assert.h>
 #include <iostream>
+#include <cilk/cilk.h>
+#include <cilk/cilk_api.h>
 using namespace std;
 
 #define equalDelta false
@@ -18,6 +21,7 @@ int64_t computeS(int64_t n, double delta){
 	return (int64_t)(log2(n) / (2*delta*delta));
 }
 
+// this is for when the input size gets small enough that making groups is a bad idea
 int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
 	int64_t low = 0; int64_t high = n-1;
 	while(low < high){
@@ -38,6 +42,8 @@ int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
 	return low;
 }
 
+// this function is the most important part of this file
+// it implements the grouped partition, and will be called from a different function that can implement special behavior on the top layer
 int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64_t s, int64_t logB, double delta){
 	int64_t b = 1<<logB;
 	int64_t numGroups = n / (b*s);
@@ -46,7 +52,7 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 		
 		int64_t* X = (int64_t*)malloc(sizeof(int64_t)*s);
 		// generate X (one list to store them all)
-		for (int64_t i = 0; i < s; ++i) {
+		parallel_for (int64_t i = 0; i < s; ++i) {
 			X[i] = rand() % numGroups;
 		}
 
@@ -112,10 +118,15 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 			}
 
 			int64_t newV = lowPidx + ((lowXoffset+numGroups*lowXidx)<<logB);
+			vmin = vmin < newV ? vmin : newV;
+			vmax = vmax > newV ? vmax : newV;
+			/*
 			if(newV < vmin)
 				vmin = newV;
 			if (newV > vmax)
 				vmax = newV;
+			*/
+
 		}
 
 		// here is a bit of edge case cleanup
@@ -145,9 +156,9 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 		}
 
 		// solve the smaller subproblem, which starts at vmin, and has size vmax - vmin
+		free(X);
 		int64_t middle = vmin + groupedPartitionRecursive(A+vmin, vmax-vmin, pivotVal, computeS(vmax-vmin, delta), logB, delta);
 
-		free(X);
 		return middle;
 	}
 	else { // if the input is really small, delegate to a serial partitioner
@@ -174,6 +185,7 @@ int64_t groupedPartition(int64_t* A, int64_t N0, int64_t pivotVal){
 	return middle;
 }
 
+/*
 void checkCorrectness(){
 	int64_t N0 = 1<<15;
 	int64_t* A = (int64_t*)malloc(N0*sizeof(int64_t));
@@ -197,8 +209,9 @@ void checkCorrectness(){
 	for(int64_t i = middle; i < N0; ++i){
 		assert(A[i] > pivotVal);
 	}
+	free(A);
 }
-
+*/
 /*
 int main() {
 	srand(time(NULL)); 

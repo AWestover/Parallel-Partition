@@ -1,6 +1,7 @@
 # Not doing -march=native because we're scp-ying onto remote machines to run
 CC=g++-7
-CFLAGS=-std=c++11 -march=native -funroll-loops -g -O3 -fcilkplus  -lcilkrts -ldl #-fcsi  -L/efs/tools/tapir-6/build/lib/clang/6.0.0/lib/linux/ -lclang_rt.cilkscale-x86_64
+# Alek Alek ALEK: reset optimization level to O3 once you are done debugging
+CFLAGS=-std=c++11 -march=native -funroll-loops -g -O1 -fcilkplus  -lcilkrts -ldl #-fcsi  -L/efs/tools/tapir-6/build/lib/clang/6.0.0/lib/linux/ -lclang_rt.cilkscale-x86_64
 
 main: main.o partition.o libc_partition.o cache_friendly_partition.o
 	$(CC) $(CFLAGS) -o $@ main.o partition.o libc_partition.o cache_friendly_partition.o
