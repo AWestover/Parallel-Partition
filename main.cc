@@ -629,8 +629,15 @@ void bandwidth_bound_tests() {
     cout << "(" << num_cores <<", "<< av_best_speedup <<")";
   }
 
-  // ALEK ALEK ALEK: do we need to do something here for my method?
-  
+  // ALEK ALEK ALEK: is this the correct thing to add here?
+   cout<<"%% cache friendly"<<endl;
+  cout<<"\\addplot coordinates {";
+  for (int64_t num_cores = 1; num_cores <= NUM_THREADS_DEFAULT; num_cores++) {
+    double millisecs = test_partition_multiple_trials(4, MAX_INPUT_SIZE, NUM_TRIALS, false, num_cores);
+    double speedup = serial_baseline / millisecs;
+    cout << "( " << num_cores  << ", " << speedup << ") ";
+  }
+  cout<<"};"<<endl; 
   
   cout<<"};"<<endl;
   cout<<"\\legend{Low-Space, Low-Space Bandwidth Constraint, Two-Layer, Two-Layer Bandwidth Constraint}"<<endl;
@@ -667,13 +674,12 @@ int main() {
   test_partition(1, 141123, false, NUM_THREADS_DEFAULT);
   test_partition(2, 141123, false, NUM_THREADS_DEFAULT);
   // cout << "% testing 3" << endl;
+  // ALEK ALEK ALEK : this test is misbehaving on my Mac. I believe that is because I ahve g++ 7.4.0 instead of 7.3.0 
   //for (int64_t i = 141123; i < 141323; i++) { // 3 needs some extra testing, because it is misbehaving 
-    // test_partition(3, 141123, false, NUM_THREADS_DEFAULT);
+  test_partition(3, 141123, false, NUM_THREADS_DEFAULT);
   //}
-  // cout << "% starting my test" << endl;
   test_partition(4, 141123, false, NUM_THREADS_DEFAULT);
   cout << "% ran the tests " << endl;
-  return 0;
 
 #ifdef USE_CILK
   cout << "starting parallel test 1" << endl;
@@ -681,8 +687,7 @@ int main() {
   cout << "starting parallel test 2" << endl;
   parallel_partition_tests_two(); // Run the parallel tests!
   parallel_sort_tests(); 
-  // ALEK ALEK ALEK 
-  // bandwidth_bound_tests();
+  bandwidth_bound_tests();
 #endif
 #ifdef RUN_SERIAL
   serial_partition_tests(); // Run the serial tests!

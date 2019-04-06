@@ -18,8 +18,7 @@
 // Must be a power of two. Interestingly, reducing this doesn't change CILK's measured span.
 #define BLOCK_SIZE 64
 // MAX_INPUT_SIZE governs the size of the maximum array we will test on
-// ALEK ALEK ALEK (1<<30) is really the size 
-#define MAX_INPUT_SIZE (1 << 20)
+#define MAX_INPUT_SIZE (1 << 30)
 // NUM_THREADS_DEFAULT should be set to the number of cores on the machine we're running on
 #define NUM_THREADS_DEFAULT 18
 // Exactly one of USE_CILK and RUN_SERIAL should be commented.
