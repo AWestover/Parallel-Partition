@@ -52,17 +52,17 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 		
 		int64_t* X = (int64_t*)malloc(sizeof(int64_t)*s);
 		// generate X (one list to store them all)
-		parallel_for (int64_t i = 0; i < s; ++i) {
+		for (int64_t i = 0; i < s; ++i) {
 			X[i] = rand() % numGroups;
 		}
 
 		// serial partition on each group done in parallel across the groups
-		int64_t vmin = n-1; int64_t vmax = 0;
+		int64_t* allVs = (int64_t*)malloc(sizeof(int64_t)*numGroups);
 
 		// everything with idx < vmin has A[idx] <= pivotval
 		// everything with idx >= vmax has A[idx] > pivotVal
 		// so the thing to recurse on is A+vmin, with size vmax-vmin
-		for (int64_t i = 0; i < numGroups; ++i) {
+		parallel_for (int64_t i = 0; i < numGroups; ++i) {
 
 			int64_t low = 0;
 			int64_t lowPidx = 0; // index into P
@@ -117,22 +117,22 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 				}
 			}
 
-			int64_t newV = lowPidx + ((lowXoffset+numGroups*lowXidx)<<logB);
-			vmin = vmin < newV ? vmin : newV;
-			vmax = vmax > newV ? vmax : newV;
-			/*
-			if(newV < vmin)
-				vmin = newV;
-			if (newV > vmax)
-				vmax = newV;
-			*/
-
+			allVs[i] = lowPidx + ((lowXoffset+numGroups*lowXidx)<<logB);
 		}
+
+		// find the minimum in serial (we had data races when we tried to in parallel have everything write to the same variable at the same time (concurrent writing))
+		int64_t vmin = n-1; int64_t vmax = 0;
+		for (int64_t i = 0; i < numGroups; i++) {
+			if(allVs[i] < vmin)
+				vmin = allVs[i];
+			if(allVs[i] > vmax)
+				vmax = allVs[i];
+		}
+		
 
 		// here is a bit of edge case cleanup
 		// need to partition A from (s*b)*numGroups (ie sb(n/(sb))) to n
 
-		// Question: should I be worried about infinite loops with this? What if it repeatedly pushes vmax up a bunch? does numGroups coarseness thing fix this?
 		int64_t leftOverStart = s*b*numGroups;
 		int64_t leftOverSize = n - leftOverStart;
 		int64_t successorPartitionSize = leftOverStart - vmax;
@@ -152,7 +152,7 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 				vmax += 1;
 			}
 			vmax = n - successorPartitionSize; 		
-			assert (vmax < n);
+			assert (vmax < n); // this should never happen. It would indicate that the vmax code got messed up if it did. It would also indicate taht there are no successsors in the array. O wait, that is possible, dang, add a test case for this (adverserial pivotValue)
 		}
 
 		// solve the smaller subproblem, which starts at vmin, and has size vmax - vmin

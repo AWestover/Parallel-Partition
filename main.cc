@@ -666,9 +666,14 @@ int main() {
   test_partition(0, 141123, true, NUM_THREADS_DEFAULT); // This is the case where the value of more_succ changes which case of the code is run
   test_partition(1, 141123, false, NUM_THREADS_DEFAULT);
   test_partition(2, 141123, false, NUM_THREADS_DEFAULT);
-  test_partition(3, 141123, false, NUM_THREADS_DEFAULT);
+  cout << "% testing 3" << endl;
+  for (int64_t i = 141123; i < 141223; i++) { // 3 needs some extra testing, because it is misbehaving 
+    test_partition(3, 141123, false, NUM_THREADS_DEFAULT);
+  }
+  cout << "% starting my test" << endl;
   test_partition(4, 141123, false, NUM_THREADS_DEFAULT);
-  cout << "ran the tests " << endl;
+  cout << "% ran the tests " << endl;
+  return 0;
 
 #ifdef USE_CILK
   cout << "starting parallel test 1" << endl;
