@@ -667,7 +667,7 @@ int main() {
   test_partition(1, 141123, false, NUM_THREADS_DEFAULT);
   test_partition(2, 141123, false, NUM_THREADS_DEFAULT);
   cout << "% testing 3" << endl;
-  for (int64_t i = 141123; i < 141223; i++) { // 3 needs some extra testing, because it is misbehaving 
+  for (int64_t i = 141123; i < 141323; i++) { // 3 needs some extra testing, because it is misbehaving 
     test_partition(3, 141123, false, NUM_THREADS_DEFAULT);
   }
   cout << "% starting my test" << endl;
