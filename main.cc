@@ -629,8 +629,7 @@ void bandwidth_bound_tests() {
     cout << "(" << num_cores <<", "<< av_best_speedup <<")";
   }
 
-  // ALEK ALEK ALEK: is this the correct thing to add here?
-   cout<<"%% cache friendly"<<endl;
+  cout<<"%% cache friendly"<<endl;
   cout<<"\\addplot coordinates {";
   for (int64_t num_cores = 1; num_cores <= NUM_THREADS_DEFAULT; num_cores++) {
     double millisecs = test_partition_multiple_trials(4, MAX_INPUT_SIZE, NUM_TRIALS, false, num_cores);
