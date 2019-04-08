@@ -250,7 +250,7 @@ void parallel_partition_tests() {
     }
     cout<<"};"<<endl;
   }
-  cout<<"\\legend{Low-Space, Med-Space, High-Space, Two-Layer}"<<endl;
+  cout<<"\\legend{Low-Space, Med-Space, High-Space, Two-Layer, Cache-friendly}"<<endl;
   cout<<"\\end{axis}"<<endl<<"\\end{tikzpicture}"<<endl<<"}"<<endl;
 }
 
@@ -306,7 +306,7 @@ void parallel_partition_tests_two() {
     }
     cout<<"};"<<endl;
   }
-  cout<<"\\legend{Low-Space, Med-Space, High-Space, Two-Layer}"<<endl;
+  cout<<"\\legend{Low-Space, Med-Space, High-Space, Two-Layer, Cache-Friendly}"<<endl;
   cout<<"\\end{axis}"<<endl<<"\\end{tikzpicture}"<<endl<<"}"<<endl;
 }
 
@@ -360,7 +360,7 @@ void serial_partition_tests() {
     }
     cout<<"};"<<endl;
   }
-  cout<<"\\legend{Low-Space, Med-Space, High-Space, Two-Layer}"<<endl;
+  cout<<"\\legend{Low-Space, Med-Space, High-Space, Two-Layer, Cache-Friendly}"<<endl;
   cout<<"\\end{axis}"<<endl<<"\\end{tikzpicture}"<<endl<<"}"<<endl;
 }
 
@@ -638,6 +638,35 @@ void bandwidth_bound_tests() {
     cout << "( " << num_cores  << ", " << speedup << ") ";
   }
   cout<<"};"<<endl; 
+
+  cout<<"%% Cache-Friendly Bandwidth Bound"<<endl;
+  cout<<"\\addplot coordinates {";
+  for (int64_t num_cores = 1; num_cores <= NUM_THREADS_DEFAULT; num_cores++) {
+    double av_best_speedup = 0;
+    for (int64_t trial = 0; trial  < NUM_TRIALS; trial++) {
+      double read_bandwidth = sequential_access_bandwidth(num_cores, true, false);
+      double both_bandwidth = sequential_access_bandwidth(num_cores, true, true);
+      double num_bytes_read_and_written = MAX_INPUT_SIZE * sizeof(int64_t) * 1;
+      double num_bytes_just_read =  0;
+      // The next two lines account for the fact that a small fraction
+      // of reads and writes are by sheer luck already in cache; the
+      // fraction is as determined using cachegrind.
+      //num_bytes_read_and_written *=  124.2 / 134.3;
+      //num_bytes_just_read *=  124.2 / 134.3;
+      double required_runtime_for_read_writes =
+	num_bytes_read_and_written  / (both_bandwidth * pow(10.0, 9));
+      double required_runtime_for_just_reads =
+	num_bytes_just_read / (read_bandwidth * pow(10.0, 9));
+      double total_required_runtime =
+	required_runtime_for_read_writes + required_runtime_for_just_reads;
+      double best_speedup = serial_baseline / (total_required_runtime * 1000.0);
+      av_best_speedup += best_speedup;
+    }
+    av_best_speedup /= NUM_TRIALS;
+    cout << "(" << num_cores <<", "<< av_best_speedup <<")";
+  }
+
+
   
   cout<<"};"<<endl;
   cout<<"\\legend{Low-Space, Low-Space Bandwidth Constraint, Two-Layer, Two-Layer Bandwidth Constraint}"<<endl;
@@ -673,11 +702,7 @@ int main() {
   test_partition(0, 141123, true, NUM_THREADS_DEFAULT); // This is the case where the value of more_succ changes which case of the code is run
   test_partition(1, 141123, false, NUM_THREADS_DEFAULT);
   test_partition(2, 141123, false, NUM_THREADS_DEFAULT);
-  // cout << "% testing 3" << endl;
-  // ALEK ALEK ALEK : this test is misbehaving on my Mac. I believe that is because I ahve g++ 7.4.0 instead of 7.3.0 
-  //for (int64_t i = 141123; i < 141323; i++) { // 3 needs some extra testing, because it is misbehaving 
   test_partition(3, 141123, false, NUM_THREADS_DEFAULT);
-  //}
   test_partition(4, 141123, false, NUM_THREADS_DEFAULT);
   cout << "% ran the tests " << endl;
 
