@@ -62,63 +62,64 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 		// everything with idx < vmin has A[idx] <= pivotval
 		// everything with idx >= vmax has A[idx] > pivotVal
 		// so the thing to recurse on is A+vmin, with size vmax-vmin
+		
 		parallel_for (int64_t i = 0; i < numGroups; ++i) {
 
-			int64_t low = 0;
-			int64_t lowPidx = 0; // index into P
-			int64_t lowXidx = 0; // index into X
-			int64_t lowXoffset = (X[lowXidx] + i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus
+		  int64_t lowXidx = 0; // index into X
+		  int64_t lowXoffset = (X[lowXidx] + i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus
+		  
+		  int64_t highXidx = s-1; // index into X
+		  int64_t highXoffset = (X[highXidx]+i >= numGroups) ? X[highXidx]+i - numGroups : X[highXidx]+i; // cheaper than modulus
+		  
+		  int64_t lowBase = (lowXoffset+numGroups*lowXidx)<<logB;
+		  int64_t highBase = (highXoffset+numGroups*highXidx)<<logB;
 
-			int64_t high = (s<<logB)-1;
-			int64_t highPidx = b-1; // index into P
-			int64_t highXidx = s-1; // index into X
-			int64_t highXoffset = (X[highXidx]+i >= numGroups) ? X[highXidx]+i - numGroups : X[highXidx]+i; // cheaper than modulus
-			
-			int64_t lowBase = (lowXoffset+numGroups*lowXidx)<<logB;
-			int64_t highBase = (highXoffset+numGroups*highXidx)<<logB;
+		  int64_t ALowIdx =  (lowXoffset+numGroups*lowXidx) << logB;
+		  int64_t block_boundary_low = ALowIdx + b;
+		  
+		  int64_t block_boundary_high =  ((highXoffset+numGroups*highXidx)<<logB) - 1;
+		  int64_t AHighIdx = block_boundary_high + b;
 
-			while(low < high){
-				while(A[lowPidx + lowBase] <= pivotVal && low < high) {
-					low++;
-					if(lowPidx != b-1){
-						lowPidx += 1;
-					} 
-					else {
-						lowPidx = 0;
-						lowXidx += 1;
-						lowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus 
-						lowBase =  (lowXoffset+numGroups*lowXidx) << logB;
-					}
-				}
-				while (A[highPidx + highBase] > pivotVal && low < high){
-					high--;
-					if(highPidx != 0){
-						highPidx -= 1;
-					} 
-					else {
-						highPidx = b-1;
-						highXidx -= 1;
-						highXoffset = (X[highXidx]+i >= numGroups) ? X[highXidx]+i - numGroups : X[highXidx]+i; // cheaper than modulus
-						highBase = (highXoffset+numGroups*highXidx) << logB;
-					}
-				}
-				int64_t tmp = A[lowPidx + lowBase];
-				A[lowPidx + lowBase] = A[highPidx + highBase];
-				A[highPidx + highBase] = tmp;
-			}
-			if(A[lowPidx + lowBase] <= pivotVal){
-				low++;
-				if(lowPidx != b-1){
-					lowPidx += 1;
-				} else {
-					lowPidx = 0;
-					lowXidx += 1;
-					lowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus
-				}
-			}
-
-			allVs[i] = lowPidx + ((lowXoffset+numGroups*lowXidx)<<logB);
+		  
+		  while(ALowIdx < AHighIdx){
+		    while(A[ALowIdx] <= pivotVal && ALowIdx < AHighIdx) {
+		      ALowIdx++;
+		      if(ALowIdx == block_boundary_low){
+			lowXidx += 1;
+			lowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus 
+			lowBase =  (lowXoffset+numGroups*lowXidx) << logB;
+			ALowIdx =  (lowXoffset+numGroups*lowXidx) << logB;
+			block_boundary_low = ALowIdx + b;			      
+		      }
+		    }
+		    while (A[AHighIdx] > pivotVal && ALowIdx < AHighIdx){
+		      AHighIdx--;
+		      if(AHighIdx == block_boundary_high){
+		    	highXidx -= 1;
+		    	highXoffset = (X[highXidx]+i >= numGroups) ? X[highXidx]+i - numGroups : X[highXidx]+i; // cheaper than modulus
+			block_boundary_high = ((highXoffset+numGroups*highXidx) << logB) - 1;			      
+			AHighIdx =  block_boundary_high + b;
+		      }
+		    }
+		    int64_t tmp = A[ALowIdx];
+		    A[ALowIdx] = A[AHighIdx];
+		    A[AHighIdx] = tmp;
+		  }
+		  if(A[ALowIdx] <= pivotVal){
+		    ALowIdx++;
+		    if(ALowIdx == block_boundary_low){
+		      lowXidx += 1;
+		      lowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus 
+		      lowBase =  (lowXoffset+numGroups*lowXidx) << logB;
+		      ALowIdx =  (lowXoffset+numGroups*lowXidx) << logB;
+		      block_boundary_low = ALowIdx + b;			      
+		    }
+		  }
+		  
+		  allVs[i] = ALowIdx;
+		
 		}
+
 
 		// find the minimum in serial (we had data races when we tried to in parallel have everything write to the same variable at the same time (concurrent writing))
 		int64_t vmin = n-1; int64_t vmax = 0;
@@ -168,7 +169,7 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 
 int64_t groupedPartition(int64_t* A, int64_t N0, int64_t pivotVal){
 	double delta = 0.5;
-	int64_t logB = 4;
+	int64_t logB = 9;
 
 	int64_t logN0 = (int64_t)log2(N0); 
 

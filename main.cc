@@ -69,6 +69,15 @@ int64_t test_partition(int64_t in_place, uint64_t n, bool more_succ, uint64_t nu
       if (array[i] == 0) num_zeros++;
     }
   } while ((((num_zeros > n / 2) && more_succ) || ((num_zeros < n / 2) && !more_succ)));
+  if (in_place == -3) { 
+    gettimeofday(&tp, NULL);
+    long int ms1 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    // Our implementation. Better to use libc's though.
+    serial_partition(array, n, 50);
+    gettimeofday(&tp, NULL);
+    long int ms2 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    answer = (ms2 - ms1);
+  }
   if (in_place == -2) { 
     gettimeofday(&tp, NULL);
     long int ms1 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
@@ -704,6 +713,54 @@ int main() {
   test_partition(3, 141123, false, NUM_THREADS_DEFAULT);
   test_partition(4, 141123, false, NUM_THREADS_DEFAULT);
   cout << "% ran the tests " << endl;
+
+  uint64_t size_to_run_on = (1 << 29);
+  uint64_t num_threads = 1;
+
+   
+  // cout<<"High-Span Algorithm: (size "<<size_to_run_on<<", num_threads "<<num_threads<<")"<<endl;
+  // cout<<test_partition(3, size_to_run_on, false, num_threads)<<endl;
+  // cout<<"Cache Friendly Algorithm: (size "<<size_to_run_on<<", num_threads "<<num_threads<<")"<<endl;
+  // cout<<test_partition(4, size_to_run_on, false, num_threads)<<endl;
+
+ 
+  // cout<<"Our Serial Partition: (size "<<size_to_run_on<<")"<<endl;
+  // cout<<test_partition(-3, size_to_run_on, false, num_threads)<<endl;
+  // cout<<"LibC Serial Partition: (size "<<size_to_run_on<<")"<<endl;
+  // cout<<test_partition(-1, size_to_run_on, false, num_threads)<<endl;
+
+
+  for (size_to_run_on = (1 << 23); size_to_run_on *= 2; size_to_run_on <= (1 << 30)) {
+    cout<<"----------------------------------------"<<endl;
+    num_threads = 18;
+    cout<<"High-Span Algorithm: (size "<<size_to_run_on<<", num_threads "<<num_threads<<")"<<endl;
+    cout<<test_partition(3, size_to_run_on, false, num_threads)<<endl;
+    cout<<"Cache Friendly Algorithm: (size "<<size_to_run_on<<", num_threads "<<num_threads<<")"<<endl;
+    cout<<test_partition(4, size_to_run_on, false, num_threads)<<endl;
+    
+    cout<<"%% Cache-Friendly Bandwidth Bound"<<endl;
+    int64_t num_cores = num_threads;
+    double read_bandwidth = sequential_access_bandwidth(num_cores, true, false);
+    double both_bandwidth = sequential_access_bandwidth(num_cores, true, true);
+    double num_bytes_read_and_written = size_to_run_on * sizeof(int64_t) * 1;
+    double num_bytes_just_read =  0;
+    // The next two lines account for the fact that a small fraction
+    // of reads and writes are by sheer luck already in cache; the
+    // fraction is as determined using cachegrind.
+    //num_bytes_read_and_written *=  124.2 / 134.3;
+    //num_bytes_just_read *=  124.2 / 134.3;
+    double required_runtime_for_read_writes =
+      num_bytes_read_and_written  / (both_bandwidth * pow(10.0, 9));
+    double required_runtime_for_just_reads =
+      num_bytes_just_read / (read_bandwidth * pow(10.0, 9));
+    double total_required_runtime =
+      required_runtime_for_read_writes + required_runtime_for_just_reads;
+    cout<<(int) (total_required_runtime * 1000)<<endl;
+  }
+
+  return 0;
+
+  
 
 #ifdef USE_CILK
   cout << "starting parallel test 1" << endl;
