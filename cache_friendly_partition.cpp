@@ -1,6 +1,15 @@
 
-// this is the version of the code where I recurse on the same program.
-// parallel partition program
+// AUTHOR: Alek Westover
+// cache friendly parallel partition program
+// note that this code uses our algorithm in the recursive step for parallel partition
+//
+// break the array into s chunks
+// make numGroups = n /(b*s) groups, with elements determined in the following manner:
+// on each chunk, generate 1 random number,  
+// X[i] + i % (num cache block chunks in the chunk of the array) is the index into the chunk of the array that we are considering of the cache block that is added to group i from this chunk of the array
+// serial partition each group (we can do all the serial partitions for different groups in parallel)
+// in each group compute vi: the middle (where the array switches from having predecessors to having successors, equivalently, compute the number of predecessors in the array)
+// we now recurse on min(vi) to max(vi) with a new appropriately chosen group size and number of groups for the smaller array
 
 #include "params.h"
 #include <stdio.h>
@@ -14,18 +23,24 @@
 #include <cilk/cilk_api.h>
 using namespace std;
 
+// if equal delta = true, then we 
 #define equalDelta false
 
-// this is not changed, it is allways the same
+// s = log(n) / (2*delta*delta)
+// numGroups = n / (b*s)
+// smaller delta -> bigger s -> smaller numGroups
+// equalDelta false -> use small delta = 1 / sqrt(2*log(n)) on the top
+// so equalDelta false means that there will be fewer groups on the top layer (and that the groups will be bigger therefore, so we can be confident that the recursive subproblem is much smaller in size)
+
 int64_t computeS(int64_t n, double delta){
 	return (int64_t)(log2(n) / (2*delta*delta));
 }
 
-// this is for when the input size gets small enough that making groups is a bad idea
+// we partition sufficiently small arrays in serial, because at this point the overhead is too big to make parallelizing it make sense 
 int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
 	int64_t low = 0; int64_t high = n-1;
 	while(low < high){
-		while(A[low] <= pivotVal && low < high) {
+		while(A[low] <= pivotVal && low < high) { // we have to check low < high because otherwise [1 2 3 4 5] with pivot value 10 would cause a problem
 			low++;
 		}
 		while (A[high] > pivotVal && low < high){
@@ -45,7 +60,7 @@ int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
 // this function is the most important part of this file
 // it implements the grouped partition, and will be called from a different function that can implement special behavior on the top layer
 int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64_t s, int64_t logB, double delta){
-	int64_t b = 1<<logB;
+	int64_t b = 1<<logB; // cache block size 
 	int64_t numGroups = n / (b*s);
 	if (numGroups > 2){
 		// first solve the top layer
@@ -63,6 +78,7 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 		// everything with idx >= vmax has A[idx] > pivotVal
 		// so the thing to recurse on is A+vmin, with size vmax-vmin
 		
+		// parallel partition takes the most (nearly all) time in this loop on the top level of recursion
 		parallel_for (int64_t i = 0; i < numGroups; ++i) {
 
 		  int64_t lowXidx = 0; // index into X
@@ -133,7 +149,9 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 
 		// here is a bit of edge case cleanup
 		// need to partition A from (s*b)*numGroups (ie sb(n/(sb))) to n
+		// there are 2 cases, based on whether ther are more extra elements than known sucessors or not
 
+		// if there are less extra elements than sucessors (this is true on decenetly big inputs) then just sacrifice some of the successors by swapping them with extras
 		int64_t leftOverStart = s*b*numGroups;
 		int64_t leftOverSize = n - leftOverStart;
 		int64_t successorPartitionSize = leftOverStart - vmax;
@@ -186,54 +204,3 @@ int64_t groupedPartition(int64_t* A, int64_t N0, int64_t pivotVal){
 	return middle;
 }
 
-/*
-void checkCorrectness(){
-	int64_t N0 = 1<<15;
-	int64_t* A = (int64_t*)malloc(N0*sizeof(int64_t));
-	int64_t countZeros = 0;
-	for (int64_t i = 0; i < N0; ++i) {
-		A[i] = 100*(rand()%2);
-		if(A[i] == 0){
-			countZeros += 1;
-		}
-	}
-
-	int64_t pivotVal = 50;
-	// solve the problem
-	int64_t middle = groupedPartition(A, N0, pivotVal);
-	
-	assert (middle == countZeros);
-	
-	for (int64_t i = 0; i < middle; ++i) {
-		assert(A[i] <= pivotVal);
-	}
-	for(int64_t i = middle; i < N0; ++i){
-		assert(A[i] > pivotVal);
-	}
-	free(A);
-}
-*/
-/*
-int main() {
-	srand(time(NULL)); 
-	int64_t logN0 = 28;
-	int64_t N0 = 1<<logN0;
-	int64_t* A = (int64_t*)malloc(N0*sizeof(int64_t));
-	for (int64_t i = 0; i < N0; ++i) {
-		A[i] = 100*(rand()%2);
-	}
-	// A[i] <= pivotVal goes on one side of the partition, A[i] > pivotVal goes on the other side
-	int64_t pivotVal = 50;
-	assert(((int64_t)A)%64 == 0);
-
-	clock_t t0 = clock();
-	// solve the problem
-	groupedPartition(A, N0, pivotVal);
-	double timeTaken = (clock()-t0) / (double) CLOCKS_PER_SEC;
-	checkCorrectness();
-	cout << "time taken: " <<  timeTaken << endl;
-
-	free(A);
-	return 0;
-}
-*/
