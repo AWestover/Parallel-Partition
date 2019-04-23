@@ -25,7 +25,7 @@ using namespace std;
 
 // if equal delta = true, then we 
 #define equalDelta false
-#define multiplicationInLoop true
+#define multiplicationInLoop false
 
 // s = log(n) / (2*delta*delta)
 // numGroups = n / (b*s)
@@ -51,7 +51,11 @@ int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
         int64_t tmp = A[low];
         A[low] = A[high];
         A[high] = tmp;
+		// we know already that 
+		// A[low] <= pivotVal, A[high] > pivotVal, this saves us 1 check of the while loops above
+		low++; high--;
     }
+	low--; // shouldn't have incremented on the last itteration of the while loop, this neutralizes the final low++
     if(A[low] <= pivotVal){
         low++;
     }
@@ -101,17 +105,17 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
                     ALowIdx++;
                     if(ALowIdx == block_boundary_low){
                         lowXidx += 1;
-                        if(!multiplicationInLoop) {
-                            int64_t deltaLowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i;
-                            deltaLowXoffset -= lowXoffset; 
-                            lowXoffset += deltaLowXoffset;
-                            ALowIdx += (deltaLowXoffset<<logB) + XdeltaAdelta;
-                        }
-                        else {
+						if(!multiplicationInLoop) {
+							int64_t deltaLowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i;
+							deltaLowXoffset -= lowXoffset; 
+							lowXoffset += deltaLowXoffset;
+							ALowIdx += (deltaLowXoffset<<logB) + XdeltaAdelta - b;
+						}
+						else {
                             lowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus 
-                            ALowIdx = (lowXoffset+numGroups*lowXidx) << logB;
-                        }
-                        block_boundary_low = ALowIdx + b; 
+							ALowIdx = (lowXoffset+numGroups*lowXidx) << logB;
+						}
+						block_boundary_low = ALowIdx + b; 
                     }
                 }
                 while (A[AHighIdx] > pivotVal && ALowIdx < AHighIdx){
@@ -143,16 +147,15 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 						int64_t deltaLowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i;
 						deltaLowXoffset -= lowXoffset; 
 						lowXoffset += deltaLowXoffset;
-						ALowIdx += (deltaLowXoffset<<logB) + XdeltaAdelta;
+						ALowIdx += (deltaLowXoffset<<logB) + XdeltaAdelta - b;
 					}
 					else {
 						lowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus 
 						ALowIdx = (lowXoffset+numGroups*lowXidx) << logB;
 					}
-                    block_boundary_low = ALowIdx + b;   
+                    block_boundary_low = ALowIdx + b;
                 }
             }
-              
             allVs[i] = ALowIdx;
         }
 
