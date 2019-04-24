@@ -88,23 +88,38 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
         // parallel partition takes the most (nearly all) time in this loop on the top level of recursion
         parallel_for (int64_t i = 0; i < numGroups; ++i) {
 
+			// Xidx indicates which chunk low is currently in
             int64_t lowXidx = 0; // index into X
+			// on each chunk of the array, each group gets a portion of size b, which is determined by X[i] and i, specifically X[i]+i % numGroups is the index of the chunk of b that you get
+			// offset tells you X[i]+i % numGroups, which is the index into the chunk of assigned to this group
             int64_t lowXoffset = (X[lowXidx] + i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus
 
+			// Xidx indicates which chunk low is currently in
             int64_t highXidx = s-1; // index into X
+			// on each chunk of the array, each group gets a portion of size b, which is determined by X[i] and i, specifically X[i]+i % numGroups is the index of the chunk of b that you get
+			// offset tells you X[i]+i % numGroups, which is the index into the chunk of assigned to this group
             int64_t highXoffset = (X[highXidx]+i >= numGroups) ? X[highXidx]+i - numGroups : X[highXidx]+i; // cheaper than modulus
 
-            int64_t ALowIdx =  (lowXoffset+numGroups*lowXidx) << logB;
+			// ALowIdx refers to the actual index in the array A that low is on
+            int64_t ALowIdx = (lowXoffset+numGroups*lowXidx) << logB;
+			// we will increment ALowIdx within the block of size b until it reaches the end of the block, at block_boundary_low
             int64_t block_boundary_low = ALowIdx + b;
 
+			// block_boundary high is 1 less than the end of the block that we are currently in. we will decrement AHighIdx until it reaches the boundary
             int64_t block_boundary_high =  ((highXoffset+numGroups*highXidx)<<logB) - 1;
+			// AHighIdx refers to the actual index in the array A that high is on
             int64_t AHighIdx = block_boundary_high + b;
           
+			// similar to the serial partition loop, (we are processing each group in serial, in parallel over the groups) but it differs
+			// in that the next element function is trickier than just +1 because we must jump blocks whenever we reach a block boundary
+			// that is the if statement, which implements jumping to the next block 
             while(ALowIdx < AHighIdx){
                 while(A[ALowIdx] <= pivotVal && ALowIdx < AHighIdx) {
                     ALowIdx++;
                     if(ALowIdx == block_boundary_low){
+						// jump to the next chunk of the array
                         lowXidx += 1;
+						// this is a version without multiplicatoin, it may be slower thouhg, because it has extra add and subtract steps, and an extra variable
 						if(!multiplicationInLoop) {
 							int64_t deltaLowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i;
 							deltaLowXoffset -= lowXoffset; 
@@ -112,16 +127,21 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 							ALowIdx += (deltaLowXoffset<<logB) + XdeltaAdelta - b;
 						}
 						else {
+							// get the position within the chunk 
                             lowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus 
+							// get the start of the chunk
 							ALowIdx = (lowXoffset+numGroups*lowXidx) << logB;
 						}
+						// get the end of the chunk
 						block_boundary_low = ALowIdx + b; 
                     }
                 }
                 while (A[AHighIdx] > pivotVal && ALowIdx < AHighIdx){
                     AHighIdx--;
                     if(AHighIdx == block_boundary_high){
+						// jump to the next chunk of the array (going backwards)
                         highXidx -= 1;
+						// this is a version without multiplicatoin, it may be slower thouhg, because it has extra add and subtract steps, and an extra variable
                         if(!multiplicationInLoop) {
 							int64_t deltaHighXoffset = (X[highXidx]+i >= numGroups) ? X[highXidx]+i - numGroups : X[highXidx]+i;
                             deltaHighXoffset -= highXoffset; 
@@ -129,17 +149,23 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
                             block_boundary_high += (deltaHighXoffset<<logB) - XdeltaAdelta;
                         }
                         else {
+							// get the position within the chunk 
                             highXoffset = (X[highXidx]+i >= numGroups) ? X[highXidx]+i - numGroups : X[highXidx]+i; // cheaper than modulus
+							// get the start of the chunk (where we end because we are going backwards)
                             block_boundary_high = ((highXoffset+numGroups*highXidx) << logB) - 1;                 
                         }
+						// get the end of the chunk (where we start because we are going backwards)
                         AHighIdx =  block_boundary_high + b;
                     }
                 }
+				// swap the elements
                 int64_t tmp = A[ALowIdx];
                 A[ALowIdx] = A[AHighIdx];
                 A[AHighIdx] = tmp;
             }
+			// make sure that lowIdx specifies the number of predecessors and not number of predecessors - 1  (either are possible until we do this cleanup step)
             if(A[ALowIdx] <= pivotVal){
+				// this is the exact same incrementing code as above
                 ALowIdx++;
                 if(ALowIdx == block_boundary_low){
 					lowXidx += 1;
@@ -186,6 +212,7 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
                 vmax += 1;
             }
         }
+		// if there are less successors than extra elements (this can only happen on inredibly small inputs) then sacrifice the successors
         else { // llllllllll ?????????? hhhh ???????? swap hs with the back of the extra section
             for(int64_t i = 0; i < successorPartitionSize; i++){
                 int64_t tmp = A[n - 1 - i];
@@ -194,11 +221,11 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
                 vmax += 1;
             }
             vmax = n - successorPartitionSize;      
-            assert (vmax < n); // this should never happen. It would indicate that the vmax code got messed up if it did. It would also indicate taht there are no successsors in the array. O wait, that is possible, dang, add a test case for this (adverserial pivotValue)
+            assert (vmax < n); // this should never happen. It would indicate that the vmax code got messed up if it did. It would also indicate taht there are no successsors in the array. Oh wait, that is possible, dang, add a test case for this (adverserial pivotValue)
         }
 
-        // solve the smaller subproblem, which starts at vmin, and has size vmax - vmin
-        free(X);
+        // solve the smaller subproblem recursively, which starts at vmin, and has size vmax - vmin
+        free(X); // free the array! 
         int64_t middle = vmin + groupedPartitionRecursive(A+vmin, vmax-vmin, pivotVal, computeS(vmax-vmin, delta), logB, delta);
 
         return middle;
@@ -208,6 +235,8 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
     }
 }
 
+// this is the top level, 
+// because the top level takes up nearly all of the time, we can do special tuning for it here
 int64_t groupedPartition(int64_t* A, int64_t N0, int64_t pivotVal){
     double delta = 0.5;
     int64_t logB = 9;
