@@ -27,6 +27,41 @@ using namespace std;
 #define equalDelta false
 #define multiplicationInLoop false
 
+
+// Compute min / max of an array in parallel with span O(log n)
+// note: I don't use these because I suspect there will be a larger overhead cost than is gained especially because s starts out really small s = O(polylog(n))
+
+int parallelMin(int* v, int s){
+	if (s < 4){
+		int minYet = v[0];
+		for (int i = 1; i < s; i++) {
+			if (v[i] < minYet){
+				minYet = v[i];
+			}	
+		}
+		return minYet;
+	}
+	int leftMin = parallelMin(v, s/2);
+	int rightMin = parallelMin(v+s/2, s/2 + s%2);
+	return min(leftMin, rightMin);
+}
+
+int parallelMax(int* v, int s){
+	if (s < 4){
+		int maxYet = v[0];
+		for (int i = 1; i < s; i++) {
+			if(v[i] > maxYet){
+				maxYet = v[i]; 
+			}
+		}
+		return maxYet;
+	}
+	int leftMax = parallelMax(v, s/2);
+	int rightMax = parallelMax(v+s/2, s/2 + s%2);
+	return max(leftMax, rightMax);
+}
+
+
 // s = log(n) / (2*delta*delta)
 // numGroups = n / (b*s)
 // smaller delta -> bigger s -> smaller numGroups
