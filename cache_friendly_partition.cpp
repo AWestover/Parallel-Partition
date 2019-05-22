@@ -4,7 +4,7 @@
 // note that this code uses our algorithm in the recursive step for parallel partition
 //
 // break the array into s chunks
-// make numGroups = n /(b*s) groups, with elements determined in the following manner:
+// make g = n /(b*s) groups, with elements determined in the following manner:
 // on each chunk, generate 1 random number,  
 // X[i] + i % (num cache block chunks in the chunk of the array) is the index into the chunk of the array that we are considering of the cache block that is added to group i from this chunk of the array
 // serial partition each group (we can do all the serial partitions for different groups in parallel)
@@ -27,44 +27,14 @@ using namespace std;
 #define equalDelta false
 #define multiplicationInLoop false
 
-
-// Compute min / max of an array in parallel with span O(log n)
-// note: I don't use these because I suspect there will be a larger overhead cost than is gained especially because s starts out really small s = O(polylog(n))
-
-int parallelMin(int* v, int s){
-	if (s < 4){
-		int minYet = v[0];
-		for (int i = 1; i < s; i++) {
-			if (v[i] < minYet){
-				minYet = v[i];
-			}	
-		}
-		return minYet;
-	}
-	int leftMin = parallelMin(v, s/2);
-	int rightMin = parallelMin(v+s/2, s/2 + s%2);
-	return min(leftMin, rightMin);
-}
-
-int parallelMax(int* v, int s){
-	if (s < 4){
-		int maxYet = v[0];
-		for (int i = 1; i < s; i++) {
-			if(v[i] > maxYet){
-				maxYet = v[i]; 
-			}
-		}
-		return maxYet;
-	}
-	int leftMax = parallelMax(v, s/2);
-	int rightMax = parallelMax(v+s/2, s/2 + s%2);
-	return max(leftMax, rightMax);
-}
-
+struct Vs {
+	int64_t vmin; 
+	int64_t vmax;
+};
 
 // s = log(n) / (2*delta*delta)
-// numGroups = n / (b*s)
-// smaller delta -> bigger s -> smaller numGroups
+// g = n / (b*s)
+// smaller delta -> bigger s -> smaller g
 // equalDelta false -> use small delta = 1 / sqrt(2*log(n)) on the top
 // so equalDelta false means that there will be fewer groups on the top layer (and that the groups will be bigger therefore, so we can be confident that the recursive subproblem is much smaller in size)
 
@@ -97,51 +67,166 @@ int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
     return low;
 }
 
+// this is our implementation of a parallel for loops with spawning recursive subproblems
+// it outputs vmin, vmax
+Vs serialGroupPartitions(int64_t i, int64_t groupsLeftLoop, int64_t* A, int64_t pivotVal, int64_t* X, int64_t s, int64_t logB, int64_t b, int64_t g, int64_t XdeltaAdelta){
+	if (groupsLeftLoop == 1){
+		// Xidx indicates which chunk low is currently in
+		int64_t lowXidx = 0; // index into X
+		// on each chunk of the array, each group gets a portion of size b, which is determined by X[i] and i, specifically X[i]+i % g is the index of the chunk of b that you get
+		// offset tells you X[i]+i % g, which is the index into the chunk of assigned to this group
+		int64_t lowXoffset = (X[lowXidx] + i >= g) ? X[lowXidx]+i - g : X[lowXidx]+i; // cheaper than modulus
+
+		// Xidx indicates which chunk low is currently in
+		int64_t highXidx = s-1; // index into X
+		// on each chunk of the array, each group gets a portion of size b, which is determined by X[i] and i, specifically X[i]+i % g is the index of the chunk of b that you get
+		// offset tells you X[i]+i % g, which is the index into the chunk of assigned to this group
+		int64_t highXoffset = (X[highXidx]+i >= g) ? X[highXidx]+i - g : X[highXidx]+i; // cheaper than modulus
+
+		// ALowIdx refers to the actual index in the array A that low is on
+		int64_t ALowIdx = (lowXoffset+g*lowXidx) << logB;
+		// we will increment ALowIdx within the block of size b until it reaches the end of the block, at block_boundary_low
+		int64_t block_boundary_low = ALowIdx + b;
+
+		// block_boundary high is 1 less than the end of the block that we are currently in. we will decrement AHighIdx until it reaches the boundary
+		int64_t block_boundary_high =  ((highXoffset+g*highXidx)<<logB) - 1;
+		// AHighIdx refers to the actual index in the array A that high is on
+		int64_t AHighIdx = block_boundary_high + b;
+	  
+		// similar to the serial partition loop, (we are processing each group in serial, in parallel over the groups) but it differs
+		// in that the next element function is trickier than just +1 because we must jump blocks whenever we reach a block boundary
+		// that is the if statement, which implements jumping to the next block 
+		while(ALowIdx < AHighIdx){
+			while(A[ALowIdx] <= pivotVal && ALowIdx < AHighIdx) {
+				ALowIdx++;
+				if(ALowIdx == block_boundary_low){
+					// jump to the next chunk of the array
+					lowXidx += 1;
+					// this is a version without multiplicatoin, it may be slower thouhg, because it has extra add and subtract steps, and an extra variable
+					if(!multiplicationInLoop) {
+						int64_t deltaLowXoffset = (X[lowXidx]+i >= g) ? X[lowXidx]+i - g : X[lowXidx]+i;
+						deltaLowXoffset -= lowXoffset; 
+						lowXoffset += deltaLowXoffset;
+						ALowIdx += (deltaLowXoffset<<logB) + XdeltaAdelta - b;
+					}
+					else {
+						// get the position within the chunk 
+						lowXoffset = (X[lowXidx]+i >= g) ? X[lowXidx]+i - g : X[lowXidx]+i; // cheaper than modulus 
+						// get the start of the chunk
+						ALowIdx = (lowXoffset+g*lowXidx) << logB;
+					}
+					// get the end of the chunk
+					block_boundary_low = ALowIdx + b; 
+				}
+			}
+			while (A[AHighIdx] > pivotVal && ALowIdx < AHighIdx){
+				AHighIdx--;
+				if(AHighIdx == block_boundary_high){
+					// jump to the next chunk of the array (going backwards)
+					highXidx -= 1;
+					// this is a version without multiplicatoin, it may be slower thouhg, because it has extra add and subtract steps, and an extra variable
+					if(!multiplicationInLoop) {
+						int64_t deltaHighXoffset = (X[highXidx]+i >= g) ? X[highXidx]+i - g : X[highXidx]+i;
+						deltaHighXoffset -= highXoffset; 
+						highXoffset += deltaHighXoffset;
+						block_boundary_high += (deltaHighXoffset<<logB) - XdeltaAdelta;
+					}
+					else {
+						// get the position within the chunk 
+						highXoffset = (X[highXidx]+i >= g) ? X[highXidx]+i - g : X[highXidx]+i; // cheaper than modulus
+						// get the start of the chunk (where we end because we are going backwards)
+						block_boundary_high = ((highXoffset+g*highXidx) << logB) - 1;                 
+					}
+					// get the end of the chunk (where we start because we are going backwards)
+					AHighIdx =  block_boundary_high + b;
+				}
+			}
+			// swap the elements
+			int64_t tmp = A[ALowIdx];
+			A[ALowIdx] = A[AHighIdx];
+			A[AHighIdx] = tmp;
+		}
+		// make sure that lowIdx specifies the number of predecessors and not number of predecessors - 1  (either are possible until we do this cleanup step)
+		if(A[ALowIdx] <= pivotVal){
+			// this is the exact same incrementing code as above
+			ALowIdx++;
+			if(ALowIdx == block_boundary_low){
+				lowXidx += 1;
+				if(!multiplicationInLoop) {
+					int64_t deltaLowXoffset = (X[lowXidx]+i >= g) ? X[lowXidx]+i - g : X[lowXidx]+i;
+					deltaLowXoffset -= lowXoffset; 
+					lowXoffset += deltaLowXoffset;
+					ALowIdx += (deltaLowXoffset<<logB) + XdeltaAdelta - b;
+				}
+				else {
+					lowXoffset = (X[lowXidx]+i >= g) ? X[lowXidx]+i - g : X[lowXidx]+i; // cheaper than modulus 
+					ALowIdx = (lowXoffset+g*lowXidx) << logB;
+				}
+				block_boundary_low = ALowIdx + b;
+			}
+		}
+
+		Vs vscur;
+		vscur.vmin = ALowIdx;
+		vscur.vmax = ALowIdx;
+		return vscur;
+	}
+	else{
+		Vs vsleft = serialGroupPartitions(i, groupsLeftLoop/2, A, pivotVal, X, s, logB, b, g, XdeltaAdelta);
+		Vs vsright = serialGroupPartitions(i+groupsLeftLoop/2, groupsLeftLoop/2+(groupsLeftLoop&1), A, pivotVal, X, s, logB, b, g, XdeltaAdelta);
+		Vs vsaggregate;
+		vsaggregate.vmin = std::min(vsleft.vmin, vsright.vmin);
+		vsaggregate.vmax = std::max(vsleft.vmax, vsright.vmax);
+		return vsaggregate;
+	}
+}
+
 // this function is the most important part of this file
 // it implements the grouped partition, and will be called from a different function that can implement special behavior on the top layer
 int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64_t s, int64_t logB, double delta){
     int64_t b = 1<<logB; // cache block size 
-    int64_t numGroups = n / (b*s);
-    if (numGroups > 2){
+    int64_t g = n / (b*s);  // g
+    if (g > 2){
         // the array A has been broken up into s parts, and each index into the array X denotes something about one of these parts
-        // the size of each of the s parts is numGroups*b = XdeltaAdelta
-        int64_t XdeltaAdelta = numGroups<<logB;
+        // the size of each of the s parts is g*b = XdeltaAdelta
+        int64_t XdeltaAdelta = g<<logB;
         
         int64_t* X = (int64_t*)malloc(sizeof(int64_t)*s);
         // generate X (one list to store them all)
         for (int64_t i = 0; i < s; ++i) {
-            X[i] = rand() % numGroups;
+            X[i] = rand() % g;
         }
 
+		/*
         // serial partition on each group done in parallel across the groups
-        int64_t* allVs = (int64_t*)malloc(sizeof(int64_t)*numGroups);
+		int64_t* allVs = (int64_t*)malloc(sizeof(int64_t)*g);
 
         // everything with idx < vmin has A[idx] <= pivotval
         // everything with idx >= vmax has A[idx] > pivotVal
         // so the thing to recurse on is A+vmin, with size vmax-vmin
         
         // parallel partition takes the most (nearly all) time in this loop on the top level of recursion
-        parallel_for (int64_t i = 0; i < numGroups; ++i) {
+        parallel_for (int64_t i = 0; i < g; ++i) {
 
 			// Xidx indicates which chunk low is currently in
             int64_t lowXidx = 0; // index into X
-			// on each chunk of the array, each group gets a portion of size b, which is determined by X[i] and i, specifically X[i]+i % numGroups is the index of the chunk of b that you get
-			// offset tells you X[i]+i % numGroups, which is the index into the chunk of assigned to this group
-            int64_t lowXoffset = (X[lowXidx] + i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus
+			// on each chunk of the array, each group gets a portion of size b, which is determined by X[i] and i, specifically X[i]+i % g is the index of the chunk of b that you get
+			// offset tells you X[i]+i % g, which is the index into the chunk of assigned to this group
+            int64_t lowXoffset = (X[lowXidx] + i >= g) ? X[lowXidx]+i - g : X[lowXidx]+i; // cheaper than modulus
 
 			// Xidx indicates which chunk low is currently in
             int64_t highXidx = s-1; // index into X
-			// on each chunk of the array, each group gets a portion of size b, which is determined by X[i] and i, specifically X[i]+i % numGroups is the index of the chunk of b that you get
-			// offset tells you X[i]+i % numGroups, which is the index into the chunk of assigned to this group
-            int64_t highXoffset = (X[highXidx]+i >= numGroups) ? X[highXidx]+i - numGroups : X[highXidx]+i; // cheaper than modulus
+			// on each chunk of the array, each group gets a portion of size b, which is determined by X[i] and i, specifically X[i]+i % g is the index of the chunk of b that you get
+			// offset tells you X[i]+i % g, which is the index into the chunk of assigned to this group
+            int64_t highXoffset = (X[highXidx]+i >= g) ? X[highXidx]+i - g : X[highXidx]+i; // cheaper than modulus
 
 			// ALowIdx refers to the actual index in the array A that low is on
-            int64_t ALowIdx = (lowXoffset+numGroups*lowXidx) << logB;
+            int64_t ALowIdx = (lowXoffset+g*lowXidx) << logB;
 			// we will increment ALowIdx within the block of size b until it reaches the end of the block, at block_boundary_low
             int64_t block_boundary_low = ALowIdx + b;
 
 			// block_boundary high is 1 less than the end of the block that we are currently in. we will decrement AHighIdx until it reaches the boundary
-            int64_t block_boundary_high =  ((highXoffset+numGroups*highXidx)<<logB) - 1;
+            int64_t block_boundary_high =  ((highXoffset+g*highXidx)<<logB) - 1;
 			// AHighIdx refers to the actual index in the array A that high is on
             int64_t AHighIdx = block_boundary_high + b;
           
@@ -156,16 +241,16 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
                         lowXidx += 1;
 						// this is a version without multiplicatoin, it may be slower thouhg, because it has extra add and subtract steps, and an extra variable
 						if(!multiplicationInLoop) {
-							int64_t deltaLowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i;
+							int64_t deltaLowXoffset = (X[lowXidx]+i >= g) ? X[lowXidx]+i - g : X[lowXidx]+i;
 							deltaLowXoffset -= lowXoffset; 
 							lowXoffset += deltaLowXoffset;
 							ALowIdx += (deltaLowXoffset<<logB) + XdeltaAdelta - b;
 						}
 						else {
 							// get the position within the chunk 
-                            lowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus 
+                            lowXoffset = (X[lowXidx]+i >= g) ? X[lowXidx]+i - g : X[lowXidx]+i; // cheaper than modulus 
 							// get the start of the chunk
-							ALowIdx = (lowXoffset+numGroups*lowXidx) << logB;
+							ALowIdx = (lowXoffset+g*lowXidx) << logB;
 						}
 						// get the end of the chunk
 						block_boundary_low = ALowIdx + b; 
@@ -178,16 +263,16 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
                         highXidx -= 1;
 						// this is a version without multiplicatoin, it may be slower thouhg, because it has extra add and subtract steps, and an extra variable
                         if(!multiplicationInLoop) {
-							int64_t deltaHighXoffset = (X[highXidx]+i >= numGroups) ? X[highXidx]+i - numGroups : X[highXidx]+i;
+							int64_t deltaHighXoffset = (X[highXidx]+i >= g) ? X[highXidx]+i - g : X[highXidx]+i;
                             deltaHighXoffset -= highXoffset; 
                             highXoffset += deltaHighXoffset;
                             block_boundary_high += (deltaHighXoffset<<logB) - XdeltaAdelta;
                         }
                         else {
 							// get the position within the chunk 
-                            highXoffset = (X[highXidx]+i >= numGroups) ? X[highXidx]+i - numGroups : X[highXidx]+i; // cheaper than modulus
+                            highXoffset = (X[highXidx]+i >= g) ? X[highXidx]+i - g : X[highXidx]+i; // cheaper than modulus
 							// get the start of the chunk (where we end because we are going backwards)
-                            block_boundary_high = ((highXoffset+numGroups*highXidx) << logB) - 1;                 
+                            block_boundary_high = ((highXoffset+g*highXidx) << logB) - 1;                 
                         }
 						// get the end of the chunk (where we start because we are going backwards)
                         AHighIdx =  block_boundary_high + b;
@@ -205,14 +290,14 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
                 if(ALowIdx == block_boundary_low){
 					lowXidx += 1;
 					if(!multiplicationInLoop) {
-						int64_t deltaLowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i;
+						int64_t deltaLowXoffset = (X[lowXidx]+i >= g) ? X[lowXidx]+i - g : X[lowXidx]+i;
 						deltaLowXoffset -= lowXoffset; 
 						lowXoffset += deltaLowXoffset;
 						ALowIdx += (deltaLowXoffset<<logB) + XdeltaAdelta - b;
 					}
 					else {
-						lowXoffset = (X[lowXidx]+i >= numGroups) ? X[lowXidx]+i - numGroups : X[lowXidx]+i; // cheaper than modulus 
-						ALowIdx = (lowXoffset+numGroups*lowXidx) << logB;
+						lowXoffset = (X[lowXidx]+i >= g) ? X[lowXidx]+i - g : X[lowXidx]+i; // cheaper than modulus 
+						ALowIdx = (lowXoffset+g*lowXidx) << logB;
 					}
                     block_boundary_low = ALowIdx + b;
                 }
@@ -223,20 +308,23 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 
         // find the minimum in serial (we had data races when we tried to in parallel have everything write to the same variable at the same time (concurrent writing))
         int64_t vmin = n-1; int64_t vmax = 0;
-        for (int64_t i = 0; i < numGroups; i++) {
+        for (int64_t i = 0; i < g; i++) {
             if(allVs[i] < vmin)
                 vmin = allVs[i];
             if(allVs[i] > vmax)
                 vmax = allVs[i];
         }
-        
+		*/
+		Vs vsfinal = serialGroupPartitions(0, g, A, pivotVal, X, s, logB, b, g, XdeltaAdelta);
+		int64_t vmin = vsfinal.vmin;
+		int64_t vmax = vsfinal.vmax;
 
         // here is a bit of edge case cleanup
-        // need to partition A from (s*b)*numGroups (ie sb(n/(sb))) to n
+        // need to partition A from (s*b)*g (ie sb(n/(sb))) to n
         // there are 2 cases, based on whether ther are more extra elements than known sucessors or not
 
         // if there are less extra elements than sucessors (this is true on decenetly big inputs) then just sacrifice some of the successors by swapping them with extras
-        int64_t leftOverStart = s*b*numGroups;
+        int64_t leftOverStart = s*b*g;
         int64_t leftOverSize = n - leftOverStart;
         int64_t successorPartitionSize = leftOverStart - vmax;
         if (leftOverSize < successorPartitionSize) { // llllllllll ?????????? hhhhhhhhhhhhhhhhhhhhhhh  ???? swap the ?s with the early hs
