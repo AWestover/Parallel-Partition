@@ -2,7 +2,7 @@
 // AUTHOR: Alek Westover
 // cache friendly parallel partition program
 // note that this code uses our algorithm in the recursive step for parallel partition
-//
+
 // break the array into s chunks
 // make g = n /(b*s) groups, with elements determined in the following manner:
 // on each chunk, generate 1 random number,  
@@ -172,8 +172,9 @@ Vs serialGroupPartitions(int64_t i, int64_t groupsLeftLoop, int64_t* A, int64_t 
 		return vscur;
 	}
 	else{
-		Vs vsleft = serialGroupPartitions(i, groupsLeftLoop/2, A, pivotVal, X, s, logB, b, g, XdeltaAdelta);
+		Vs vsleft = parallel_spawn serialGroupPartitions(i, groupsLeftLoop/2, A, pivotVal, X, s, logB, b, g, XdeltaAdelta);
 		Vs vsright = serialGroupPartitions(i+groupsLeftLoop/2, groupsLeftLoop/2+(groupsLeftLoop&1), A, pivotVal, X, s, logB, b, g, XdeltaAdelta);
+		parallel_sync;
 		Vs vsaggregate;
 		vsaggregate.vmin = std::min(vsleft.vmin, vsright.vmin);
 		vsaggregate.vmax = std::max(vsleft.vmax, vsright.vmax);
@@ -197,7 +198,7 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
             X[i] = rand() % g;
         }
 
-		/*
+		/**/
         // serial partition on each group done in parallel across the groups
 		int64_t* allVs = (int64_t*)malloc(sizeof(int64_t)*g);
 
@@ -314,10 +315,10 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
             if(allVs[i] > vmax)
                 vmax = allVs[i];
         }
-		*/
-		Vs vsfinal = serialGroupPartitions(0, g, A, pivotVal, X, s, logB, b, g, XdeltaAdelta);
-		int64_t vmin = vsfinal.vmin;
-		int64_t vmax = vsfinal.vmax;
+		/**/
+		// Vs vsfinal = serialGroupPartitions(0, g, A, pivotVal, X, s, logB, b, g, XdeltaAdelta);
+		// int64_t vmin = vsfinal.vmin;
+		// int64_t vmax = vsfinal.vmax;
 
         // here is a bit of edge case cleanup
         // need to partition A from (s*b)*g (ie sb(n/(sb))) to n
