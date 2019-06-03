@@ -544,32 +544,31 @@ the preceding element).
 
 \section{A Cache Efficient Parallel Partition}
 
-Unfortunately, as we show in the experiment section, the algorithm described above does not perform well in practice. 
-The reason for this is its lack of cache efficiency. 
+However, despite its theoretical appeal, the algorithm described above does not perform well in practice, as we show in the experiments section. 
+The reason for the Strided Algorithm's poor performance is its lack of cache efficiency. 
 In this section we provide a theoretical description of cache behavior, and use this model of cache behavior to design a new algorithm for parallel partition that is cache efficient and fast in practice. 
 
 \paragraph{Cache Behavior Preliminaries}
 In our model the \defn{cache} is composed of a set of $\operatorname{polylog}{n}$ cache lines.
 A \defn{cache line} is a set of $\operatorname{polylog}{n}$ values.
 Let \defn{block size} denote the size of a cache line.
-A \defn{cache miss} occurs when the program tries to access a value that is not loaded into cache.
-It is expensive to read values into cache, so the number of cache misses that an algorithm incurs plays a role in determining the running time of an algorithm in practice. 
+A \defn{cache miss} occurs when a program tries to access a value that is not loaded into cache at the time of the program's request.
+It takes time to read a value into cache, so the number of cache misses that an algorithm incurs plays a role in determining the running time of an algorithm in practice. 
 We use the Least Recently Used (LRU) cache replacement algorithm to determine which cache line to discard when the cache is full. 
 When the cache is full, the LRU cache replacement algorithm decides to evict the cache line that was least recently accessed of all cache lines currently in the cache. 
 The LRU cache replacement algorithm is not the best cache replacement algorithm; the optimal cache replacement algorithm is known as OPT. 
 OPT evicts the element that will be needed farthest into the future.
 The ability to predict the future makes OPT impossible to implement in practice.
-This initially seems unfortunate because for some inputs OPT performs much better than LRU when both cache replacement algorithms operate on caches of the same size. 
-However, LRU can be made to perform approximately as well as OPT if LRU is given a larger sized cache than OPT. 
-Tim Roughgarden's Resource Augmentation Theorem formalizes this idea. His theorem says
-\cite{http://timroughgarden.org/f14/l/l3.pdf}
-\begin{theorem}
+The impossibility of implementing OPT initially seems to be an obstacle preventing analysis of cache behavior because for some access sequences OPT performs much better than LRU when both cache replacement algorithms operate on caches of the same size. 
+However, if LRU is given a larger sized cache than OPT then LRU can  achieve performance comparable to that of OPT. 
+Tim Roughgarden's Resource Augmentation Theorem formalizes this idea,
+\begin{theorem}[Resource Augmentation Theorem \cite{http://timroughgarden.org/f14/l/l3.pdf}]
 	LRU operating a cache of size $K\cdot M$ for some $K>1$ will incur at most and $1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on cache of size $M$.
 \end{theorem}
-We make $K=\operatorname{polylog}{n}$, so we can assume that we have nearly as good cache behavior as OPT.
+We make $K=\operatorname{polylog}{n}$, so we can assume that LRU operating on cache of size $K\cdot M$ achieves nearly as good cache behavior as OPT operating on cache of size $M$.
 The specific behavior that we want is the ability to pin values to the cache.
 If there is a set of values that are accessed consistently throughout the program, then we would like to keep the values in cache all the time rather than periodically reloading them into cache.
-OPT would clearly accomplish this, because it could predict that in the future these values would be needed, and it would therefore not evict the values that we wished to be pinned to the cache.
+OPT would clearly accomplish this, because it could predict that these values would be needed in the future, and it would therefore not evict the values that we wished to be pinned to the cache.
 And, by the Resource Augmentation Theorem, LRU can be assumed to achieve this same cache behavior.
 
 \paragraph{A Cache-Efficient Algorithm}
@@ -631,7 +630,7 @@ We now describe how the algorithm creates the collections $U_y$.
 			$$U_y = \bigcup_{j\in G_y} P_j.$$ 
 		The algorithm performs a serial partition on each $U_y$ in parallel.
 	\item Define $v_y$ to be the index of the first successor in $U_y$. Define $v_{min}=\min{v_y}$ and $v_{max}=\max{v_y}$. 
-	\item Then after recursively applying the Grouped Partition Algorithm to the subarray ${A[v_{min}],\ldots,A[v_{max}-1]}$ the array is fully partitioned.
+	\item After recursively applying the Grouped Partition Algorithm to the subarray ${A[v_{min}],\ldots,A[v_{max}-1]}$ the array is fully partitioned.
 \end{itemize}
 
 \paragraph{Algorithm Analysis}
@@ -642,10 +641,10 @@ This makes $v_{max}-v_{min} < O(\delta \cdot n)$, where $v_{max}-v_{min}$ is the
 The algorithm uses $\delta = 1/ \sqrt{\log n}$ on the top layer of recursion and $\delta = 1/2$ on lower layers. 
 This results in span $O(b \log^2 n)$.
 Note that the algorithm has work $O(n)$ because serial partition has linear work. %% CHECK THIS
-Also note that the algorithm incurs only $n(1+o(1))$ cache misses. %% explain why, also this is really breif
+Also note that the algorithm incurs only $n(1+o(1))$ cache misses. %% explain why, also this is really brief
 In addition to these desirable theoretical guarantees, the algorithm performs well in practice.
-The algorithm achieves better parallelism and performance than the algorithms discussed above. Also, because it achieves an optimal number of cache misses, the bandwidth bound for the Grouped Partition Algorithm is the lowest possible bandwidth bound.
-This algorithm addresses all the concerns with the Strided Algorithm that were posed in the previous paragraph.
+The algorithm achieves better parallelism and performance than the algorithms discussed above. 
+Also, because the Grouped Partition Algorithm achieves an optimal number of cache misses, its bandwidth bound is optimal.
 
 \section{Experimental Evaluation}\label{secexp}
 
