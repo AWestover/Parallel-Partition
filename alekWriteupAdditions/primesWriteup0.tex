@@ -348,10 +348,7 @@ $$U_y = \bigcup_{j\in G_y} P_j.$$
 Define $\mu_y$ to be the number of predecessors in $U_y$ divided by the number of elements in $U_y$. This is analogous to the definition of $\mu$: the number of predecessors in $A$ divided by $n$.
 
 Once the algorithm has generated $X$, it performs a serial partition on each collection $U_y$ in parallel. 
-After partitioning the collection $U_y$, the Grouped Partition algorithm stores the index $v_y$ which is the index in $A$ of the first successor in $U_y$.
-Recall that $s$ is small, and that the algorithm already created an array $X$ of size $s$, so storing the values $v_0,\ldots,v_{s-1}$ does not change the asymptotics for memory consumption of the algorithm.
-After the Grouped Partition algorithm finishes performing in parallel a serial partition of each group, the algorithm computes in serial $v_{min} =\min v_y$ and $v_{max} = \max{v_y}$.
-Note that we cannot just have a variable that all threads write to storing the current lowest $v_y$ and current highest $v_y$ and then overwrite this in each thread when it finishes its group because this would cause data races in the parallel algorithm.
+While performing the serial partitions of each $U_y$ the algorithm computes the indices $v_{max}, v_{min}$ where $v_{max}=\max{v_y}, v_{min}=\min v_y$ and $v_y$ is the index in $A$ of the first successor in $U_y$.
 Thus, because for all $y$ 
 $$v_{min}\leq v_{y} \leq v_{max},$$
 all elements of $A$ with index less than $v_{min}$ are predecessors and all elements of $A$ with index greater or equal to $v_{max}$ are successors.
@@ -361,6 +358,7 @@ The base case for the recursion is that when the algorithm can no longer make a 
 
 See Algorithm \ref{alg:parallelPartition} for a pseudocode implementation of the algorithm.
 
+%%%%%%%% ALEK ALEK ALEK: should probably update this to reflect the fact that we aren't really storing the v_y s and we are doing a recursive spawning thing rather than the loop
 \begin{figure*}
 	\caption{Parallel Partition}
 	\label{alg:parallelPartition}
@@ -402,9 +400,9 @@ See Algorithm \ref{alg:parallelPartition} for a pseudocode implementation of the
 
 					\State Swap $A[\text{ALowIdx}]$ and $A[\text{AHighIdx}]$
 				\EndWhile
-				\State Store $v_i$: the index of the first successor in $U_y$
+				\State Store $v_i$: the index of the first successor in $U_y$ %% NONONO
 			\EndFor
-			\State Compute $v_{min} = \min v_i, v_{max}=\max v_i$
+			\State Compute $v_{min} = \min v_i, v_{max}=\max v_i$%% NONONO
 			\State Recurse on $A[v_{min}],\ldots,A[v_{max}-1]$
 		\EndIf
 	\end{algorithmic}	
@@ -498,6 +496,20 @@ Then,
 $$\mu - \delta < \mu_y < \mu + \delta$$
 for all $y$, so 
 	$$\max{\mu_y} - \min(\mu_y) < 2\delta. $$
+%% The evasion of a hard inequality with the theta stuff is probably bad, especially given that the real inequality isn't too nasty and is pretty informative	
+%% here is a sketch of the math for the real stuff
+%% $$|\mu - \mu_y|<\delta$$
+%% index of the group P_j that v_y lies in is 
+%% G_y[\mu_y s] = g \mu_y s + ((X[\mu_y s] + y)%g)
+%% g\mu_y s \leq G_y[\mu_y s] < g\mu_y s + g
+%% v_y is then within one of these blocks
+%% ie   g\mu_y s b \leq   v_y < (g \mu_y s +g)b + b
+%% note n = gsb
+%% so this is    n \mu_y \leq v_y < n \mu_y + (g+1)b
+%% \mu_y n \leq v_y < \mu_y n + (g+1)b
+%% $$v_{max} < n(\mu +\delta) + (g+1)b$$
+%% v_{min} > n(\mu - \delta)
+%% v_{max} - v_{min} < 2n\delta +(g+1)b
 We can compute $v_y$ from $\mu_y$, because $\lfloor \mu_y\cdot s \rfloor$ gives the number of parts $P_j$ where $j \in G_y$ that are completely filled with predecessors once the collection $U_y$ is partitioned. 
 There are $s$ portions of size $g\cdot b$ in the array, so to find the index of the start of the portion of index $\lfloor \mu_y\cdot s \rfloor$, we compute
 	$$v_y = \Theta((\mu_y \cdot s)\cdot (g\cdot b)).$$
