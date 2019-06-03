@@ -37,6 +37,7 @@ struct Vs {
 // smaller delta -> bigger s -> smaller g
 // equalDelta false -> use small delta = 1 / sqrt(2*log(n)) on the top
 // so equalDelta false means that there will be fewer groups on the top layer (and that the groups will be bigger therefore, so we can be confident that the recursive subproblem is much smaller in size)
+// clarifiction: size of recursive subproblem should be about delta * n
 
 int64_t computeS(int64_t n, double delta){
     return (int64_t)(log2(n) / (2*delta*delta));

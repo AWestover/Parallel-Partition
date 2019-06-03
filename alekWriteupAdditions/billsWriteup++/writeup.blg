@@ -1,0 +1,77 @@
+This is BibTeX, Version 0.99d (TeX Live 2018)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: writeup.aux
+The style file: ACM-Reference-Format.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: paper.bib
+Warning--I didn't find a database entry for "http://timroughgarden.org/f14/l/l3.pdf"
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=20001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--empty publisher in Anderson90
+Warning--empty address in Anderson90
+Warning--no number and no volume in AxtmannWi17
+Warning--page numbers missing in both pages and numpages fields in AxtmannWi17
+Warning--can't use both volume and number fields in BlellochFi12
+Warning--empty publisher in BlellochFi12
+Warning--empty address in BlellochFi12
+Warning--empty publisher in Frias08
+Warning--empty address in Frias08
+Warning--empty publisher in FrigoLe09
+Warning--empty address in FrigoLe09
+Warning--empty publisher in Han01
+Warning--empty address in Han01
+Warning--empty address in HanHe12
+Warning--no number and no volume in Kleen05
+Warning--page numbers missing in both pages and numpages fields in Kleen05
+Warning--empty publisher in LiuKn05
+Warning--empty address in LiuKn05
+Warning--empty publisher in ShunGu15
+Warning--empty address in ShunGu15
+Warning--empty publisher in TsigasZh03
+Warning--empty address in TsigasZh03
+You've used 26 entries,
+            5719 wiz_defined-function locations,
+            1477 strings with 18918 characters,
+and the built_in function-call counts, 31788 in all, are:
+= -- 4276
+> -- 1028
+< -- 0
++ -- 348
+- -- 376
+* -- 2121
+:= -- 3138
+add.period$ -- 131
+call.type$ -- 26
+change.case$ -- 170
+chr.to.int$ -- 26
+cite$ -- 48
+duplicate$ -- 2800
+empty$ -- 1963
+format.name$ -- 456
+if$ -- 7835
+int.to.chr$ -- 2
+int.to.str$ -- 1
+missing$ -- 105
+newline$ -- 240
+num.names$ -- 208
+pop$ -- 1000
+preamble$ -- 1
+purify$ -- 404
+quote$ -- 0
+skip$ -- 990
+stack$ -- 0
+substring$ -- 2491
+swap$ -- 307
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 556
+warning$ -- 22
+while$ -- 239
+width$ -- 0
+write$ -- 480
+(There were 23 warnings)

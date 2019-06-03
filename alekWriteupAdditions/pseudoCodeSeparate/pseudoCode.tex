@@ -1,0 +1,95 @@
+
+
+%%% line numbers
+%%% make a version that is less formal... and compare which one is better
+
+\documentclass[11pt]{article}
+\author{Alek Westover}
+\title{Cache Efficient Parallel Partition}
+
+\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amsfonts}
+
+\usepackage{amsmath}
+% defines a new function
+\def\polylog{\operatorname{polylog}}
+\def\pred{\operatorname{pred}}
+\def\E{\operatorname{\mathbb{E}}}
+
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+% \floor*{\frac{x}{y}} actually does a nice looking floor!
+\DeclarePairedDelimiter{\paren}{(}{)}
+% paren*{ } will also give the correct size
+\newcommand{\defn}[1]       {{\textit{\textbf{\boldmath #1}}}}
+
+\renewcommand{\paragraph}[1]{\vspace{0.09in}\noindent{\bf \boldmath #1.}} 
+
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{algorithm, algpseudocode}
+
+%%%% Theorem stuff
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+
+\begin{document}
+
+\vspace{5mm}
+\begin{algorithm}
+	\caption{Parallel Partition}
+	\label{alg:parallelPartition}
+	\textbf{Input: }
+	\textbf{Output: }
+	\begin{algorithmic}[1]
+		\If{$g<2$}
+			\State serialPartition A
+		\Else
+			\For{$i \in \{0,1,\ldots,s-1\}$}
+				\State $X[i] \gets$ a random integer from $[0,g-1]$ 
+			\EndFor
+			\ForAll{$ y \in \{0, 1,\ldots,g\}$ in parallel}
+				\State -- Now we perform a serial partition on $U_y$
+
+				\State -- Initialize ALowIdx to be the index of the first element in $U_y$
+				\State $\text{ALowIdx} \gets ((X[0]+y) \bmod g)\cdot b$
+
+				\State -- Initialize AHighIdx to be the index of the last element in $U_y$
+				\State $\text{AHighIdx} \gets n - g\cdot b + ((X[s-1]+y) \bmod g)\cdot b + b-1$
+
+				\While{ALowIdx $<$ AHighIdx} 
+					\While{A[ALowIdx] $\leq$ pivotValue}
+						\State ALowIdx $\gets$ ALowIdx$+1$
+						\If{ALowIdx on block boundary}
+							\State -- We perform a block increment
+							\State $i \gets $ \# of block increments so far (including this one)
+							\State -- Increase ALowIdx to start of block $i$ of $G_y$
+							\State $\text{ALowIdx} \gets ((X[i] + y)\bmod g) \cdot b + i\cdot b\cdot g$
+						\EndIf
+					\EndWhile
+					\While{A[high] $>$ pivotValue}
+						\State AHighIdx $\gets$ AHighIdx$-1$
+						\If{AHighIdx on block boundary}
+							\State -- We perform a block decrement
+							\State $i \gets $ \# of block decrements so far (including this one)
+							\State -- Decrease AHighIdx to end of block $s-1-i$ of $G_y$
+							\State $\text{AHighIdx} \gets ((X[s-1-i] + y)\bmod g) \cdot b + i\cdot b\cdot g + b - 1$
+						\EndIf
+					\EndWhile
+
+					\State Swap $A[\text{ALowIdx}]$ and $A[\text{AHighIdx}]$
+				\EndWhile
+				\State Store $v_i$: the index of the first successor in $U_y$
+			\EndFor
+			\State Compute $v_{min} = \min v_i, v_{max}=\max v_i$
+			\State Recurse on $A[v_{min}],\ldots,A[v_{max}-1]$
+		\EndIf
+	\end{algorithmic}	
+\end{algorithm}
+
+\end{document}
+
+
