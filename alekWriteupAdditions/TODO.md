@@ -5,10 +5,13 @@
   and then add the Grouped Partition algorithm (only version 3)
     concisely explain why it's cool  ********this is the biggest part I need to add
 
-  look at tense agreement. Especially for stuff where I say P_js U_ys etc. It is probably wrong to say "for all indices v_y", instead say "for all indices v_0,v_1,...,v_n-1"
+  look at tense agreement. Especially for stuff where I say P_js U_ys etc. It is probably wrong to say "for all indices v_y", instead say "for all indices v_0,v_1,...,v_g-1"
   read paper for block, collection, group etc consistency  -- bill said to keep reminders of what these are in the paper (ppl prob wont catch on to the fact that we consistently refer to Pj as a part / block etc because its kinda confusing)
 
   make sure that I never say "compute min(v_y)" in serial because we don't!!! (I thought there were less v_ys then there really were, g is pretty big)
+  probably change the pseudocode to reflect this
+
+clean up variable names in code to align with writeup?
 
 #### Questions for Bill:
   * Improve global definitions and usage
