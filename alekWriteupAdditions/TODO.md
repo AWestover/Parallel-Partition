@@ -13,9 +13,7 @@
   * Improve global definitions and usage
 
 ## writeup completeness
-  * Add cache misses analysis for grouped partition algorithm
-
-  * do Brent's theorem: compute *work* for algorithms (not just span)
+  * compute work for algorithms (not just span)
 
   * say more about Bill's algorithm in my paper (look over his paper again, describe his algorithm in my paper?)
 

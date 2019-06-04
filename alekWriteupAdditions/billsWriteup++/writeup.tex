@@ -638,7 +638,7 @@ The Grouped Partition Algorithm achieves low span and high parallelism with high
 Define $\mu_y$ to be the fraction of elements of $U_y$ that are successors, and $\mu$ to be the fraction of elements of $A$ that are successors.
 We can show using Hoeffding bounds (i.e. Chernoff Bounds for random variables on $[0,1]$ rather than on $\{0,1\}$) that by setting $s=\Theta(\frac{n}{\delta^2})$ we get, with high probability in $n$, for all $y$ $|\mu-\mu_y| < \delta$. 
 This makes $v_{max}-v_{min} < O(\delta \cdot n)$, where $v_{max}-v_{min}$ is the size of the recursive subproblem that the algorithm must solve. 
-The algorithm uses $\delta = 1/ \sqrt{\log n}$ on the top layer of recursion and $\delta = 1/2$ on lower layers. 
+The algorithm uses $\delta = 1/ \sqrt{\log n}$ on the top layer of recursion and a constant $\delta = 1/4$ on lower layers. 
 This results in span $O(b \log^2 n)$.
 Note that the algorithm has work $O(n)$ because serial partition has linear work. %% CHECK THIS
 Also note that the algorithm incurs only $n(1+o(1))$ cache misses. %% explain why, also this is really brief

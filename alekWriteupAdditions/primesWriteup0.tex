@@ -461,12 +461,13 @@ we have that with high probability in $n$, $|\mu - \mu_y| < \delta$ for all $y$.
 
 \paragraph{Grouped Partition Subproblem Analysis}
 Once the Grouped Partition algorithm has made a single pass over the array there is a subproblem left to solve.
-Lemma \ref{lem:groupedAlgDelta} informs us how much smaller we can expect the subarray to be relative to the original array, and using this we can establish the span and cache efficiency of the Grouped Partition algorithm.
+Lemma \ref{lem:groupedAlgDelta} can be used to find out how much smaller we can expect the subarray to be relative to the original array, from which we can derive the span and cache efficiency of the Grouped Partition Algorithm.
 There are two options for solving the recursive subproblem, and we calculate the span of the algorithm given each approach.
 
 \begin{proposition}
 By first applying the Grouped Partition algorithm to the top level of recursion for the partition problem, and then solving the remaining subproblem problem with an already existing algorithm for parallel partition, the algorithm achieves span
-	$$T_\infty(n) = O\paren*{\paren*{\frac{b}{\delta^2} + \log\log n} \log n}.$$
+	$$T_\infty(n) = O\paren*{\paren*{\frac{b}{\delta^2} + \log\log n} \log n},$$ and makes $(1+
+\delta)\cdot n$ cache misses.
 \end{proposition}
 \begin{proof}
 From previous work we know that it is possible to perform a parallel partition of an array of size $\delta\cdot n$ with span $O(\log(n\delta)\log\log(n\delta)).$ 
@@ -479,15 +480,22 @@ This makes the span of our algorithm, with this choice of a recursive technique,
 	$$T_\infty(n)=  O\paren*{b \cdot \frac{\log n}{\delta ^2} + \log(n\delta)\log\log(n\delta)}.$$
 Note that $\log(n\delta) = \log(n) - \log(\frac{1}{\delta}) < \log n$ so we can simplify the span to
 	$$T_\infty(n) = O\paren*{\paren*{\frac{b}{\delta^2} + \log\log n} \log n}.$$
+
+	Now we compute the number of cache misses incurred. 
+	On the top level, the algorithm incurs $n$ cache misses for the serial partitions of all the groups.
+	%%%%%% CHECK THISSSSSSSSSSS
+	When recursing on an array of size $\delta \cdot n$ the algorithm incurs $\delta \cdot n$ cache misses. 
+	Thus, in total the algorithm incurs $(\delta + 1) \cdot n$ cache misses.
 \end{proof}
 
 \paragraph{Recursing With the Same Algorithm}
 We could instead recurse with the Grouped Partition algorithm.
 Note that with Francis and Pannan's algorithm which only performs well on random inputs we could not do this because their algorithm works poorly on the subarray generated, but our algorithm's performance is guaranteed for arbitrary inputs so we can recurse with our algorithm.
-There are two ways we can do this. We could applying special treatment to the top level of recursion because it is by far the biggest problem, or we could treat all levels the same.
+There are two ways we can do this. 
+We could applying special treatment to the top level of recursion because it is by far the biggest problem, or we could treat all levels the same.
 
 \begin{proposition}
-If we use the same allowable deviation $\delta$ for $|\mu_y - \mu|$ at all levels of recursion then the algorithm has span $$T_{\infty}(n) = \Theta(b\log^2 n).$$
+If we use the same allowable deviation $\delta$ for $|\mu_y - \mu|$ at all levels of recursion then the algorithm has span $$T_{\infty}(n) = \Theta(b\log^2 n),$$ and incurs approximately $2n$ cache misses.
 \end{proposition}
 
 \begin{proof}
@@ -527,6 +535,9 @@ $$T_{\infty}(n) = \Theta(b\cdot \log n)+T_{\infty}(n/2).$$
 	The depth of the recursion is $\Theta(\log n)$ because the input size is reduced by half at each level. Thus, by adding up the $\log n$ terms of the form $$b \cdot \log (n/2^i) = b\cdot (\log n - i), $$
 we get the span of the algorithm, which is 
 	$$T_{\infty}(n) = \Theta(b\log^2 n).$$
+
+	The number of cache misses is approximately
+	$$n + n/2^1 + n/2^2 + \cdots = 2n .$$
 \end{proof}
 
 \begin{proposition}
@@ -540,6 +551,11 @@ $$T_\infty(n_0) = b\cdot \Theta(\frac{\log n_0}{\delta ^2})+T_\infty(\delta n_0)
 and for all $n<n_0$, where we use $\delta_{fake} = \frac{1}{2}$
 $$T_\infty(n) =  b\cdot \Theta(\log n_0)+T_\infty(\delta_{fake} n).$$
 From the previous part we have shown that once we are using $\delta_{fake}$ we get span $\Theta(b\log^2 n)$, so we can have $\delta = \frac{1}{\sqrt{\log n}}$ to get span $\Theta(b\log^2 n)$, but this is much better than before. 
+The improvement can be seen in the cache behavior analysis.
+The algorithm incurs $n$ cache misses on the top layer, and then at lower layers the algorithm incurs less than
+	$$\frac{1}{\sqrt{\log n}} + \frac{1}{2\sqrt{\log n}} + \cdots = \frac{2}{\sqrt{\log n}}.$$
+	Thus, the total number of cache misses is $$(1+o(1))n$$ because $\frac{2}{\log n} \in o(1)$.
+
 \end{proof}
 	
 	
