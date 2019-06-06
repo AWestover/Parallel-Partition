@@ -23,7 +23,5 @@
 
 
 ## writeup correctness
-
-  *   make sure that I never say "compute min(v_y)" in serial because we don't!!! (I thought there were less v_ys then there really were, g is pretty big)
-   - probably change the pseudocode to reflect this
+  * make pseudocode show the recursive spawn structure rather than the parallel for loop?
 

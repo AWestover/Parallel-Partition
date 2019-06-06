@@ -30,6 +30,7 @@
 \usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage{algorithm, algpseudocode}
+% \usepackage[noend]{algpseudocode} -- this would get rid of the endifs, maybe worth thinking about for code concision
 
 %%%% Theorem stuff
 \newtheorem{theorem}{Theorem}
@@ -341,24 +342,45 @@ This means that group $G_0$ is a collection of indices for specific parts $P_j$,
 \end{multline*}
 Intuitively this means that, for group $G_y$, on each chunk of size $g$ of the array, take $X[j]$ and add the group's index $i$ (wrapping around if there is overflow beyond the number of groups) to get to the index of the $P_j$ that belongs to group $G_y$ from this chunk of the array.
 Note that we do not need to store the indices of each $P_j$ that belongs to a group because $X$ and the group index is enough information to determine which $P_j$s belong to a group.
-We call our algorithm in-place because the size $s$ of X is made $O(\polylog(n))$ which is small compared to the array of size $n$ that is an input to the partition problem.
+We call our algorithm in-place because $s$ (recall $s = |X|$) is made $O(\polylog(n))$.
 
 Define $U_y$ to be the union of all parts that belong to group $G_y$. That is,
 $$U_y = \bigcup_{j\in G_y} P_j.$$
 Define $\mu_y$ to be the number of predecessors in $U_y$ divided by the number of elements in $U_y$. This is analogous to the definition of $\mu$: the number of predecessors in $A$ divided by $n$.
 
 Once the algorithm has generated $X$, it performs a serial partition on each collection $U_y$ in parallel. 
-While performing the serial partitions of each $U_y$ the algorithm computes the indices $v_{max}, v_{min}$ where $v_{max}=\max{v_y}, v_{min}=\min v_y$ and $v_y$ is the index in $A$ of the first successor in $U_y$.
-Thus, because for all $y$ 
+The algorithm performs the partitions in parallel by splitting the tasks using a recursive method of calling the function repeatedly.
+While performing the serial partitions of each $U_y$, the algorithm computes the indices $v_{max}, v_{min}$ where $v_{max}=\max{v_y}, v_{min}=\min v_y$ and $v_y$ is the index in $A$ of the first successor in $U_y$.
+This is roughly outlined in Figure \ref{fig:recursiveParallelLoop}.
+\begin{figure*}
+	\caption{Recursive Spawning Implementation of Parallel For Loop}
+	\label{fig:recursiveParallelLoop}
+	\textbf{Input:} first group index, number of groups to process\\
+	\textbf{Output: $v_{min}, v_{max}$ for $U_y,\ldots, U_{y+n-1}$}
+	\begin{algorithmic}[1]
+		\Procedure{partitionGroups}{$y, n$}
+			\If{$n=1$}
+				\State perform serial partition of $U_y$
+				\State\Return{$v_y,v_y$}
+			\Else
+				\State leftvs $\gets$ \Call{partitionGroups}{$y,n/2$}
+				\State rightvs $\gets$ \Call{partitionGroups}{$y+n/2,n/2+n\&2$}
+				\State\Return{$\min(\text{leftvs.$v_{min}$}, \text{rightvs.$v_{min}$})$, $\max(\text{leftvs.$v_{max}$}, \text{rightvs.$v_{max}$})$}
+			\EndIf
+		\EndProcedure
+	\end{algorithmic}	
+\end{figure*}
+
+Then, because for all $y$ 
 $$v_{min}\leq v_{y} \leq v_{max},$$
 all elements of $A$ with index less than $v_{min}$ are predecessors and all elements of $A$ with index greater or equal to $v_{max}$ are successors.
 Thus, by recursing on the subarray $A[v_{min}],\ldots,A[v_{max}-1]$, we complete the partitioning of the array.
 We recursively apply the Grouped Partition algorithm to the subproblem.
 The base case for the recursion is that when the algorithm can no longer make a substantial number of groups, in which case it partitions the input array in serial.
 
-See Algorithm \ref{alg:parallelPartition} for a pseudocode implementation of the algorithm.
+See Figure \ref{alg:parallelPartition} for a pseudocode implementation of the algorithm.
 
-%%%%%%%% ALEK ALEK ALEK: should probably update this to reflect the fact that we aren't really storing the v_y s and we are doing a recursive spawning thing rather than the loop
+%%%%%%%% ALEK ALEK ALEK: show recursive spawning rather than parallel for loop?
 \begin{figure*}
 	\caption{Parallel Partition}
 	\label{alg:parallelPartition}
@@ -400,9 +422,7 @@ See Algorithm \ref{alg:parallelPartition} for a pseudocode implementation of the
 
 					\State Swap $A[\text{ALowIdx}]$ and $A[\text{AHighIdx}]$
 				\EndWhile
-				\State Store $v_i$: the index of the first successor in $U_y$ %% NONONO
 			\EndFor
-			\State Compute $v_{min} = \min v_i, v_{max}=\max v_i$%% NONONO
 			\State Recurse on $A[v_{min}],\ldots,A[v_{max}-1]$
 		\EndIf
 	\end{algorithmic}	
