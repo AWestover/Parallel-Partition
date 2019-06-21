@@ -177,8 +177,7 @@ We first bound the number of predecessors $x_i$ in each part $P_i$, which allows
 
 The Multiplicative Chernoff bound bounds the probability of a random variable such as $x_i$ deviation by more than $\delta \cdot \mu$ from its mean.
 Specifically it says,
-$$P(x_i>\mu(1+\delta)) = O(e^{-\mu \cdot \delta^2/3}).
-$$
+$$P(x_i>\mu(1+\delta)) = O(e^{-\mu \cdot \delta^2/3}).$$
 We want to know what value of $\delta$ makes $x_i\leq\mu(1+\delta)$ with high probability.
 To find the smallest $\delta$ satisfying this, we must solve 
 $$O(e^{-\mu \cdot \delta^2/3}) = n^{-c},$$
@@ -430,7 +429,7 @@ See Figure \ref{alg:parallelPartition} for a pseudocode implementation of the al
 
 Now we prove the following lemma to simultaneously bound $|\mu - \mu_y|$ for all $y$. 
 \begin{lemma}
-If $s=\Theta(\frac{\log n}{\delta^2})$ then the Grouped Partition Algorithm forms $g$ such that, with high probability in $n$, for all $y$, $|\mu - \mu_y| < \delta$.
+Given $n, \mu$, For our choice of $b, \delta$, if $s=\Theta(\frac{\log n}{\delta^2})$ and $g = \frac{n}{b\cdot s}$ then the Grouped Partition Algorithm forms $g$ such that, with high probability in $n$, for all $y$, $|\mu - \mu_y| < \delta$.
 \label{lem:groupedAlgDelta}
 \end{lemma}
 
@@ -459,7 +458,7 @@ $$\E(\mu_y) = \frac{1}{b\cdot s \cdot g}\sum_{j=0}^{s\cdot g-1}\pred(j) = \frac{
 We are looking for the probability that 
 $$\Big | \mu_y - \mu \Big | \geq \delta.$$
 	Note that $\mu_y$ is the average of the $s$ independent random variables $$\frac{1}{b}\pred(G_y[i]) \in [0, 1]$$ by Equation \eqref{eqn:emui}, so we can apply Hoeffding's inequality.
-Let $M_y$ be the event that $|\mu_y-\mu| < \delta$. 
+Let $M_y$ be the event that $|\mu_y-\mu| \geq \delta$. 
 Hoeffding's inequality gives us that the probability of $\mu_y$ deviating from its expected value, which was calculated to be $\mu$, by more than $\delta$ is
 	$$\Pr(M_y) \leq \exp(-2s\delta^2).$$
 We have found this bound for each group $G_y$ by themselves, but we need the bound to apply to all groups at once. 
@@ -469,14 +468,17 @@ Using the fact that
 	$$\Pr\paren*{\bigcup_{y=0}^{g-1} M_y } \leq \sum_{y\in [0,g-1]} \Pr(M_y), $$
 	we see that by making each $$\Pr(M_y) <\epsilon / g,$$ we can make the probability of any of the events $M_0,\ldots,M_{g-1}$ occurring less than $\epsilon$.
 	We established an upper bound for $\Pr(M_y)$ above with Hoeffding's inequality, so to ensure that $\Pr(M_y)$ is less than $\epsilon / g$ it suffices to make the upper bound less than $\epsilon / g$. That is,
-	$$\Pr(M_y) < \exp(-2s\delta^2) < \frac{\epsilon}{g}.$$
+	$$\Pr(M_y) < \exp(-2s\delta^2) \leq \frac{\epsilon}{g}.$$
 Solving for the necessary size of $s$ we find that  
 	$$s \geq \frac{\ln(g / \epsilon)}{2\delta^2}.$$
-Recall that $n = g \cdot b \cdot s$, so we can assert that 
-	$$\frac{\ln n}{2\delta^2} \geq \frac{\ln(g / \epsilon)}{2\delta^2}.$$
-Thus by choosing 
+If we want all events $M_y$ to not occur with high probability in $n$, then we must set $\epsilon = 1/n^c$. 
+Thus,
+	$$s \geq \frac{\ln(g \cdot n^c)}{2\delta^2}.$$
+	%% HEY maybe do the version that is parameterized by epsilon...
+Larger values of $s$ hurt our span however, so we will chose $\delta$ to be just big enough to ensure that $M_y$ all happen with high probability in $n$.
+Thus we chose 
 	$$s = \Theta \paren*{ \frac{\log n}{\delta^2}}$$
-we have that with high probability in $n$, $|\mu - \mu_y| < \delta$ for all $y$.
+	to ensure that with high probability in $n$ ${|\mu - \mu_y| < \delta}$ for all $y$.
 \end{proof}
 
 \paragraph{Grouped Partition Subproblem Analysis}
@@ -579,7 +581,18 @@ The algorithm incurs $n$ cache misses on the top layer, and then at lower layers
 \end{proof}
 	
 	
-\section{Systems stuff}
+\section{Systems Performance}
+
+\paragraph{Handling Non-divisible Array Size}
+In the analysis above we have assumed that $n$ is divisible by our parameters $g, b, s$. 
+However, this simplifying assumption is incredibly restrictive and unnecessary.
+In our algorithm $b$ and $s$ parameters, and then $g$ is determined as $$g = \floor* { \frac{n}{b\cdot s} }.$$
+If $n \bmod (b\cdot s) \not\equiv 0$, then $g\cdot b \cdot s < n$.
+To deal with this problem, we first apply our partial partition algorithm to ${A[0],\ldots,A[g\cdot s\cdot b -1]}$.
+After doing this there is a subarray ${A[v_{min}],\ldots, A[v_{max}-1]}$ left to partition, and there is also the part of the array ${A[g\cdot s\cdot b],\ldots, A[n-1]}$ that we have ignored.
+The algorithm deals with the tail of the array by either swapping the tail with a portion of the array of equal size which is the earliest successors in the array, or, in the rare case that there are more elements in the tail than successors--this may realistically happen on a very low layer of recursion when solving the partition problem with repeated applications of our algorithm, or if the pivot value is chosen adversarially such that there are very few successors--then the entire section of the array which is composed of successors is swapped with the last portion of the tail which is of the same length as the length of the section of the array composed of successors and appropriately incrementing $v_{max}$. 
+This step adds very little to the size of the recursive subproblem because $$n - b\cdot s \floor*{\frac{n}{b\cdot s}} < b\cdot s.$$
+This does not affect the algorithm's work, span, or cache-efficiency.
 
 \paragraph{Optimizations}
 The Grouped Partition algorithm must perform a serial partition on each group $G_y$.
@@ -592,8 +605,7 @@ Our algorithm spends most of its time on the serial partition step at the top le
 This makes it so that the algorithm gets high parallelism because by increasing the number of groups that the algorithm can process in parallel the amount of time that the algorithm must spend on the time consuming step of serial partitioning is reduced.
 The overhead introduced in the serial partition step of the algorithm slows it down initially, but is overcome when the number of processors increases.
 
-\paragraph{Graphs}
-This new algorithm is very cache efficient, and operates very close to the memory bandwidth bound.
-You can run the code yourself at https://github.com/awestover/Parallel-Partition. Add lots of graphs here and some discussion. 
+\paragraph{Performance}
+This new algorithm is very cache efficient, and operates very close to the memory bandwidth bound. Our implementation of the algorithm is available on github: https://github.com/awestover/Parallel-Partition.  
 
 \end{document}

@@ -5,3 +5,6 @@
 main.dSYM/
 *.pyc
 main
+*.dvi
+*.fdb_latexmk
+*.fls
