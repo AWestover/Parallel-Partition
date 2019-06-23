@@ -175,7 +175,7 @@ $ $\newline
 To prove this, we use Chernoff Bounds, which give bounds on the probability of a deviation of a random variable from its mean (expected value) $\mu$ by more than a certain amount.
 We first bound the number of predecessors $x_i$ in each part $P_i$, which allows us to bound $v_i$, the index in the array $A$ of the first successor in $P_i$ after $P_i$ has been partitioned.
 
-The Multiplicative Chernoff bound bounds the probability of a random variable such as $x_i$ deviation by more than $\delta \cdot \mu$ from its mean.
+The Multiplicative Chernoff bound bounds the probability of a random variable such as $x_i$ deviating by more than $\delta \cdot \mu$ from its mean.
 Specifically it says,
 $$P(x_i>\mu(1+\delta)) = O(e^{-\mu \cdot \delta^2/3}).$$
 We want to know what value of $\delta$ makes $x_i\leq\mu(1+\delta)$ with high probability.
@@ -208,12 +208,12 @@ Now, we apply the union bound for with high probability events.
 It states that the union of a set of events that are false with high probability is still false with high probability.
 Using the union bound allows us to go from saying 
 \begin{multline*}
-\text{for all i, with high probability} \\ 
+\text{for all $i$, with high probability} \\ 
 	|v_i - \frac{n}{2}| = O(\sqrt{t\cdot n\log n}),
 \end{multline*}
 to saying 
 \begin{multline*}
-	\text{with high probability, for all i} \\ 
+	\text{with high probability, for all $i$} \\ 
 	|v_i - \frac{n}{2}| = O(\sqrt{t\cdot n\log n}).
 \end{multline*}
 This establishes that, with high probability, 
