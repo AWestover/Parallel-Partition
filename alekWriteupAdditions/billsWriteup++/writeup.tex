@@ -646,14 +646,14 @@ After partitioning the subarray ${A[v_{min}],\ldots,A[v_{max}-1]}$ the array is 
 We now prove the following general theorem about the Cache-Efficient Parallel-Partition Algorithm.
 \begin{theorem}
 	\label{thm:generalResult}
-	The Cache-Efficient Partial-Partition Algorithm applied to an array of size $n$ with $\mu \cdot n$ predecessors using parameters $b$ as block size, $\epsilon$ as probability of failure to achieve the desired size reduction, and $\delta$ where $2n\delta$ approximates the size of the not yet partitioned subarray after the algorithm runs; and using variables $s\defeq \frac{\log (n/\epsilon)}{2\delta^2}$ chunks, and $g=\frac{n}{b\cdot s}$ groups, partitions groups $G_0, \ldots, G_{g-1}$ in parallel such that with probability $1-\epsilon$ the indices $v_0,\ldots, v_{g-1}$ of the first successor in each group satisfy $-n \cdot \delta \leq v_y - \mu \cdot n < n (\delta + 1/s)$. 
-	The Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $O\paren*{b \frac{\log (n/\epsilon)}{\delta^2}}$, incurs $n$ cache misses, and leaves a subproblem of partitioning $A[v_{min}],\ldots, A[v_{max}-1]$ which has size $v_{max}-v_{min} < n(2\delta + 1/s)$ to complete in order to complete the partitioning of the array. 
+	The Cache-Efficient Partial-Partition Algorithm applied to an array of size $n$ with $\mu \cdot n$ predecessors using parameters $b$ as block size, $\epsilon$ as probability of failure to achieve the desired size reduction, and $\delta$ where $2n\delta$ approximates the size of the not yet partitioned subarray after the algorithm runs; and using variables $s\defeq \frac{\log (n/(b\epsilon/2))}{2\delta^2}$ chunks, and $g=\frac{n}{b\cdot s}$ groups, partitions groups $G_0, \ldots, G_{g-1}$ in parallel such that with probability $1-\epsilon$ the indices $v_0,\ldots, v_{g-1}$ of the first successor in each group satisfy $-n \cdot \delta \leq v_y - \mu \cdot n < n (\delta + 1/s)$. 
+	The Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $O\paren*{b \frac{\log (n/(b\epsilon/2))}{\delta^2}}$, incurs $n$ cache misses, and leaves a subproblem of partitioning $A[v_{min}],\ldots, A[v_{max}-1]$ which has size $v_{max}-v_{min} < n(2\delta + 1/s)$ to complete in order to complete the partitioning of the array. 
 \end{theorem}
 \begin{proof}
 	%%% for the cache misses thing should it be n/log n because they are cache lines not individual values?
 	The algorithm accesses each element of the array once, resulting in its work $O(n)$.
 	Because the program has the ability to pin small arrays and values that are repeatedly used to the cache, the only cache misses incurred come from accessing each element of the array, resulting in $n$ cache misses.
-	The algorithm has span $$O(n/g) = O(b\cdot s) = O\paren*{b \frac{\log (n/\epsilon)}{\delta^2}}$$
+	The algorithm has span $$O(n/g) = O(b\cdot s) = O\paren*{b \frac{\log (n/(b\epsilon/2))}{\delta^2}}$$
 	because of the $g$ serial partitions of groups that it performs in parallel on arrays of size $b\cdot s$.
 	To show that with probability $1-\epsilon$ the algorithm leaves a subarray of size $v_{max}-v_{min} < n(2\delta + 1/s)$, we consider the fraction of elements in each collection $U_y$ that are predecessors, which we denote by $\mu_y$.
 	Note that each $\mu_y$ is the average of $s$ independent random variables, where random variable $i$ is the fraction of $P_{G_y[i]}$ that is composed of predecessors, a random variable in $[0, 1]$.
@@ -668,12 +668,10 @@ We now prove the following general theorem about the Cache-Efficient Parallel-Pa
 	$$\Pr[|\mu_y - \mu| \geq \delta] \leq \epsilon/g $$ for all $y\in \{0,\ldots,g-1\}$, because
 	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \sum_{y=0}^{g-1} \Pr[|\mu_y - \mu| \geq \delta].$$
 	We can show that this is satisfied by considering the bound on $\Pr[|\mu_y - \mu| \geq \delta]$ given by Hoeffding's inequality. 
-	Substituting in $s$ which was chosen $s\defeq\Theta\paren*{\frac{\log (n/\epsilon)}{\delta^2}}$, this becomes
-	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp\Big(-2 \Theta\Big(\frac{\log (n/\epsilon)}{\delta^2}\Big) \delta^2\Big). $$
+	Substituting in $s$ which was chosen $s\defeq \frac{\log (n/(b\epsilon/2))}{2\delta^2}$, this becomes
+	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp\Big(-2 \frac{\log (n/(b\epsilon/2))}{2\delta^2} \delta^2\Big). $$
 	Simplifying we find that  
-	%% this was slightly questionable
-	%% also why not do n/b instead of n here?
-	$$2\exp\Big(-2 \Theta\Big(\frac{\log (n/\epsilon)}{\delta^2}\Big) \delta^2\Big) = \frac{\epsilon}{n} < \frac{\epsilon}{g},$$
+	$$2\exp\Big(-2 \frac{\log (n/(b\epsilon/2))}{\delta^2} \delta^2\Big) = \frac{\epsilon}{n/b} < \frac{\epsilon}{g},$$
 	which proves that 
 	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \epsilon.$$
 	Then, because the elements in each group are distributed evenly throughout the array, $\mu_y\cdot n$ approximately determines $v_y$ (with probability $1-\epsilon$), so we can bound $v_y-\mu\cdot n$. 
@@ -686,7 +684,6 @@ We now prove the following general theorem about the Cache-Efficient Parallel-Pa
 	Rearranging, we have 
 	$$0 \leq v_y- \mu_y\cdot n < g\cdot b.$$
 	We desire to bound $v_y-\mu\cdot n$, which can be done using our bound on $|\mu_y - \mu|$ as follows:
-	%% feels kind of weird that this is asymmetrical.
 	$$ - \delta\cdot n \leq v_y - \mu\cdot n < \delta\cdot n + g\cdot b.$$
 	This concentration of all $v_y$s implies that with probability $1-\epsilon$, 
 	$$v_{max}-v_{min}<n(2\cdot\delta + 1/s).$$ 
@@ -696,25 +693,25 @@ We can use this result to analyze some Parallel Partition algorithms with intere
 
 We now present a cache-efficient algorithm for parallel partition with small span.
 \begin{corollary}
-	%%%%% I actually don't know what this algorithm is!!! so im not so sure about the results...
-	%%%% also delta seems way too big, like low key bigger than 1 i guess the constants save us by eating b,but still
-	An algorithm that first applies the Cache-Efficient Partial-Partition Algorithm with parameters $b=O(1)$, $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$), and $\delta = \Theta\Big(\sqrt{\frac{b}{\log\log n}}\Big)$, and then partitions the generated subarray with an already existing algorithm with span $O(\log n \log\log n)$, has work $O(n)$, span $O(\log n \log\log n)$, and incurs $(1+2\delta)n$ cache misses.
+	%%%% also delta seems way too big, like low key bigger than 1 I guess the constants save us by eating b,but still
+	An algorithm that first applies the Cache-Efficient Partial-Partition Algorithm with parameters $b=O(1)$, $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$), and $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, and then partitions the generated subarray with an algorithm that has work $O(n)$ and span $O(\log n \log\log n)$ (the existence of such an algorithm is guaranteed by Theorem \ref{thminplace}), has work $O(n)$, span $O(\log n \log\log n)$, and incurs less than $(1+2\delta + 1/s)n$ cache misses.
 \end{corollary}
 \begin{proof}
-	By Theorem \ref{thm:generalResult} the top layer where we apply the Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $$O(b\cdot s) = O\Big(\frac{b\log(n/\epsilon)}{\delta^2}\Big)=O(\log n \log\log n)$$, and incurs $n$ cache misses.
-	The subproblem has size $2\delta\cdot n$, so using the $O(\log n \log\log n)$ algorithm, we achieve span
-	$$O(\log(n\delta)\log\log(n\delta))$$
+	By Theorem \ref{thm:generalResult} the top layer where we apply the Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $$O(b\cdot s) = O\Big(\frac{b\log(n/(b\epsilon/2))}{\delta^2}\Big)=O(\log n \log\log n),$$ and incurs $n$ cache misses.
+	The subproblem has size less than $(2\delta+1/s)\cdot n$, so using an algorithm with span $O(\log n \log\log n)$ and work $O(n)$, we achieve span
+	$$O(\log((2\delta+1/s)\cdot n)\log\log((2\delta+1/s)\cdot n)),$$
+	and work $$O((2\delta+1/s)\cdot n)$$
 	in solving the subproblem.
-	We also achieve work $XXX$ and incur $2\delta n$ cache misses. %%[[not really!! probably way more than this!!]]
-	Thus the total work is $O(n+XXX)$, and the total span is $$O(\log\log n \log n),$$
-	and the total number of cache misses is $n(1+2\delta)$. %% NOT REALLY
+	Thus the total work is $O(n)$, and the total span is $$O(\log\log n \log n).$$
+	In solving the subproblem we incur $2\delta n$ cache misses, %%[[not really!! probably way more than this!!]]
+	so the total number of cache misses is $n(1+2\delta)$. %% NOT REALLY
 	This shows that our algorithm can be used to solve parallel partition with just as good span as the $O(\log n \log\log n)$ algorithm, and with very good cache behavior.
 \end{proof}
 
 %% how do I show that it is a corollary of \ref{thm:generalResult} in TeX?
 The Cache-Efficient Partial-Partition Algorithm can also be used to create an exceptionally simple algorithm--albiet with slightly worse span than the above algorithm--to perform a parallel partition, which we call the Grouped Partition Algorithm.
 \begin{corollary}
-	The Grouped Partition Algorithm, which uses the Cache-Efficient Partial-Partition Algorithm to both initially partially partition the array, and then also to recursively solve all subproblems (with the base case of the recursion being triggered when the array is too small to make a significant number of groups, at which time the algorithm solves the final partitioning with a serial partition), and which uses parameters $b=O(1)$, and $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) on all levels of the problem, and which uses the parameter $\delta=1/\sqrt{\log n}$ only on the top level of recursion, while using the parameter $\delta=1/4$ on lower levels of recursion, has work $O(n)$ attains span $O(b\log^2 n)$, and incurs $n + \frac{2 n}{\log n}$ cache misses. %% cache misses is sketchy 
+	The Grouped Partition Algorithm, which uses the Cache-Efficient Partial-Partition Algorithm to both initially partially partition the array, and then also to recursively solve all subproblems (with the base case of the recursion being triggered when the array is too small to make a significant number of groups, at which time the algorithm solves the final partitioning with a serial partition), and which uses parameters $b=O(1)$, and $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) on all levels of the problem, and which uses the parameter $\delta=1/\sqrt{\log n}$ only on the top level of recursion, while using the parameter $\delta=1/4$ on lower levels of recursion, has work $O(n)$ attains span $O(b\log^2 n)$, and incurs $n + 2 n/\log n$ cache misses. %% cache misses is sketchy 
 \end{corollary}
 \begin{proof}
 	By Theorem \ref{thm:generalResult}, the top level of the algorithm has work $O(n)$, span $$O\Big(b\frac{\log(n/\epsilon)}{\delta^2}\Big)=O(b\log^2 n),$$ and incurs $n$ cache misses.  
@@ -728,7 +725,7 @@ The Cache-Efficient Partial-Partition Algorithm can also be used to create an ex
 	On each of the lower levels the contribution to the span is $O(b\cdot s)$ for the $s$ on the level, and the array size on that level.
 	For level $i>0$ (0 is the top level, and this only applies to lower levels) the array size is $2^{2-i}n/\sqrt{\log n}$, and because $\delta=1/4$ this makes the span contribution $O(b\log (n/2^i))$.
 	Then, by adding up $O(\log n)$ terms of the form $O(b(\log n - i))$, we get the total span to be $O(b\log^2 n)$.
-	To compute the total number of cache misses of the algorithm, we add the sizes of all arrays at all levels of recursion, which yields $n+4\frac{n}{\sqrt{\log n}}$, which is $n(1+o(1))$.
+	To compute the total number of cache misses of the algorithm, we add the sizes of all arrays at all levels of recursion, which yields $n+4n/\sqrt{\log n}$, which is $n(1+o(1))$.
 \end{proof}
 
 In addition to these desirable theoretical guarantees, the algorithm performs well in practice, as shown in the experimental section.
