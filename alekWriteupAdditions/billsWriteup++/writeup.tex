@@ -33,6 +33,7 @@
 
 \usepackage{mathtools}
 \newcommand{\defeq}{\vcentcolon=}
+\DeclarePairedDelimiter{\paren}{(}{)}
 
 \usepackage{enumitem}
 \usepackage{subcaption}
@@ -645,16 +646,16 @@ After partitioning the subarray ${A[v_{min}],\ldots,A[v_{max}-1]}$ the array is 
 We now prove the following general theorem about the Cache-Efficient Parallel-Partition Algorithm.
 \begin{theorem}
 	\label{thm:generalResult}
-	The Cache-Efficient Partial-Partition Algorithm applied to an array of size $n$ with $\mu \cdot n$ predecessors using parameters $b$ as block size, $\epsilon$ as probability of failure to achieve the desired size reduction, and $\delta$ where $2n\delta$ approximates the size of the not yet partitioned subarray after the algorithm runs; and using variables $s\defeq\Theta(\frac{\log (n/\epsilon)}{\delta^2})$ chunks, and $g=\frac{n}{b\cdot s}$ groups, partitions groups $G_0, \ldots, G_{g-1}$ in parallel such that with probability $1-\epsilon$ the indices $v_0,\ldots, v_{g-1}$ of the first successor in each group satisfy $|v_y - \mu \cdot n| < n \cdot \delta + o(small thing)$. 
-	The Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $O(b \frac{\log (n/\epsilon)}{\delta^2})$, incurs $n$ cache misses, and leaves a subproblem of partitioning $A[v_{min}],\ldots, A[v_{max}-1]$ which has size $v_{max}-v_{min}+1 = 2n\delta + o(small thing)$ to complete in order to complete the partitioning of the array. 
+	The Cache-Efficient Partial-Partition Algorithm applied to an array of size $n$ with $\mu \cdot n$ predecessors using parameters $b$ as block size, $\epsilon$ as probability of failure to achieve the desired size reduction, and $\delta$ where $2n\delta$ approximates the size of the not yet partitioned subarray after the algorithm runs; and using variables $s\defeq \frac{\log (n/\epsilon)}{2\delta^2}$ chunks, and $g=\frac{n}{b\cdot s}$ groups, partitions groups $G_0, \ldots, G_{g-1}$ in parallel such that with probability $1-\epsilon$ the indices $v_0,\ldots, v_{g-1}$ of the first successor in each group satisfy $-n \cdot \delta \leq v_y - \mu \cdot n < n (\delta + 1/s)$. 
+	The Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $O\paren*{b \frac{\log (n/\epsilon)}{\delta^2}}$, incurs $n$ cache misses, and leaves a subproblem of partitioning $A[v_{min}],\ldots, A[v_{max}-1]$ which has size $v_{max}-v_{min} < n(2\delta + 1/s)$ to complete in order to complete the partitioning of the array. 
 \end{theorem}
 \begin{proof}
-	%%% for the cache misses thing shouldn't it be n/log n because they are cache lines not individual values?
+	%%% for the cache misses thing should it be n/log n because they are cache lines not individual values?
 	The algorithm accesses each element of the array once, resulting in its work $O(n)$.
 	Because the program has the ability to pin small arrays and values that are repeatedly used to the cache, the only cache misses incurred come from accessing each element of the array, resulting in $n$ cache misses.
-	The algorithm has span $$O(n/g) = O(b\cdot s) = O\Big(b \frac{\log (n/\epsilon)}{\delta^2}\Big)$$
+	The algorithm has span $$O(n/g) = O(b\cdot s) = O\paren*{b \frac{\log (n/\epsilon)}{\delta^2}}$$
 	because of the $g$ serial partitions of groups that it performs in parallel on arrays of size $b\cdot s$.
-	To show that with probability $1-\epsilon$ the algorithm leaves a subarray of size only $2n\delta$, we consider the fraction of elements in each collection $U_y$ that are predecessors, which we denote by $\mu_y$.
+	To show that with probability $1-\epsilon$ the algorithm leaves a subarray of size $v_{max}-v_{min} < n(2\delta + 1/s)$, we consider the fraction of elements in each collection $U_y$ that are predecessors, which we denote by $\mu_y$.
 	Note that each $\mu_y$ is the average of $s$ independent random variables, where random variable $i$ is the fraction of $P_{G_y[i]}$ that is composed of predecessors, a random variable in $[0, 1]$.
 	The groups are constructed in a symmetric way such that for each group, the probability of the group getting any specific block is the same as the probability of any other group getting that block. 
 	Because of this symmetry, $\E[\mu_y]$--a characteristic on the group--is the same.
@@ -664,10 +665,10 @@ We now prove the following general theorem about the Cache-Efficient Parallel-Pa
 	The parameter $\epsilon$ specifies that 
 	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \epsilon.$$
 	To show that this constraint is satisfied it suffices to show that 
-	$$\Pr[|\mu_y - \mu| \geq \delta] < \epsilon/g $$ for all $y\in \{0,\ldots,g-1\}$, because
+	$$\Pr[|\mu_y - \mu| \geq \delta] \leq \epsilon/g $$ for all $y\in \{0,\ldots,g-1\}$, because
 	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \sum_{y=0}^{g-1} \Pr[|\mu_y - \mu| \geq \delta].$$
 	We can show that this is satisfied by considering the bound on $\Pr[|\mu_y - \mu| \geq \delta]$ given by Hoeffding's inequality. 
-	Substituting in $s$ which was chosen $s\defeq\Theta(\frac{\log (n/\epsilon)}{\delta^2})$, this becomes
+	Substituting in $s$ which was chosen $s\defeq\Theta\paren*{\frac{\log (n/\epsilon)}{\delta^2}}$, this becomes
 	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp\Big(-2 \Theta\Big(\frac{\log (n/\epsilon)}{\delta^2}\Big) \delta^2\Big). $$
 	Simplifying we find that  
 	%% this was slightly questionable
@@ -675,11 +676,21 @@ We now prove the following general theorem about the Cache-Efficient Parallel-Pa
 	$$2\exp\Big(-2 \Theta\Big(\frac{\log (n/\epsilon)}{\delta^2}\Big) \delta^2\Big) = \frac{\epsilon}{n} < \frac{\epsilon}{g},$$
 	which proves that 
 	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \epsilon.$$
-	Then, because the elements in each group are distributed evenly throughout the array, $\mu_y\cdot n$ approximately determines $v_y$, so the concentration of $\mu_y$s implies a concentration of $v_y$s, specifically, with probability $1-\epsilon$,
-	%% can't really fully drop the O, but need to drop it a bit maybe add an o
-	$$|v_y-\mu \cdot n| < n\delta.$$
-	The concentration of all $v_y$s implies that with probability $1-\epsilon$, 
-	$$v_{max}-v_{min}<2n\cdot\delta.$$ %%this isn't quite true
+	Then, because the elements in each group are distributed evenly throughout the array, $\mu_y\cdot n$ approximately determines $v_y$ (with probability $1-\epsilon$), so we can bound $v_y-\mu\cdot n$. 
+	Specifically, the index for the block of group $G_y$ that contains $v_y$ is $$G_y[\mu_y\cdot s]= (X[\mu_y \cdot s] + y) \bmod g + \mu_y \cdot s\cdot g.$$
+	Because the entries of $X$ are random, we would like to bound $G_y[\mu_y\cdot s]$ without referencing $X$, only referencing parameters and variables of the problem.
+	This bound is, 
+	$$ \mu_y \cdot s\cdot g \leq G_y[\mu_y\cdot s] \leq  \mu_y \cdot s\cdot g + g-1.$$
+	Then, because block $P_{G_y[i]} = \{A[b\cdot i], \ldots, A[b\cdot i + b-1]\}$, we can bound $v_y$ as $$\mu_y\cdot s\cdot g\cdot b \leq v_y \leq (\mu_y \cdot s\cdot g + g-1)\cdot b + b-1.$$
+	Note that $n=s\cdot g\cdot b$. 
+	Rearranging, we have 
+	$$0 \leq v_y- \mu_y\cdot n < g\cdot b.$$
+	We desire to bound $v_y-\mu\cdot n$, which can be done using our bound on $|\mu_y - \mu|$ as follows:
+	%% feels kind of weird that this is asymmetrical.
+	$$ - \delta\cdot n \leq v_y - \mu\cdot n < \delta\cdot n + g\cdot b.$$
+	This concentration of all $v_y$s implies that with probability $1-\epsilon$, 
+	$$v_{max}-v_{min}<n(2\cdot\delta + 1/s).$$ 
+	This is the size of the recursive subproblem because for any index $i < v_{min}$, $A[i]$ is a predecessor, and for any index $i \geq v_{max}$, $A[i]$ is a successor, so by partitioning $A[v_{min}], \ldots, A[v_{max}-1]$ the partitioning of the array is complete.
 \end{proof}
 We can use this result to analyze some Parallel Partition algorithms with interesting characteristics that use the Cache-Efficient Partial-Partition Algorithm.
 
