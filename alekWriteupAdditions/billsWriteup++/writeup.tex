@@ -669,9 +669,9 @@ We now prove the following general theorem about the Cache-Efficient Parallel-Pa
 	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \sum_{y=0}^{g-1} \Pr[|\mu_y - \mu| \geq \delta].$$
 	We can show that this is satisfied by considering the bound on $\Pr[|\mu_y - \mu| \geq \delta]$ given by Hoeffding's inequality. 
 	Substituting in $s$ which was chosen $s\defeq \frac{\log (n/(b\epsilon/2))}{2\delta^2}$, this becomes
-	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp\Big(-2 \frac{\log (n/(b\epsilon/2))}{2\delta^2} \delta^2\Big). $$
+	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp\Big({-2} \frac{\log (n/(b\epsilon/2))}{2\delta^2} \delta^2\Big). $$
 	Simplifying we find that  
-	$$2\exp\Big(-2 \frac{\log (n/(b\epsilon/2))}{\delta^2} \delta^2\Big) = \frac{\epsilon}{n/b} < \frac{\epsilon}{g},$$
+	$$2\exp\Big({-2} \frac{\log (n/(b\epsilon/2))}{\delta^2} \delta^2\Big) = \frac{\epsilon}{n/b} < \frac{\epsilon}{g},$$
 	which proves that 
 	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \epsilon.$$
 	Then, because the elements in each group are distributed evenly throughout the array, $\mu_y\cdot n$ approximately determines $v_y$ (with probability $1-\epsilon$), so we can bound $v_y-\mu\cdot n$. 
@@ -693,7 +693,7 @@ We can use this result to analyze some Parallel Partition algorithms with intere
 
 We now present a cache-efficient algorithm for parallel partition with small span.
 \begin{corollary}
-	%%%% also delta seems way too big, like low key bigger than 1 I guess the constants save us by eating b,but still
+	%%%% also delta seems _way_ too big, (it can't be bigger than 1, but it looks bigger than 1 for reasonable problem sizes). I guess the constants save us by eating b, but still
 	An algorithm that first applies the Cache-Efficient Partial-Partition Algorithm with parameters $b=O(1)$, $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$), and $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, and then partitions the generated subarray with an algorithm that has work $O(n)$ and span $O(\log n \log\log n)$ (the existence of such an algorithm is guaranteed by Theorem \ref{thminplace}), has work $O(n)$, span $O(\log n \log\log n)$, and incurs less than $(1+2\delta + 1/s)n$ cache misses.
 \end{corollary}
 \begin{proof}
@@ -703,9 +703,8 @@ We now present a cache-efficient algorithm for parallel partition with small spa
 	and work $$O((2\delta+1/s)\cdot n)$$
 	in solving the subproblem.
 	Thus the total work is $O(n)$, and the total span is $$O(\log\log n \log n).$$
-	In solving the subproblem we incur $2\delta n$ cache misses, %%[[not really!! probably way more than this!!]]
-	so the total number of cache misses is $n(1+2\delta)$. %% NOT REALLY
-	This shows that our algorithm can be used to solve parallel partition with just as good span as the $O(\log n \log\log n)$ algorithm, and with very good cache behavior.
+	In solving the subproblem we incur $2\delta n$ cache misses, [[NOT REALLY! probably way more than this!! (3.5 times more than this???)]] so the total number of cache misses is $n(1+XXX)$.
+	This shows that our algorithm can be used to solve parallel partition with just as good work and span as the $O(\log n \log\log n)$ algorithm, and with much improved cache behavior.
 \end{proof}
 
 %% how do I show that it is a corollary of \ref{thm:generalResult} in TeX?
