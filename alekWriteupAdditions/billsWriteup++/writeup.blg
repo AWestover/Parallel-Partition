@@ -5,7 +5,6 @@ The style file: ACM-Reference-Format.bst
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Database file #1: paper.bib
-Warning--I didn't find a database entry for "http://timroughgarden.org/f14/l/l3.pdf"
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
 Reallocated global_strs (elt_size=20001) to 20 items from 10.
@@ -33,45 +32,45 @@ Warning--empty publisher in ShunGu15
 Warning--empty address in ShunGu15
 Warning--empty publisher in TsigasZh03
 Warning--empty address in TsigasZh03
-You've used 26 entries,
+You've used 27 entries,
             5719 wiz_defined-function locations,
-            1478 strings with 18924 characters,
-and the built_in function-call counts, 31788 in all, are:
-= -- 4276
-> -- 1028
+            1484 strings with 19012 characters,
+and the built_in function-call counts, 32958 in all, are:
+= -- 4418
+> -- 1066
 < -- 0
-+ -- 348
-- -- 376
-* -- 2121
-:= -- 3138
-add.period$ -- 131
-call.type$ -- 26
-change.case$ -- 170
-chr.to.int$ -- 26
-cite$ -- 48
-duplicate$ -- 2800
-empty$ -- 1963
-format.name$ -- 456
-if$ -- 7835
++ -- 361
+- -- 392
+* -- 2203
+:= -- 3261
+add.period$ -- 136
+call.type$ -- 27
+change.case$ -- 176
+chr.to.int$ -- 27
+cite$ -- 49
+duplicate$ -- 2906
+empty$ -- 2038
+format.name$ -- 476
+if$ -- 8107
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 105
-newline$ -- 240
-num.names$ -- 208
-pop$ -- 1000
+missing$ -- 109
+newline$ -- 248
+num.names$ -- 216
+pop$ -- 1033
 preamble$ -- 1
-purify$ -- 404
+purify$ -- 419
 quote$ -- 0
-skip$ -- 990
+skip$ -- 1028
 stack$ -- 0
-substring$ -- 2491
-swap$ -- 307
+substring$ -- 2597
+swap$ -- 320
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 556
+type$ -- 572
 warning$ -- 22
-while$ -- 239
+while$ -- 250
 width$ -- 0
-write$ -- 480
-(There were 23 warnings)
+write$ -- 497
+(There were 22 warnings)

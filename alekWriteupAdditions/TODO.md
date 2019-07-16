@@ -1,38 +1,28 @@
 # TODO:
 
 ## TOP PRIORITY:
-  check correctness on all the math
-  really fix some of it up
+  * check correctness on all the math
 
 ## Code
   * see todo list in the code
-  * make sure parameters chosen align with writeup's advertised parameters
+  * __make sure parameters chosen align with writeup's advertised parameters__
 
 ## English
   *  look at tense agreement. Especially for stuff where I say P_js U_ys etc. It is probably wrong to say "for all indices v_y", instead say "for all indices v_0,v_1,...,v_g-1"
-
     * read paper for block, collection, group etc consistency  -- bill said to keep reminders of what these are in the paper (ppl prob wont catch on to the fact that we consistently refer to Pj as a part / block etc because its kinda confusing)
-
   * how much redundancy is good, how much is too much? work on the math / english balance
-
   * Improve global definitions and usage
 
 ## writeup completeness
   * compute work for algorithms (not just span)
-
   * say more about Bill's algorithm in my paper (look over his paper again, describe his algorithm in my paper?)
-
   * Add "systems stuff"--e.g. graphs
 
 ## writeup correctness
-  * make sure 
-  * make pseudocode show the recursive spawn structure rather than the parallel for loop 
-
-  * replace all occurrences of "Grouped Partition Algorithm" with the new name
   * make sure I explicitly say every time g is defined to be n / (bs) (g = n/ (bs) is not good enough, need to say it is by definition)
   * "Cache-Efficient Partial-Partition Algorithm" refers to ONLY ONE LEVEL OF RECURSION in an algorithm that we made for solving parallel partition
-    --- you can solve parallel partition by applying grouped partition algorithm and then solving a recursive subproblem with more itterations of grouped partition algorithm
-    -- or you can solve parallel partition by applying grouped partition algorithm and solving the remaining subproblem with another O(logn log logn) algorithm
+    --- you can solve parallel partition by applying the Cache-Efficient Partial-Partition Algorithm and then solving a recursive subproblem with more itterations of the Cache-Efficient Partial-Partition Algorithm 
+    -- or you can solve parallel partition by applying the Cache-Efficient Partial-Partition Algorithm and then solving the remaining subproblem with Bill's O(logn log logn) algorithm
 
 # Bill's Suggestions:
 ## introduction of cache modeling (work on together at mathcamp)

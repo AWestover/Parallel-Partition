@@ -548,32 +548,25 @@ the preceding element).
 
 \section{A Cache Efficient Parallel Partition}
 
-However, despite its theoretical appeal, the algorithm described above does not perform well in practice, as we show in the experiments section. 
-The reason for the Strided Algorithm's poor performance is its lack of cache efficiency. 
-In this section we provide a theoretical description of cache behavior, and use this model of cache behavior to design a new algorithm for parallel partition that is cache efficient and fast in practice. 
+The algorithm described above bottlenecked by cache misses in practice, as we show in the experiments section. 
+In this section we address this by developing an algorithm with provably good cache behavior. 
+The new algorithm continues to have polylogarithmic span, while exhibiting optimal cache behavior up to low order factors.
 
-\paragraph{Cache Behavior Preliminaries}
-In our model the \defn{cache} is composed of a set of $\operatorname{polylog}{n}$ cache lines.
-A \defn{cache line} is a set of $\operatorname{polylog}{n}$ values.
-Let \defn{block size} denote the size of a cache line.
-A \defn{cache miss} occurs when a program tries to access a value that is not loaded into cache at the time of the program's request.
-It takes time to read a value into cache, so the number of cache misses that an algorithm incurs plays a role in determining the running time of an algorithm in practice. 
-We use the Least Recently Used (LRU) cache replacement algorithm to determine which cache line to discard when the cache is full. 
-When the cache is full, the LRU cache replacement algorithm decides to evict the cache line that was least recently accessed of all cache lines currently in the cache. 
-The LRU cache replacement algorithm is not the best cache replacement algorithm; the optimal cache replacement algorithm is known as OPT. 
-OPT evicts the element that will be needed farthest into the future.
-The ability to predict the future makes OPT impossible to implement in practice.
-The impossibility of implementing OPT initially seems to be an obstacle preventing analysis of cache behavior because for some access sequences OPT performs much better than LRU when both cache replacement algorithms operate on caches of the same size. 
-However, if LRU is given a larger sized cache than OPT then LRU can  achieve performance comparable to that of OPT. 
-Tim Roughgarden's Resource Augmentation Theorem formalizes this idea,
-\begin{theorem}[Resource Augmentation Theorem \cite{http://timroughgarden.org/f14/l/l3.pdf}]
-	LRU operating a cache of size $K\cdot M$ for some $K>1$ will incur at most and $1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on cache of size $M$.
+\paragraph{Modelling Cache Misses}
+We treat memory as being accessed in some fixed cache-line size $b$. 
+In our model each processor's cache is composed of a set of $\operatorname{polylog}{n}$ cache lines.
+A cache miss occurs when the line being accessed is not currently in cache, in which case some other line is evicted from cache to make room for the new entry.
+Each cache is managed with a LRU (Least Recently Used) eviction policy and we assume that child threads inherit their cache contents from their parent.
+
+In the analysis of our algorithm it will be useful to assume that certain small arrays are pinned in cache (i.e. their entries are never evicted from cache).
+This assumption is without loss of generality in the sense that LRU eviction is competitive (up to resource augmentation) with the optimal off-line eviction strategy OPT (i.e. Furthest in the Future).
+Formally this is due to the following theorem by Sleator and Tarjan:
+\begin{theorem}[Resource Augmentation Theorem \cite{SleatorTa85}]
+	LRU operating on a cache of size $K\cdot M$ for some $K>1$ will incur at most $1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on a cache of size $M$, for the same series of memory accesses.
 \end{theorem}
-We make $K=\operatorname{polylog}{n}$, so we can assume that LRU operating on cache of size $K\cdot M$ achieves nearly as good cache behavior as OPT operating on cache of size $M$.
-The specific behavior that we want is the ability to pin values to the cache.
-If there is a set of values that are accessed consistently throughout the program, then we would like to keep the values in cache all the time rather than periodically reloading them into cache.
-OPT would clearly accomplish this, because it could predict that these values would be needed in the future, and it would therefore not evict the values that we wished to be pinned to the cache.
-And, by the Resource Augmentation Theorem, LRU can be assumed to achieve this same cache behavior.
+
+We assume caches of size $\log^c n$ for $c$ a constant of our choice. 
+Up to changes in $c$ LRU incurs no more than a $1+\frac{1}{\operatorname{polylog}{n}}$ factor more cache misses than OPT incurs.
 
 \paragraph{A Cache-Efficient Algorithm}
 
@@ -627,6 +620,7 @@ The subarray to partition is $A[\min{v_y}], \ldots, A[\max{v_y}-1]$.
 
 \paragraph{Algorithm Description}
 We now describe the algorithm.
+[[[[[DESCRIBE s, g, X]]]]]
 \begin{itemize}
 	\item Logically partition the array $A$ into blocks $P_j$ each of $b$ adjacent elements, i.e. $${P_j = \{A[b\cdot j], A[b\cdot j + 1], \ldots, A[b\cdot (j+1)-1]\}}.$$
 	\item Form an array $X$ with $|X|=s$, where each element $X[i]$ is an integer chosen randomly at uniform from $[0, g-1].$
@@ -643,12 +637,21 @@ Define $v_y$ to be the index of the first successor in $U_y$, and define $v_{min
 After partitioning the subarray ${A[v_{min}],\ldots,A[v_{max}-1]}$ the array is fully partitioned.
 
 \paragraph{Algorithm Analysis}
-We now prove the following general theorem about the Cache-Efficient Parallel-Partition Algorithm.
-\begin{theorem}
+We now prove the following general theorem about the Cache-Efficient Partial-Partition Algorithm.
+\begin{proposition}
 	\label{thm:generalResult}
-	The Cache-Efficient Partial-Partition Algorithm applied to an array of size $n$ with $\mu \cdot n$ predecessors using parameters $b$ as block size, $\epsilon$ as probability of failure to achieve the desired size reduction, and $\delta$ where $2n\delta$ approximates the size of the not yet partitioned subarray after the algorithm runs; and using variables $s\defeq \frac{\log (n/(b\epsilon/2))}{2\delta^2}$ chunks, and $g=\frac{n}{b\cdot s}$ groups, partitions groups $G_0, \ldots, G_{g-1}$ in parallel such that with probability $1-\epsilon$ the indices $v_0,\ldots, v_{g-1}$ of the first successor in each group satisfy $-n \cdot \delta \leq v_y - \mu \cdot n < n (\delta + 1/s)$. 
-	The Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $O\paren*{b \frac{\log (n/(b\epsilon/2))}{\delta^2}}$, incurs $n$ cache misses, and leaves a subproblem of partitioning $A[v_{min}],\ldots, A[v_{max}-1]$ which has size $v_{max}-v_{min} < n(2\delta + 1/s)$ to complete in order to complete the partitioning of the array. 
-\end{theorem}
+	Let $A$ be an array of size $n$; 
+	Let $\mu$ be the fraction of predecessors in $A$; 
+	Let $\epsilon \in (0, 1)$ be a failure probability; 
+	Let $\delta \in (0, 1)$;
+	Set algorithm parameter $s\defeq \frac{\log (n/(b\epsilon/2))}{2\delta^2}$.
+
+	The Cache-Efficient Partial-Partition Algorithm, when executed on array $A$: 
+	achieves work $O(n)$; 
+	achieves span $O\paren*{b \frac{\log (n/(b\epsilon/2))}{\delta^2}}$; 
+	incurs $(s+n)/b + O(1)$ cache misses (assuming the array $X$ is pinned to cache); 
+	and leaves an unpartitioned subarray $A[v_{min}],\ldots, A[v_{max}-1]$ which, with probability $1-\epsilon$, has size $v_{max}-v_{min} < n(2\delta + 1/s)$. 
+\end{proposition}
 \begin{proof}
 	%%% for the cache misses thing should it be n/log n because they are cache lines not individual values?
 	The algorithm accesses each element of the array once, resulting in its work $O(n)$.
@@ -691,11 +694,12 @@ We now prove the following general theorem about the Cache-Efficient Parallel-Pa
 \end{proof}
 We can use this result to analyze some Parallel Partition algorithms with interesting characteristics that use the Cache-Efficient Partial-Partition Algorithm.
 
-We now present a cache-efficient algorithm for parallel partition with small span.
-\begin{corollary}
-	%%%% also delta seems _way_ too big, (it can't be bigger than 1, but it looks bigger than 1 for reasonable problem sizes). I guess the constants save us by eating b, but still
-	An algorithm that first applies the Cache-Efficient Partial-Partition Algorithm with parameters $b=O(1)$, $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$), and $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, and then partitions the generated subarray with an algorithm that has work $O(n)$ and span $O(\log n \log\log n)$ (the existence of such an algorithm is guaranteed by Theorem \ref{thminplace}), has work $O(n)$, span $O(\log n \log\log n)$, and incurs less than $(1+2\delta + 1/s)n$ cache misses.
-\end{corollary}
+We now present a cache-efficient algorithm for parallel partition with small span, assuming that $b$ is dominated by $\log \log n$.
+%%%% also delta seems _way_ too big, (it can't be bigger than 1, but it looks bigger than 1 for reasonable problem sizes). I guess the constants save us by eating b, but still
+\begin{theorem}
+	[[[ADD DIAL TO TOGGLE THIS RESULT i.e. make it more general]]]
+	An algorithm that first applies the Cache-Efficient Partial-Partition Algorithm with parameters, $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$), and $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, and then partitions the generated subarray with an algorithm that has work $O(n)$ and, with high probability in $n$, span $O(\log n \log\log n)$ (the existence of such an algorithm is guaranteed by Theorem \ref{thminplace}), has work $O(n)$, span $O(\log n \log\log n)$, and incurs fewer than $(1+2\delta + 1/s)n$ cache misses.
+\end{theorem}
 \begin{proof}
 	By Theorem \ref{thm:generalResult} the top layer where we apply the Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $$O(b\cdot s) = O\Big(\frac{b\log(n/(b\epsilon/2))}{\delta^2}\Big)=O(\log n \log\log n),$$ and incurs $n$ cache misses.
 	The subproblem has size less than $(2\delta+1/s)\cdot n$, so using an algorithm with span $O(\log n \log\log n)$ and work $O(n)$, we achieve span
@@ -708,7 +712,7 @@ We now present a cache-efficient algorithm for parallel partition with small spa
 \end{proof}
 
 %% how do I show that it is a corollary of \ref{thm:generalResult} in TeX?
-The Cache-Efficient Partial-Partition Algorithm can also be used to create an exceptionally simple algorithm--albiet with slightly worse span than the above algorithm--to perform a parallel partition, which we call the Grouped Partition Algorithm.
+The Cache-Efficient Partial-Partition Algorithm can also be used to create an exceptionally simple algorithm--albeit with slightly worse span than the above algorithm--to perform a parallel partition, which we call the Grouped Partition Algorithm.
 \begin{corollary}
 	The Grouped Partition Algorithm, which uses the Cache-Efficient Partial-Partition Algorithm to both initially partially partition the array, and then also to recursively solve all subproblems (with the base case of the recursion being triggered when the array is too small to make a significant number of groups, at which time the algorithm solves the final partitioning with a serial partition), and which uses parameters $b=O(1)$, and $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) on all levels of the problem, and which uses the parameter $\delta=1/\sqrt{\log n}$ only on the top level of recursion, while using the parameter $\delta=1/4$ on lower levels of recursion, has work $O(n)$ attains span $O(b\log^2 n)$, and incurs $n + 2 n/\log n$ cache misses. %% cache misses is sketchy 
 \end{corollary}

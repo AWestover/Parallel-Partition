@@ -390,6 +390,7 @@ See Figure \ref{alg:parallelPartition} for a pseudocode implementation of the al
 			\For{$i \in \{0,1,\ldots,s-1\}$}
 				\State $X[i] \gets$ a random integer from $[0,g-1]$ 
 			\EndFor
+			\State -- We implement this parallel for-loop with a sequence of recursive spawns, and which facilitates computing $v_{min}$, $v_{max}$ without storing $v_y$s
 			\ForAll{$ y \in \{0, 1,\ldots,g-1\}$ in parallel}
 				\State -- Now we perform a serial partition on $U_y$
 

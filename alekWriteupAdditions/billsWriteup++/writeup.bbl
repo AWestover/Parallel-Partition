@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{26}
+\begin{thebibliography}{27}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -319,6 +319,18 @@
   \bibinfo{booktitle}{\emph{Proceedings of the twenty-sixth annual ACM-SIAM
   symposium on Discrete algorithms}}. Society for Industrial and Applied
   Mathematics, \bibinfo{pages}{431--448}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Sleator and Tarjan}{Sleator and
+  Tarjan}{1985}]%
+        {SleatorTa85}
+\bibfield{author}{\bibinfo{person}{Daniel~D Sleator} {and}
+  \bibinfo{person}{Robert~E Tarjan}.} \bibinfo{year}{1985}\natexlab{}.
+\newblock \showarticletitle{Amortized efficiency of list update and paging
+  rules}.
+\newblock \bibinfo{journal}{\emph{Commun. ACM}} \bibinfo{volume}{28},
+  \bibinfo{number}{2} (\bibinfo{year}{1985}), \bibinfo{pages}{202--208}.
 \newblock
 
 
