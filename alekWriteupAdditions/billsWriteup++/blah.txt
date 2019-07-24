@@ -423,67 +423,71 @@ ar-ray $\OML/nxlmi/m/it/9 A\LMS/ntxsy/m/n/9 »\OML/nxlmi/m/it/9 v[]\LMS/ntxsy/m/
 n/9 ¼\OML/nxlmi/m/it/9 ; [] ; A\LMS/ntxsy/m/n/9 »\OML/nxlmi/m/it/9 v[] \LMS/ntx
 sy/m/n/9 ^^@
 [5.5] [6.6]
-Overfull \hbox (1.50536pt too wide) in paragraph at lines 734--736
+Overfull \hbox (8.50797pt too wide) in paragraph at lines 723--726
+\T1/LinuxLibertineT-TLF/m/n/9 (-20) and in-curs fewer than $\OML/nxlmi/m/it/9 O
+[][]$ \T1/LinuxLibertineT-TLF/m/n/9 (-20) cache misses. 
+
+Overfull \hbox (1.50536pt too wide) in paragraph at lines 746--748
 \T1/LinuxLibertineT-TLF/m/n/9 (-20) Par-ti-tion Al-go-rithm, which uses the Cac
 he-Efficient Partial-Partition
 
-Class acmart Warning: A possible image without description on input line 776.
+Class acmart Warning: A possible image without description on input line 788.
 
 
-Class acmart Warning: A possible image without description on input line 791.
+Class acmart Warning: A possible image without description on input line 803.
 
 
-Class acmart Warning: A possible image without description on input line 804.
+Class acmart Warning: A possible image without description on input line 816.
 
 
-Class acmart Warning: A possible image without description on input line 818.
+Class acmart Warning: A possible image without description on input line 830.
 
 
-Class acmart Warning: A possible image without description on input line 832.
+Class acmart Warning: A possible image without description on input line 844.
 
 [7.7] [8.8] [9.9]
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 878.
+surrounding objects on input line 890.
 
 
-Overfull \hbox (1.81116pt too wide) in paragraph at lines 932--942
+Underfull \vbox (badness 10000) has occurred while \output is active
+Underfull \vbox (badness 10000) has occurred while \output is active [10.10]
+Overfull \hbox (1.81116pt too wide) in paragraph at lines 944--954
 []\T1/LinuxLibertineT-TLF/m/it/9 (-20) The Low-Space Par-al-lel Im-ple-men-ta-t
 ion: \T1/LinuxLibertineT-TLF/m/n/9 (-20) Start-ing with the medium-
-[10.10]
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 959.
-
-
-Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 969.
+surrounding objects on input line 971.
 
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 988.
+surrounding objects on input line 981.
 
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 1031.
+surrounding objects on input line 1000.
 
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 1063.
+surrounding objects on input line 1043.
 
-[11.11]
 
-Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 1082.
-
+Underfull \vbox (badness 10000) has occurred while \output is active [11.11]
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 1213.
+surrounding objects on input line 1075.
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active [12.12]
-(./writeup.bbl
-Underfull \vbox (badness 10000) has occurred while \output is active)
+Class acmart Warning: \vspace should only be used to provide space above/below 
+surrounding objects on input line 1094.
+
+[12.12]
+
+Class acmart Warning: \vspace should only be used to provide space above/below 
+surrounding objects on input line 1225.
+
+(./writeup.bbl)
 
 Class acmart Warning: Some images may lack descriptions.
 
@@ -520,5 +524,5 @@ ts/type1/public/txfonts/rtxr.pfb></usr/local/texlive/2019/texmf-dist/fonts/type
 ts/txsyb.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/newtx/txsys
 .pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/newtx/zxlr.pfb></us
 r/local/texlive/2019/texmf-dist/fonts/type1/public/newtx/zxlri.pfb>
-Output written on writeup.pdf (13 pages, 775365 bytes).
+Output written on writeup.pdf (13 pages, 776547 bytes).
 Transcript written on writeup.log.

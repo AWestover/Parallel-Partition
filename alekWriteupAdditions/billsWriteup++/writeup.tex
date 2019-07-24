@@ -655,7 +655,7 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 	achieves work $O(n)$; 
 	achieves span $O\paren*{b \frac{\log (n/(b\epsilon/2))}{\delta^2}}$; 
 	incurs $\frac{s+n}{b} + O(1)$ cache misses (assuming the array $X$ is pinned to cache); 
-	and leaves an unpartitioned subarray $A[v_{min}],\ldots, A[v_{max}-1]$ which, with probability $1-\epsilon$, has size $v_{max}-v_{min} < n(2\delta + 1/s)$. 
+	and leaves an unpartitioned subarray $A[v_{min}],\ldots, A[v_{max}-1]$ which, with probability $1-\epsilon$, has size $$v_{max}-v_{min} < n\paren*{2\delta + \frac{2\delta^2}{\log (n/(b\epsilon/2))}}$$. 
 \end{proposition}
 \begin{proof}
 	%%% for the cache misses thing should it be n/log n because they are cache lines not individual values?
@@ -663,7 +663,7 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 	Because the program has the ability to pin small arrays and values that are repeatedly used to the cache, the only cache misses incurred come from accessing each element of the array, resulting in $n$ cache misses.
 	The algorithm has span $$O(n/g) = O(b\cdot s) = O\paren*{b \frac{\log (n/(b\epsilon/2))}{\delta^2}}$$
 	because of the $g$ serial partitions of groups that it performs in parallel on arrays of size $b\cdot s$.
-	To show that with probability $1-\epsilon$ the algorithm leaves a subarray of size $v_{max}-v_{min} < n(2\delta + 1/s)$, we consider the fraction of elements in each collection $U_y$ that are predecessors, which we denote by $\mu_y$.
+	To show that with probability $1-\epsilon$ the algorithm leaves a subarray of size $v_{max}-v_{min} < n\paren*{2\delta + \frac{2\delta^2}{\log (n/(b\epsilon/2))}}$, we consider the fraction of elements in each collection $U_y$ that are predecessors, which we denote by $\mu_y$.
 	Note that each $\mu_y$ is the average of $s$ independent random variables, where random variable $i$ is the fraction of $P_{G_y[i]}$ that is composed of predecessors, a random variable in $[0, 1]$.
 	The groups are constructed in a symmetric way such that for each group, the probability of the group getting any specific block is the same as the probability of any other group getting that block. 
 	Because of this symmetry, $\E[\mu_y]$--a characteristic on the group--is the same.
@@ -694,7 +694,9 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 	We desire to bound $v_y-\mu\cdot n$, which can be done using our bound on $|\mu_y - \mu|$ as follows:
 	$$ - \delta\cdot n \leq v_y - \mu\cdot n < \delta\cdot n + g\cdot b.$$
 	This concentration of all $v_y$s implies that with probability $1-\epsilon$, 
-	$$v_{max}-v_{min}<n(2\cdot\delta + 1/s).$$ 
+	$$v_{max}-v_{min}<n(2\cdot\delta) + g\cdot b.$$ 
+	We express this in terms of the algorithm's parameters, using the fact that $g\cdot b = n/s$, 
+	$$v_{max}-v_{min}<n\paren*{2\cdot\delta + \frac{2\delta^2}{\log (n/(b\epsilon/2))}}.$$ 
 	This is the size of the recursive subproblem because for any index $i < v_{min}$, $A[i]$ is a predecessor, and for any index $i \geq v_{max}$, $A[i]$ is a successor, so by partitioning $A[v_{min}], \ldots, A[v_{max}-1]$ the partitioning of the array is complete.
 \end{proof}
 We can use this result to analyze two full Parallel Partition algorithms that use the Cache-Efficient Partial-Partition Algorithm.
@@ -705,29 +707,48 @@ Once the problem size has been reduced, the cache behavior is less important, so
 
 We also analyze a second algorithm that is simple to implement in practice.
 The Grouped Partition Algorithm first partially partitions the array $A$ using the Cache-Efficient Partial-Partition Algorithm with parameter $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta$ which can be toggled to achieve a trade off between XXX and XXX. 
-The Grouped Partition Algorithm then recursively -- at this level, and all lower levels of recursion -- partitions the unpartitioned subarray using the Cache-Efficient Partial-Partition algorithm with the same value of $\epsilon$ as on the top level of recursion. 
+The Grouped Partition Algorithm then recursively partitions the unpartitioned subarray using the Grouped Partition Algorithm. 
+It is important to note that when recursing with the Grouped Partition the same parameter $\epsilon$ is used, because if we repeatedly updated the failure probability to be $1/n^c$ where $n$ was the size of the subproblem at a certain level then we would not achieve high probability in $n$. 
+This increases the span of lower levels of recursion, but the lower levels of recursion are small, so the overall span of the algorithm is not affected.
 
-We now establish the following theorem about the GIT algorithm in general and a corollary about where it optimizes.
+We now establish the following theorem about the GIT algorithm in general and a corollary about an interesting setting of the parameters.
 % also delta seems _way_ too big, (it can't be bigger than 1, but it looks bigger than 1 for reasonable problem sizes). I guess the constants save us by eating b, but still
 \begin{theorem}
 	\label{thm:GIT}
-	The GIT algorithm using parameter $\delta$ with high probability in $n$ has work $O(n)$, span $O(\log 2n\delta \log\log 2n\delta)+O(\frac{b\log n/b}{\delta^2})$, and incurs fewer than $\frac{s+n}{b}+O(1)+O((2\delta+1/s)n)$ cache misses.
+	The GIT algorithm using parameter $\delta\in(0,1)$ with high probability in $n$ has work $O(n)$, span $$O\paren*{\log \paren*{n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}} \log\log \paren*{n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}} +\frac{b\log (n/b)}{\delta^2}},$$
+and incurs fewer than 
+	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}  +n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}}$$ 
+cache misses.
 \end{theorem}
+%% note that delta \in 0, 1, so the choice of delta here is very worrying!!! (log log n is small, but b is big!!, so delta is only less than 1 because of some constants, anyways this seems not good, but its a nice theoretical result)
 \begin{corollary}{Corollary of Theorem \ref{thm:GIT}}
 	\label{cor:GIT}
-	The GIT algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$ achieves work $O(n)$, span $O(\log n \log\log n)$, and incurs fewer than $(1+2\delta + 1/s)n$ cache misses.
+	The GIT algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, for $n,b$ such that $\log \log n$ dominates $b$ i.e.  $b/\log\log n = o(1)$, achieves work $O(n)$, span $O(\log n \log\log n)$, and incurs fewer than $n+o(n)$ cache misses.
 \end{corollary}
 \begin{proof}{Proof of Theorem \ref{thm:GIT}}
-	By Theorem \ref{prop:generalResult} the top layer where we apply the Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $$O(b\cdot s) = O\Big(\frac{b\log(n/(b\epsilon/2))}{\delta^2}\Big)=O(\log n \log\log n),$$ and incurs $n$ cache misses.
-	The subproblem has size less than $(2\delta+1/s)\cdot n$, so using an algorithm with span $O(\log n \log\log n)$ and work $O(n)$, we achieve span
-	$$O(\log((2\delta+1/s)\cdot n)\log\log((2\delta+1/s)\cdot n)),$$
-	and work $$O((2\delta+1/s)\cdot n)$$
+	Using Theorem \ref{prop:generalResult}, we find the relevant statistics for the top layer where we apply the Cache-Efficient Partial-Partition Algorithm. 
+	The top layer has work $O(n)$, span 
+	$$O(b\cdot s) = O\Big(\frac{b\log(n/(b\epsilon/2))}{\delta^2}\Big)=O\paren*{\frac{b\log(n/b)}{\delta^2}},$$ and incurs fewer than 
+	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}}$$ 
+	cache misses.
+	The subproblem has size less than $O\paren*{n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}}$, so using the algorithm described by Theorem \ref{thminplace}, we achieve span
+	$$O\paren*{\log \paren*{n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}} \log\log \paren*{n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}}},$$
+	and work $$O\paren*{\paren*{n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}}} < O(n)$$
 	in solving the subproblem.
-	Thus the total work is $O(n)$, and the total span is $$O(\log\log n \log n).$$
-	In solving the subproblem we incur $2\delta n$ cache misses, [[ OK don't realy be that explicit, just O(n) for Bill's thing NOT REALLY! probably way more than this!! (3.5 times more than this???)]] so the total number of cache misses is $n(1+XXX)$.
-	This shows that our algorithm can be used to solve parallel partition with just as good work and span as the $O(\log n \log\log n)$ algorithm, and with much improved cache behavior.
+	Thus the total work is $O(n)$, and the total span is $$O\paren*{\log \paren*{n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}} \log\log \paren*{n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}} +\frac{b\log (n/b)}{\delta^2}}.$$
+	In solving the subproblem the number of cache misses that we incur is linearly dependent on the size of the subarray, so the total number of cache misses is $$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}  +n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}}.$$ 
 \end{proof}
 \begin{proof}{Proof of Corollary \ref{cor:GIT}}
+	We will substitute in our choice of $\delta $ as $\sqrt{b/\log\log n}$ to the results proved in \ref{thm:GIT}. \\
+	The work is still $O(n)$. To compute span, we first compute the size of the recursive subproblem:
+	$$n\paren*{\delta+\frac{\delta^2}{\log (n/b)}} = n\paren*{\sqrt{b/\log\log n}+\frac{b/\log\log n}{\log (n/b)}} < o(n)$$
+	by the assumption that $\log\log n$ dominates $b$.
+	Then the total span of the algorithm is 
+	$$O\paren*{\log \log n \log n + b\frac{log(n/b)}{\delta^2}} = O(\log \log n \log n).$$
+	The number of cache misses is fewer than 
+	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}  +n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}}.$$ 
+	Simplifying using our assumption that $b/\log\log n = o(1)$ we find that the number of cache misses is fewer than $$n(1+o(1)).$$
+	%% exaplain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)
 \end{proof}
 
 \begin{theorem}
