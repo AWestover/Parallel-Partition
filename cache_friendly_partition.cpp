@@ -1,22 +1,34 @@
 
 // AUTHOR: Alek Westover
 // Grouped Partition Algorithm
-// TODO: 
-// * INVESTIGATE delta
-// * do final experiments and add graphs to writeup
-// * multiplication versus addition in loop (decide to use whichever is faster)
-// * make recursive version of the main for loop have less overhead ( it is slightly slower than the loop version )
-// NOTES:
-// * don't worry about bus errors on my mac (I debugged them and they aren't coming from my part of the program. This probably happens since I run gcc7.4 not gcc7.3 and brew won't let me downgrade)
+// 
+// TODO: TOGGLE THE FOLLOWING IN EXPERIMENTS:
+// * delta 
+// 		equalDelta makes it faster according to serial experiments
+// 		note: modify delta in the _groupedPartition_ function on line 294 ish to change this
+// * mainRecursion 
+// 		turning on this option makes the main body of the program into a recursive spawning structure rather than a parallel for loop structure
+// 		we theoretically need this option on so that we don't have to store an array with vys in it to compute vmax, vmin
+// 		however, according to serial experiments, turning the option on harms performance (by a small amount)
+// 		this means that if we are going to use this option, we should look into optimizing the code for it a bit
+// * b 
+// 		we already experimented with b and found b=512 to be the optimal value
+// 		note: modify logB in the _groupedPartition_ function on line 294 ish to change this
 
-// small description:
-// break the array into s chunks
-// make g = n /(b*s) groups, with elements determined in the following manner:
-// on each chunk, generate 1 random number, X[i]
-// X[i] + i % (num cache block chunks in the chunk of the array) is the index into the chunk of the array that we are considering of the cache block that is added to group i from this chunk of the array
-// serial partition each group (we can do all the serial partitions for different groups in parallel)
-// in each group compute vi: the middle (where the array switches from having predecessors to having successors, equivalently, compute the number of predecessors in the array)
-// we now recurse on min(vi) to max(vi) with a new appropriately chosen group size and number of groups for the smaller array
+// summary of groupedPartition:
+// INPUT: 
+// 		an array A of int64_ts that will be partiitoned in place, 
+// 		an int64_t N0 the size of A, 
+// 		and an int64_t pivotVal that the array will be partitioned around (NOTE: this MUST be less than the maximum elt in the array or the code breaks)
+// OUTPUT: none, array partitioned in place
+// PROCEDURE:
+// 		break the array into s chunks
+// 		make g = n /(b*s) groups, with elements determined in the following manner:
+// 		on each chunk, generate 1 random number, X[i]
+// 		X[i] + i % (num cache block chunks in the chunk of the array) is the index into the chunk of the array that we are considering of the cache block that is added to group i from this chunk of the array
+// 		serial partition each group (we can do all the serial partitions for different groups in parallel)
+// 		in each group compute vi: the middle (where the array switches from having predecessors to having successors, equivalently, compute the number of predecessors in the array)
+// 		we now recurse on min(vi) to max(vi) with a new appropriately chosen group size and number of groups for the smaller array
 
 #include "params.h"
 #include <stdio.h>
@@ -30,10 +42,9 @@
 #include <cilk/cilk_api.h>
 using namespace std;
 
-// if equal delta = true, then we 
-#define equalDelta false
-#define multiplicationInLoop false
-#define mainRecursion true // true -> use recursive version, false -> use old loop version
+#define equalDelta true
+#define multiplicationInLoop true // this parameter has no effect on performance
+#define mainRecursion false // true -> use recursive version, false -> use old loop version
 
 struct Vs {
 	int64_t vmin; 
@@ -45,7 +56,7 @@ struct Vs {
 // smaller delta -> bigger s -> smaller g
 // equalDelta false -> use small delta = 1 / sqrt(2*log(n)) on the top
 // so equalDelta false means that there will be fewer groups on the top layer (and that the groups will be bigger therefore, so we can be confident that the recursive subproblem is much smaller in size)
-// clarifiction: size of recursive subproblem should be about delta * n
+// clarifiction: size of recursive subproblem should be about 2*delta * n
 
 int64_t computeS(int64_t n, double delta){
     return (int64_t)(log2(n) / (2*delta*delta));
@@ -245,6 +256,7 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
         int64_t leftOverStart = s*b*g;
         int64_t leftOverSize = n - leftOverStart;
         int64_t successorPartitionSize = leftOverStart - vmax;
+
         if (leftOverSize < successorPartitionSize) { // llllllllll ?????????? hhhhhhhhhhhhhhhhhhhhhhh  ???? swap the ?s with the early hs
             for(int64_t i = 0; i < leftOverSize; i++){
                 int64_t tmp = A[leftOverStart + i];
@@ -253,7 +265,7 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
                 vmax += 1;
             }
         }
-		// if there are less successors than extra elements (this can only happen on inredibly small inputs) then sacrifice the successors
+		// if there are less successors than extra elements (this should only happen on inredibly small inputs) then sacrifice the successors
         else { // llllllllll ?????????? hhhh ???????? swap hs with the back of the extra section
             for(int64_t i = 0; i < successorPartitionSize; i++){
                 int64_t tmp = A[n - 1 - i];
@@ -261,8 +273,10 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
                 A[vmax] = tmp; 
                 vmax += 1;
             }
-            vmax = n - successorPartitionSize;      
-            assert (vmax < n); // this should never happen. It would indicate that the vmax code got messed up if it did. It would also indicate taht there are no successsors in the array. Oh wait, that is possible, dang, add a test case for this (adverserial pivotValue)
+            vmax = n - successorPartitionSize;
+
+			// NOTE: the program breaks if pivotValue is greater than the max val in the array
+			assert(vmax < n);
         }
 
         // solve the smaller subproblem recursively, which starts at vmin, and has size vmax - vmin
@@ -279,7 +293,7 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
 // this is the top level, 
 // because the top level takes up nearly all of the time, we can do special tuning for it here
 int64_t groupedPartition(int64_t* A, int64_t N0, int64_t pivotVal){
-    double delta = 0.25;
+    double delta = 0.5;
     int64_t logB = 9;
 
     int64_t logN0 = (int64_t)log2(N0); 

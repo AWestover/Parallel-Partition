@@ -730,7 +730,7 @@ int main() {
   // cout<<test_partition(-1, size_to_run_on, false, num_threads)<<endl;
 
 
-  for (size_to_run_on = (1 << 23); size_to_run_on *= 2; size_to_run_on <= (1 << 30)) {
+  for (size_to_run_on = (1 << 26); size_to_run_on *= 2; size_to_run_on <= (1 << 30)) {
     cout<<"----------------------------------------"<<endl;
     num_threads = 18;
 	cout<<"High-Span Algorithm: (size "<<size_to_run_on<<", num_threads "<<num_threads<<")"<<endl;

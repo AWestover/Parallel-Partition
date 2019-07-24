@@ -561,7 +561,7 @@ Each cache is managed with a LRU (Least Recently Used) eviction policy and we as
 In the analysis of our algorithm it will be useful to assume that certain small arrays are pinned in cache (i.e. their entries are never evicted from cache).
 This assumption is without loss of generality in the sense that LRU eviction is competitive (up to resource augmentation) with the optimal off-line eviction strategy OPT (i.e. Furthest in the Future).
 Formally this is due to the following theorem by Sleator and Tarjan:
-\begin{theorem}[Resource Augmentation Theorem \cite{SleatorTa85}]
+\begin{theorem}{Resource Augmentation Theorem \cite{SleatorTa85}}
 	LRU operating on a cache of size $K\cdot M$ for some $K>1$ will incur at most $1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on a cache of size $M$, for the same series of memory accesses.
 \end{theorem}
 
@@ -605,14 +605,16 @@ With this optimization, one advantage of the Strided Algorithm is that when $v_{
 We now present an improved version of the Strided Algorithm that has optimal cache behavior and low span for arbitrary inputs which we call the \defn{Cache-Efficient Partial-Partition Algorithm}. 
 Note that this algorithm does not completely partition an array, it moves most predecessors to the beginning of the array and most successors to the end of the array, but it leaves a small subarray in the middle of the array that still must be partitioned to complete the partitioning.
 The Strided Algorithm relied on inputs being randomly ordered, but the Cache-Efficient Partial-Partition Algorithm uses randomization in the algorithm to obviate the need for random input. 
+
 Interestingly, because of the fact that the Cache-Efficient Partial-Partition Algorithm works on arbitrary inputs rather than only random inputs, the Cache-Efficient Partial-Partition Algorithm can be used to solve the subproblem that it generates, unlike the Strided Algorithm which must use some different algorithm solve the subproblem.
 This is because the subproblem generated in the Strided Algorithm is non-random: subarrays composed of every t-th element in the subarray are already be partitioned, so the Strided Algorithm would not change the array as it partitions these subarrays that are already partitioned, and thus could not finish the partitioning of the array.
 In contrast to this, the Cache-Efficient Partial-Partition Algorithm, which has guarantees for arbitrary inputs, would encounter no problems in recursing with the Cache-Efficient Partial-Partition Algorithm.
+
 The Cache-Efficient Partial-Partition Algorithm forms collections $U_y$, which are similar to the Strided Algorithm's $P_j$s, and performs a serial partition of each $U_y$ in parallel.
 We clearly cannot explicitly store each $U_y$, because that would involve storing $n$ values (or $n/b$ if we use indices of cache blocks) which would make the algorithm not in-place, and remove the algorithm's desirable cache behavior. 
 However, we can represent all of the collections $U_y$ using very little space by making each collection individually random, but not independent of other collections. 
 This construction makes it so that the fraction of successors in each group will cluster closely around the fraction of successors in $A$.
-The elements in each $U_y$ are spread out in $A$ such each section of a certain size in the array will contain the same number of elements from $U_y$. 
+The elements in each $U_y$ are spread out in $A$ so that each section of a certain size in the array will contain the same number of elements from $U_y$. 
 Define $v_y$ to be the index of the first successor in $U_y$--this is similar to the definition of the splitting position in the Strided Algorithm.
 Because of this uniformity in how the elements of $U_y$ are spread out, and the guarantee that the fraction of successors in each $U_y$ will cluster closely around the fraction of successors in $A$, the index $v_y$ of the first successor in collection $U_y$ will, with high probability in $n$, be close to all other indices $v_y$.
 This means that after each $U_y$ is partitioned in serial $A$ will almost be fully partitioned with only a small subarray left to partition.
@@ -620,7 +622,9 @@ The subarray to partition is $A[\min{v_y}], \ldots, A[\max{v_y}-1]$.
 
 \paragraph{Algorithm Description}
 We now describe the algorithm.
-[[[[[DESCRIBE s, g, X]]]]]
+Let $g$ be the number of groups that the algorithm will form.
+Let $X$ be an array of values in $\{0,1,\ldots,g-1\}$ that determines which chunk of size $b$ from the array belongs to any group $i$ in the $i$ th section of size $g\cdot b$ in the array.
+Let $s=|X|$.
 \begin{itemize}
 	\item Logically partition the array $A$ into blocks $P_j$ each of $b$ adjacent elements, i.e. $${P_j = \{A[b\cdot j], A[b\cdot j + 1], \ldots, A[b\cdot (j+1)-1]\}}.$$
 	\item Form an array $X$ with $|X|=s$, where each element $X[i]$ is an integer chosen randomly at uniform from $[0, g-1].$
@@ -640,7 +644,7 @@ After partitioning the subarray ${A[v_{min}],\ldots,A[v_{max}-1]}$ the array is 
 \paragraph{Algorithm Analysis}
 We now prove the following general theorem about the Cache-Efficient Partial-Partition Algorithm.
 \begin{proposition}
-	\label{thm:generalResult}
+	\label{prop:generalResult}
 	Let $A$ be an array of size $n$; 
 	Let $\mu$ be the fraction of predecessors in $A$; 
 	Let $\epsilon \in (0, 1)$ be a failure probability; 
@@ -650,7 +654,7 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 	The Cache-Efficient Partial-Partition Algorithm, when executed on array $A$: 
 	achieves work $O(n)$; 
 	achieves span $O\paren*{b \frac{\log (n/(b\epsilon/2))}{\delta^2}}$; 
-	incurs $(s+n)/b + O(1)$ cache misses (assuming the array $X$ is pinned to cache); 
+	incurs $\frac{s+n}{b} + O(1)$ cache misses (assuming the array $X$ is pinned to cache); 
 	and leaves an unpartitioned subarray $A[v_{min}],\ldots, A[v_{max}-1]$ which, with probability $1-\epsilon$, has size $v_{max}-v_{min} < n(2\delta + 1/s)$. 
 \end{proposition}
 \begin{proof}
@@ -675,7 +679,7 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 	Substituting in $s$ which was chosen $s\defeq \frac{\log (n/(b\epsilon/2))}{2\delta^2}$, this becomes
 	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp\Big({-2} \frac{\log (n/(b\epsilon/2))}{2\delta^2} \delta^2\Big). $$
 	Simplifying we find that  
-	$$2\exp\Big({-2} \frac{\log (n/(b\epsilon/2))}{\delta^2} \delta^2\Big) = \frac{\epsilon}{n/b} < \frac{\epsilon}{g},$$
+	$$2\exp\Big({-2} \frac{\log (n/(b\epsilon/2))}{2\delta^2} \delta^2\Big) = \frac{\epsilon}{n/b} < \frac{\epsilon}{g},$$
 	which proves that 
 	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \epsilon.$$
 	Then, because the elements in each group are distributed evenly throughout the array, $\mu_y\cdot n$ approximately determines $v_y$ (with probability $1-\epsilon$), so we can bound $v_y-\mu\cdot n$. 
@@ -695,26 +699,26 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 \end{proof}
 We can use this result to analyze two full Parallel Partition algorithms that use the Cache-Efficient Partial-Partition Algorithm.
 
-The \defn{GIT} algorithm first partially partitions A with the Cache-Efficient Partial-Partition algorithm using parameters $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta $ which can be toggled in order to achieve a trade off between XXX and XXX.
+The \defn{GIT} algorithm first partially partitions $A$ with the Cache-Efficient Partial-Partition algorithm using parameters $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta $ which can be toggled in order to achieve a trade off between XXX and XXX.
 The algorithm then partitions the unpartitioned subarray using the algorithm given by Theorem \ref{thminplace} that has span $O(\log\log n \log n)$.
 Once the problem size has been reduced, the cache behavior is less important, so we can switch to the algorithm that optimizes span rather than cache misses.
 
-%% how do I show that it is a corollary of \ref{thm:generalResult} in TeX?
 We also analyze a second algorithm that is simple to implement in practice.
 The Grouped Partition Algorithm first partially partitions the array $A$ using the Cache-Efficient Partial-Partition Algorithm with parameter $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta$ which can be toggled to achieve a trade off between XXX and XXX. 
-The Grouped Partition Algorithm then recursively partitions the unpartitioned subarray using the Cache-Efficient Partial-Partition algorithm, still using parameter the same $\epsilon$. [[THE RECURSION MIGHT NOT BE CLEAR]]
+The Grouped Partition Algorithm then recursively -- at this level, and all lower levels of recursion -- partitions the unpartitioned subarray using the Cache-Efficient Partial-Partition algorithm with the same value of $\epsilon$ as on the top level of recursion. 
 
 We now establish the following theorem about the GIT algorithm in general and a corollary about where it optimizes.
 % also delta seems _way_ too big, (it can't be bigger than 1, but it looks bigger than 1 for reasonable problem sizes). I guess the constants save us by eating b, but still
 \begin{theorem}
-	[[parameterize with $\delta$]]
-	The GIT algorithm using parameter $\delta$ with high probability in $n$ has work $O(n)$, span $O(\log n \log\log n)$, and incurs fewer than $(1+2\delta + 1/s)n$ cache misses.
+	\label{thm:GIT}
+	The GIT algorithm using parameter $\delta$ with high probability in $n$ has work $O(n)$, span $O(\log 2n\delta \log\log 2n\delta)+O(\frac{b\log n/b}{\delta^2})$, and incurs fewer than $\frac{s+n}{b}+O(1)+O((2\delta+1/s)n)$ cache misses.
 \end{theorem}
-\begin{corollary}
-	The GIT algorithm optimizes when $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$ in which case it achieves work $O(n)$, span $O(\log n \log\log n)$, and incurs fewer than $(1+2\delta + 1/s)n$ cache misses.
+\begin{corollary}{Corollary of Theorem \ref{thm:GIT}}
+	\label{cor:GIT}
+	The GIT algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$ achieves work $O(n)$, span $O(\log n \log\log n)$, and incurs fewer than $(1+2\delta + 1/s)n$ cache misses.
 \end{corollary}
-\begin{proof}[Proof of theorem]
-	By Theorem \ref{thm:generalResult} the top layer where we apply the Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $$O(b\cdot s) = O\Big(\frac{b\log(n/(b\epsilon/2))}{\delta^2}\Big)=O(\log n \log\log n),$$ and incurs $n$ cache misses.
+\begin{proof}{Proof of Theorem \ref{thm:GIT}}
+	By Theorem \ref{prop:generalResult} the top layer where we apply the Cache-Efficient Partial-Partition Algorithm has work $O(n)$, span $$O(b\cdot s) = O\Big(\frac{b\log(n/(b\epsilon/2))}{\delta^2}\Big)=O(\log n \log\log n),$$ and incurs $n$ cache misses.
 	The subproblem has size less than $(2\delta+1/s)\cdot n$, so using an algorithm with span $O(\log n \log\log n)$ and work $O(n)$, we achieve span
 	$$O(\log((2\delta+1/s)\cdot n)\log\log((2\delta+1/s)\cdot n)),$$
 	and work $$O((2\delta+1/s)\cdot n)$$
@@ -723,7 +727,7 @@ We now establish the following theorem about the GIT algorithm in general and a 
 	In solving the subproblem we incur $2\delta n$ cache misses, [[ OK don't realy be that explicit, just O(n) for Bill's thing NOT REALLY! probably way more than this!! (3.5 times more than this???)]] so the total number of cache misses is $n(1+XXX)$.
 	This shows that our algorithm can be used to solve parallel partition with just as good work and span as the $O(\log n \log\log n)$ algorithm, and with much improved cache behavior.
 \end{proof}
-\begin{proof}[proof of corollary]
+\begin{proof}{Proof of Corollary \ref{cor:GIT}}
 \end{proof}
 
 \begin{theorem}
@@ -735,7 +739,7 @@ We now establish the following theorem about the GIT algorithm in general and a 
 	The Grouped Partition Algorithm, which uses the Cache-Efficient Partial-Partition Algorithm to both initially partially partition the array, and then also to recursively solve all subproblems (with the base case of the recursion being triggered when the array is too small to make a significant number of groups, at which time the algorithm solves the final partitioning with a serial partition), and which uses parameters $b$, and $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) on all levels of the problem, and which uses the parameter $\delta=1/\sqrt{\log n}$ only on the top level of recursion, while using the parameter $\delta=1/4$ on lower levels of recursion, has work $O(n)$ attains span $O(b\log^2 n)$, and incurs $n + 2 n/\log n$ cache misses. %% cache misses is sketchy 
 \end{corollary}
 \begin{proof}
-	By Theorem \ref{thm:generalResult}, the top level of the algorithm has work $O(n)$, span $$O\Big(b\frac{\log(n/\epsilon)}{\delta^2}\Big)=O(b\log^2 n),$$ and incurs $n$ cache misses.  
+	By Theorem \ref{prop:generalResult}, the top level of the algorithm has work $O(n)$, span $$O\Big(b\frac{\log(n/\epsilon)}{\delta^2}\Big)=O(b\log^2 n),$$ and incurs $n$ cache misses.  
 	On the top layer of recursion the algorithm reduces the problem size to $2 n/\sqrt{\log n}$ by our choice of $\delta$.
 	On lower layers of recursion the algorithm cuts the problem size in half at each iteration by choosing $\delta = 1/4$.
 	The size of the problem on lower levels thus is 
@@ -1208,7 +1212,7 @@ future work.
 
 \paragraph{Acknowledgments} The author would like to thank Bradley C. Kuszmaul for several suggestions that helped simplify both the algorithm and its exposition. The author would also like to thank Reza Zadeh for encouragement and advice.
 
-This research was supported in part by NSF Grants 1314547 and 1533644.
+This research was supported in part by NSF Grants 1314547 and 1533644. 
 
 
 \bibliographystyle{ACM-Reference-Format}
