@@ -722,13 +722,13 @@ We now establish the following theorem about the GIT algorithm in general and a 
 	\label{thm:GIT}
 	The GIT algorithm using parameter $\delta\in(0,1)$: has work $O(n)$, and with high probability in $n$, achieves span $$O\paren*{\log \paren*{n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}} \log\log \paren*{n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}} +\frac{b\log (n/b)}{\delta^2}},$$
 and incurs fewer than 
-	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}  +n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}}$$
+	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}}$$
 cache misses.
 \end{theorem}
 %% note that delta \in 0, 1, so the choice of delta here is very worrying!!! (log log n is small, but b is big!!, so delta is only less than 1 because of some constants, anyways this seems not good, but its a nice theoretical result)
 \begin{corollary}[Corollary of Theorem \ref{thm:GIT}]
 	\label{cor:GIT}
-	The GIT algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, for $n,b$ such that $\log \log n$ dominates $b$ i.e.  $b/\log\log n = o(1)$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $n+o(n)$ cache misses.
+	The GIT algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, for $n,b$ such that $\log \log n$ dominates $b$ i.e.  $b/\log\log n = o(1)$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $\frac{1}{b}(n+o(n))$ cache misses.
 \end{corollary}
 \begin{proof}[Proof of Theorem \ref{thm:GIT}]
 	Using Proposition \ref{prop:generalResult}, we find the relevant statistics for the top layer where we apply the Cache-Efficient Partial-Partition Algorithm. 
