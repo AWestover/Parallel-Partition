@@ -706,16 +706,12 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 We can use this result to analyze two full Parallel Partition algorithms that use the Cache-Efficient Partial-Partition Algorithm.
 
 \begin{enumerate}
-	\item
-	\item
+	\item The \defn{GIT} algorithm achieves the best theoretical span and cache efficiency for appropriate parameter choice.
+	\item The \defn{Grouped Partition Algorithm} is slightly suboptimal in terms of span, but has a very small number of cache misses, and is exceptionally simple to implement.
 \end{enumerate}
 
 %% these 2 paragraphs are pretty redundant
 %% I wish I could say that both the algs will have param delta that does the same thing, and both have whp in $n$ guarantees
-
-%% bullet point summary of algs 
-
-%% achieves the best theoretical span and cache efficiecny
 
 The \defn{GIT} algorithm first partially partitions $A$ with the Cache-Efficient Partial-Partition algorithm using parameters $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta $ which can be toggled in order to achieve a trade off between performance as measured by span and cache misses on the upper level of recursion and the size of the subarray to partition i.e. performance in the recursive subproblem.
 The algorithm then partitions the unpartitioned subarray using the algorithm given by Theorem \ref{thminplace} that has span $O(\log\log n \log n)$.
@@ -796,7 +792,7 @@ cache misses.
 	
 	In order to compute the span of the algorithm, we apply Proposition \ref{prop:generalResult} to the subarray, which has size bounded above by $2^{2-i}n\delta_0$, and has parameter $\delta'=1/8$. 
 	Thus, level $i$ contributes
-	$$O(bs)=O\Big(b\frac{\log(2^{-i}n\delta_0/b)}{(\delta')^2}\Big)=O(b(\log(n\delta_0/b)-i))$$ to the span.
+	$$O(b\cdot s)=O\Big(b\frac{\log(2^{-i}n\delta_0/b)}{(\delta')^2}\Big)=O(b(\log(n\delta_0/b)-i))$$ to the span.
 	Now note that because the algorithm at least cuts the problem size in half each time we will reduce the problem size to the base case in at most $\log (4n\delta_0)$ levels.
 	Thus, to get the total span, we must add together $O(\log(n\delta_0))$ terms of the form $O(b(\log (n\delta_0/b) - i))$.
 	This makes the total span $O(b\log^2 (n\delta_0))$.
