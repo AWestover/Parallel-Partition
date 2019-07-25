@@ -416,76 +416,79 @@ surrounding objects on input line 623.
 Class acmart Warning: \vspace should only be used to provide space above/below 
 surrounding objects on input line 644.
 
-
-Overfull \hbox (2.31427pt too wide) in paragraph at lines 654--659
-\T1/LinuxLibertineT-TLF/m/n/9 (-20) cache); and leaves an un-par-ti-tioned sub-
-ar-ray $\OML/nxlmi/m/it/9 A\LMS/ntxsy/m/n/9 »\OML/nxlmi/m/it/9 v[]\LMS/ntxsy/m/
-n/9 ¼\OML/nxlmi/m/it/9 ; [] ; A\LMS/ntxsy/m/n/9 »\OML/nxlmi/m/it/9 v[] \LMS/ntx
-sy/m/n/9 ^^@
 [5.5] [6.6]
-Overfull \hbox (8.50797pt too wide) in paragraph at lines 723--726
-\T1/LinuxLibertineT-TLF/m/n/9 (-20) and in-curs fewer than $\OML/nxlmi/m/it/9 O
-[][]$ \T1/LinuxLibertineT-TLF/m/n/9 (-20) cache misses. 
+Overfull \hbox (13.09431pt too wide) in paragraph at lines 752--757
+\T1/LinuxLibertineT-TLF/m/n/9 (-20) go-rithm de-scribed by The-o-rem []3.1[], w
+e achieve span $\OML/nxlmi/m/it/9 O\LMS/ntxsy/m/n/9 ¹[] \OML/nxlmi/m/it/9 n^^N 
+[] [] n^^N\LMS/ntxsy/m/n/9 º$
 
-Overfull \hbox (1.50536pt too wide) in paragraph at lines 746--748
-\T1/LinuxLibertineT-TLF/m/n/9 (-20) Par-ti-tion Al-go-rithm, which uses the Cac
-he-Efficient Partial-Partition
+Overfull \hbox (3.52092pt too wide) detected at line 767
+[] \U/ntxmia/m/it/9 ý \OML/nxlmi/m/it/9 O[][] \U/ntxmia/m/it/9 = [] ý \OML/nxlm
+i/m/it/9 O[][]:
 
-Class acmart Warning: A possible image without description on input line 788.
+Overfull \hbox (8.27971pt too wide) in paragraph at lines 809--809
+[]\T1/LinuxLibertineT-TLF/m/n/9 (-20) By The-o-rem []4.3[], if we set $\OML/nxl
+mi/m/it/9 ^^N[] \U/ntxmia/m/it/9 = \OT1/LinuxLibertineT-TLF/m/n/9 (-20) 1\LMS/n
+txsy/m/n/9 []$\T1/LinuxLibertineT-TLF/m/n/9 (-20) ,
+[7.7]
 
-
-Class acmart Warning: A possible image without description on input line 803.
-
-
-Class acmart Warning: A possible image without description on input line 816.
-
-
-Class acmart Warning: A possible image without description on input line 830.
+Class acmart Warning: A possible image without description on input line 831.
 
 
-Class acmart Warning: A possible image without description on input line 844.
+Class acmart Warning: A possible image without description on input line 846.
 
-[7.7] [8.8] [9.9]
+
+Class acmart Warning: A possible image without description on input line 859.
+
+
+Class acmart Warning: A possible image without description on input line 873.
+
+
+Class acmart Warning: A possible image without description on input line 887.
+
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 890.
+surrounding objects on input line 933.
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active
-Underfull \vbox (badness 10000) has occurred while \output is active [10.10]
-Overfull \hbox (1.81116pt too wide) in paragraph at lines 944--954
+Overfull \hbox (1.81116pt too wide) in paragraph at lines 987--997
 []\T1/LinuxLibertineT-TLF/m/it/9 (-20) The Low-Space Par-al-lel Im-ple-men-ta-t
 ion: \T1/LinuxLibertineT-TLF/m/n/9 (-20) Start-ing with the medium-
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 971.
+surrounding objects on input line 1014.
 
-
-Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 981.
-
+[8.8] [9.9] [10.10]
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 1000.
+surrounding objects on input line 1024.
 
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
 surrounding objects on input line 1043.
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active
+
+Class acmart Warning: \vspace should only be used to provide space above/below 
+surrounding objects on input line 1086.
+
+
 Underfull \vbox (badness 10000) has occurred while \output is active [11.11]
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 1075.
+surrounding objects on input line 1118.
 
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 1094.
+surrounding objects on input line 1137.
 
-[12.12]
+
+Underfull \vbox (badness 10000) has occurred while \output is active [12.12]
 
 Class acmart Warning: \vspace should only be used to provide space above/below 
-surrounding objects on input line 1225.
+surrounding objects on input line 1268.
 
 (./writeup.bbl)
 
@@ -524,5 +527,5 @@ ts/type1/public/txfonts/rtxr.pfb></usr/local/texlive/2019/texmf-dist/fonts/type
 ts/txsyb.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/newtx/txsys
 .pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/newtx/zxlr.pfb></us
 r/local/texlive/2019/texmf-dist/fonts/type1/public/newtx/zxlri.pfb>
-Output written on writeup.pdf (13 pages, 776547 bytes).
+Output written on writeup.pdf (13 pages, 779299 bytes).
 Transcript written on writeup.log.
