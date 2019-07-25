@@ -42,9 +42,9 @@
 #include <cilk/cilk_api.h>
 using namespace std;
 
-#define equalDelta true
+#define equalDelta false
 #define multiplicationInLoop true // this parameter has no effect on performance
-#define mainRecursion false // true -> use recursive version, false -> use old loop version
+#define mainRecursion true // true -> use recursive version, false -> use old loop version
 
 struct Vs {
 	int64_t vmin; 

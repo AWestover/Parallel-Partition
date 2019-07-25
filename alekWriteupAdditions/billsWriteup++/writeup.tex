@@ -753,9 +753,10 @@ cache misses.
 	The number of cache misses is fewer than 
 	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}  +n\paren*{\delta+\frac{\delta^2}{\log (n/b)}}}.$$ 
 	Simplifying using our assumption that $b/\log\log n = o(1)$ we find that the number of cache misses is fewer than $$n(1+o(1)).$$
-	%% exaplain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)
+	%% explain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)
 \end{proof}
 
+%%% PLEASE CLARIFY:: the distinction between n and the array size of subproblems!!!
 \begin{theorem}
 	\label{thm:groupedPartitionAlg}
 	The Grouped Partition Algorithm using parameter $\delta_0\in(0,1)$ on the top level of recursion, and then using the parameter $\delta'=1/8$ on lower levels of recursion: achieves work $O(n)$; and with high probability in $n$, attains span $O(b\log^2 (n\delta_0))$ and incurs XXX cache misses. 
@@ -780,6 +781,7 @@ cache misses.
 	Now note that because the algorithm at least cuts the problem size in half each time we will reduce the problem size to the base case in at most $\log (4n\delta)$ levels.
 	Thus, to get the total span, we must add together $O(\log(n\delta))$ terms of the form $O(b(\log (n\delta/b) - i))$.
 	We get the total span to be $O(b\log^2 (n\delta))$.
+	To compute the total number of cache misses of the algorithm, we add 
 	% To compute the total number of cache misses of the algorithm, we again add the sizes of all arrays at all levels of recursion, which yields $n+4n/\sqrt{\log n}$, which is $n(1+o(1))$.
 \end{proof}
 \begin{proof}[Proof of Corollary \ref{cor:groupedPartitionAlg}]
