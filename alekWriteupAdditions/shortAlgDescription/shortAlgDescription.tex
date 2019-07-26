@@ -1,5 +1,4 @@
 
-
 % Alek Westover writeup draft 
 
 \documentclass[twocolumn, twoside, 12pt]{article}
@@ -35,7 +34,6 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newtheorem{proposition}{Proposition}
-
 
 \begin{document}
 \maketitle
@@ -81,6 +79,6 @@ $$v_{min}\leq v_{y} \leq v_{max},$$
 we can determine that all elements of $A$ with index less than $v_{min}$ are predecessors and elements of the array with index greater or equal to than $v_{max}$ are successors.
 Thus, by recursing on the subarray $A[v_{min}],\ldots,A[v_{max}-1]$, we complete the partitioning of the array.
 We recursively apply the Grouped Partition algorithm to the subproblem.
-The base case for the recursion is that when the algorithm can no longer make a substantial number of groups, in which case it partitions its input array in serial.
+The base case for the recursion is that when the algorithm can no longer make a substantial number of groups, in which case it partitions its input array in serial. 
 
 \end{document}

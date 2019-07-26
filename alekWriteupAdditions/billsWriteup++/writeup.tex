@@ -602,9 +602,9 @@ A more cache-friendly version of the algorithm, in which each part $P_i$ consist
 With this optimization, one advantage of the Strided Algorithm is that when $v_{\text{max}} - v_{\text{min}}$ is small, the total number of cache misses by the algorithm is close to the same as for a single scan through the data. 
 
 \paragraph{Algorithm Concept}
-We now present an improved version of the Strided Algorithm that has optimal cache behavior and low span for arbitrary inputs which we call the \defn{Cache-Efficient Partial-Partition Algorithm}. 
-Note that this algorithm does not completely partition an array, it moves most predecessors to the beginning of the array and most successors to the end of the array, but it leaves a small subarray in the middle of the array that still must be partitioned to complete the partitioning.
-The Strided Algorithm relied on inputs being randomly ordered, but the Cache-Efficient Partial-Partition Algorithm uses randomization in the algorithm to obviate the need for random input. 
+We now present the \defn{Cache-Efficient Partial-Partition Algorithm} which improves over the Strided Algorithm by achieving optimal cache behavior and low span for arbitrary inputs, in contrast to the weaker guarantees of the Strided Algorithm which only hold on random inputs. 
+Note that this algorithm does not completely partition an array, it moves "most" predecessors to the beginning of the array and "most" successors to the end of the array, but it leaves a small subarray in the middle of the array that still must be partitioned to complete the partitioning.
+The Strided Algorithm relies on inputs being randomly ordered, but the Cache-Efficient Partial-Partition Algorithm uses randomization in the algorithm to obviate the need for random input. 
 
 Interestingly, because of the fact that the Cache-Efficient Partial-Partition Algorithm works on arbitrary inputs rather than only random inputs, the Cache-Efficient Partial-Partition Algorithm can be used to solve the subproblem that it generates, unlike the Strided Algorithm which must use some different algorithm solve the subproblem.
 This is because the subproblem generated in the Strided Algorithm is non-random: subarrays composed of every t-th element in the subarray are already be partitioned, so the Strided Algorithm would not change the array as it partitions these subarrays that are already partitioned, and thus could not finish the partitioning of the array.
@@ -706,14 +706,14 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 We can use this result to analyze two full Parallel Partition algorithms that use the Cache-Efficient Partial-Partition Algorithm.
 
 \begin{enumerate}
-	\item The \defn{GIT} algorithm achieves the best theoretical span and cache efficiency for appropriate parameter choice.
+	\item The \defn{Cache-Efficient Full-Partition Algorithm} algorithm achieves the best theoretical span and cache efficiency for appropriate parameter choice.
 	\item The \defn{Grouped Partition Algorithm} is slightly suboptimal in terms of span, but has a very small number of cache misses, and is exceptionally simple to implement.
 \end{enumerate}
 
 %% these 2 paragraphs are pretty redundant
 %% I wish I could say that both the algs will have param delta that does the same thing, and both have whp in $n$ guarantees
 
-The \defn{GIT} algorithm first partially partitions $A$ with the Cache-Efficient Partial-Partition algorithm using parameters $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta $ which can be toggled in order to achieve a trade off between performance as measured by span and cache misses on the upper level of recursion and the size of the subarray to partition i.e. performance in the recursive subproblem.
+The \defn{Cache-Efficient Full-Partition Algorithm} algorithm first partially partitions $A$ with the Cache-Efficient Partial-Partition algorithm using parameters $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta $ which can be toggled in order to achieve a trade off between performance as measured by span and cache misses on the upper level of recursion and the size of the subarray to partition i.e. performance in the recursive subproblem.
 The algorithm then partitions the unpartitioned subarray using the algorithm given by Theorem \ref{thminplace} that has span $O(\log\log n \log n)$.
 Once the problem size has been reduced, the cache behavior is less important, so we can switch to the algorithm that optimizes span rather than cache misses.
 
@@ -725,23 +725,36 @@ The Grouped Partition Algorithm then recursively partitions the unpartitioned su
 It is important to note that when recursing with the Grouped Partition the same parameter $\epsilon$ is used, because if we repeatedly updated the failure probability to be $1/n^c$ where $n$ was the size of the subproblem at a certain level then we would not achieve high probability in $n$. 
 This increases the span of lower levels of recursion, but the lower levels of recursion are small, so the overall span of the algorithm is not affected.
 
-We now establish the following theorem about the GIT algorithm in general and a corollary about an interesting setting of the parameters.
+We now establish the following theorem about the Cache-Efficient Full-Partition Algorithm algorithm in general and a corollary about an interesting setting of the parameters.
 % also delta seems _way_ too big, (it can't be bigger than 1, but it looks bigger than 1 for reasonable problem sizes). I guess the constants save us by eating b, but still
 \begin{theorem}
-	\label{thm:GIT}
-	%%% this is just span O(log ndelta log log n delta)
-	The GIT algorithm using parameter $\delta\in(0,1)$: has work $O(n)$, and with high probability in $n$, achieves span $$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}},$$
+	\label{thm:fullPartition}
+	The Cache-Efficient Full-Partition Algorithm algorithm using parameter $\delta\in(0,1)$: has work $O(n)$, and with high probability in $n$, achieves span $$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}},$$
+and incurs fewer than 
+	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + n\delta}$$
+cache misses.\\\\
+OR -----------------\\
+The Cache-Efficient Full-Partition Algorithm algorithm using parameter $\alpha \in \mathbb{Z}_{\geq 0}$, and choosing some $\delta \in (0,1)$ such that 
+$$\delta \in O\paren*{\sqrt{\frac{b}{\log \log n \log ^ \alpha n}}}:$$
+ has work $O(n)$, and with high probability in $n$, achieves span 
+	$$O\paren*{\log^{\alpha} n \log\log n \log n}, $$
 and incurs fewer than 
 	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + n\delta}$$
 cache misses.
 \end{theorem}
+
 %% note that delta \in 0, 1, so the choice of delta here is very worrying!!! (log log n is small, but b is big!!, so delta is only less than 1 because of some constants, anyways this seems not good, but its a nice theoretical result)
-%%% GIVE EXPOSITION OF COROOLARY as "this is an extreme which shows that it is possible to achieve really good span and really good cache efficiency" 
-\begin{corollary}[Corollary of Theorem \ref{thm:GIT}]
-	\label{cor:GIT}
-	The GIT algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, for $n,b$ such that $\log \log n$ dominates $b$ i.e.  $b/\log\log n = o(1)$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $\frac{1}{b}(n+o(n))$ cache misses.
+One interesting corollary of the above theorem is what happens when we chose $\delta$ to optimize span.
+This can be done with an extreme setting of $\delta$.
+Nevertheless, this is very interesting because it shows that it is possible to achieve low span along with a small number of cache misses.
+\begin{corollary}[Corollary of Theorem \ref{thm:fullPartition}]
+	\label{cor:fullPartition}
+	The Cache-Efficient Full-Partition Algorithm algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, for $n,b$ such that $\log \log n$ dominates $b$ i.e.  $b/\log\log n = o(1)$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $\frac{1}{b}(n+o(n))$ cache misses.\\\\
+OR -----------------\\
+	The Cache-Efficient Full-Partition Algorithm algorithm using $\alpha = 0$, for $n,b$ such that $\log \log n$ dominates $b$ i.e.  $b/\log\log n = o(1)$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $\frac{1}{b}(n+o(n))$ cache misses.\\\\
 \end{corollary}
-\begin{proof}[Proof of Theorem \ref{thm:GIT}]
+
+\begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
 	Using Proposition \ref{prop:generalResult}, we find the relevant statistics for the top layer where we apply the Cache-Efficient Partial-Partition Algorithm. 
 	The top layer has work $O(n)$, span 
 	$$O(b\cdot s) = O\Big(\frac{b\log(2n/(b\epsilon))}{\delta^2}\Big)=O\paren*{\frac{b\log(n/b)}{\delta^2}},$$ and incurs fewer than 
@@ -754,8 +767,8 @@ cache misses.
 	In solving the subproblem the number of cache misses that we incur is linearly dependent on the size of the subarray, so the total number of cache misses is 
 	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + n\delta}.$$ 
 \end{proof}
-\begin{proof}[Proof of Corollary \ref{cor:GIT}]
-	We use $\delta = \sqrt{b/\log\log n}$ in the result proved in \ref{thm:GIT}. \\
+\begin{proof}[Proof of Corollary \ref{cor:fullPartition}]
+	We use $\delta = \sqrt{b/\log\log n}$ in the result proved in \ref{thm:fullPartition}. \\
 	The work in this case is $O(n)$. 
 	The span is
 	$$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}} = O(\log n\log\log n).$$
@@ -765,7 +778,7 @@ cache misses.
 	%% explain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)
 \end{proof}
 
-%%% PLEASE CLARIFY:: the distinction between n and the array size of subproblems!!!
+%%% Should make the distinction between n and the array size of subproblems more clear
 %%% n allways reffers to the size of the top level
 %%% 2^{-i} delta n refers to size of a subproblem
 \begin{theorem}
