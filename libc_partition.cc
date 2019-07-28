@@ -273,3 +273,33 @@ void libc_quicksort (void *const pbase, size_t total_elems)
     }
   }
 }
+
+
+/*
+ * We use the same pivot selection strategy as libc_qsort.
+ */
+int64_t select_pivot(int64_t* array, uint64_t num_elts) {
+  int64_t* lo = array;
+  int64_t *hi = array + num_elts - 1;
+  int64_t *mid = lo + ((hi - lo) >> 1);
+  if (*mid < *lo) {
+    int64_t tmp = *mid;
+    *mid = *lo;
+    *lo = tmp;
+  }
+  if (*hi < *mid) {
+    int64_t tmp = *mid;
+    *mid = *hi;
+    *hi = tmp;
+  } else {
+    goto jump_over;
+  }
+  if (*mid < *lo) {
+    int64_t tmp = *mid;
+        *mid = *lo;
+        *lo = tmp;
+  }
+ jump_over:;    
+ return *mid;
+}
+

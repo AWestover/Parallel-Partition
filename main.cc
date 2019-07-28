@@ -196,6 +196,15 @@ int64_t test_sort(int64_t type, int64_t n, uint64_t num_threads) {
     long int ms2 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
     answer = (ms2 - ms1);
   }
+  if (type == 3) {
+    gettimeofday(&tp, NULL);
+    long int ms1 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    parallel_quicksort_cache_friendly(array, n);
+    gettimeofday(&tp, NULL);
+    long int ms2 = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    answer = (ms2 - ms1);
+  }
+
 
   for (int64_t i = 0; i < n - 1; i++) assert(array[i] <= array[i + 1]);
   free(array);
@@ -250,7 +259,7 @@ void parallel_partition_tests() {
     if (i == 1) cout<<"%% In-Place Prefix-Sum"<<endl;
     if (i == 2) cout<<"%% Out-of-Place"<<endl;
     if (i == 3) cout<<"%% High-Span"<<endl;
-	if (i == 4) cout<<"%% Cache-Friendly"<<endl;
+    if (i == 4) cout<<"%% Cache-Friendly"<<endl;
     cout<<"\\addplot coordinates {";
     for (int64_t num_cores = 1; num_cores <= NUM_THREADS_DEFAULT; num_cores++) {
       double millisecs = test_partition_multiple_trials(i, MAX_INPUT_SIZE, NUM_TRIALS, false, num_cores);
@@ -401,9 +410,10 @@ void parallel_sort_tests() {
       <<endl<<"{a={mark=o,draw=blue}}]"<<endl;
   for (int64_t log_size = 24; (1 << log_size) <= MAX_INPUT_SIZE; log_size+=2) {
     double serial_baseline = test_sort_multiple_trials(0, (1 << log_size), NUM_TRIALS, 1);
-    for (int64_t i = 1; i <= 2; i++) {
+    for (int64_t i = 0; i <= 3; i++) {
       if (i == 1) cout<<"%% Low Space with log size "<<log_size<<endl;
       if (i == 2) cout<<"%% High-Span with log size "<<log_size<<endl;
+      if (i == 3) cout<<"%% Cache Friendly with log size "<<log_size<<endl;
       cout<<"\\addplot coordinates {";
       for (int64_t num_cores = 1; num_cores <= NUM_THREADS_DEFAULT; num_cores++) {
         set_num_threads(num_cores);
@@ -414,7 +424,7 @@ void parallel_sort_tests() {
     }
     cout<<"};"<<endl;
   }
-  cout<<"\\legend{ Low-Space 24, Low-Space 26, Low-Space 28, Two-Layer 24, Two-Layer 26, Two-Layer 28";
+  cout<<"\\legend{Low-Space 24, Low-Space 26, Low-Space 28, Two-Layer 24, Two-Layer 26, Two-Layer 28,  Cache-Friendly 24, Cache-Friendly 26, Cache-Friendly 28";
   cout<<"}"<<endl;
   cout<<"\\end{axis}"<<endl<<"\\end{tikzpicture}"<<endl<<"}"<<endl;
 }
@@ -589,11 +599,11 @@ void bandwidth_bound_tests() {
       //num_bytes_read_and_written *=  124.2 / 134.3;
       //num_bytes_just_read *=  124.2 / 134.3;
       double required_runtime_for_read_writes =
-	num_bytes_read_and_written  / (both_bandwidth * pow(10.0, 9));
+  	num_bytes_read_and_written  / (both_bandwidth * pow(10.0, 9));
       double required_runtime_for_just_reads =
-	num_bytes_just_read / (read_bandwidth * pow(10.0, 9));
+  	num_bytes_just_read / (read_bandwidth * pow(10.0, 9));
       double total_required_runtime =
-	required_runtime_for_read_writes + required_runtime_for_just_reads;
+  	required_runtime_for_read_writes + required_runtime_for_just_reads;
       double best_speedup = serial_baseline / (total_required_runtime * 1000.0);
       av_best_speedup += best_speedup;
     }
@@ -626,11 +636,11 @@ void bandwidth_bound_tests() {
       //num_bytes_read_and_written *=  124.2 / 134.3;
       //num_bytes_just_read *=  124.2 / 134.3;
       double required_runtime_for_read_writes =
-	num_bytes_read_and_written  / (both_bandwidth * pow(10.0, 9));
+  	num_bytes_read_and_written  / (both_bandwidth * pow(10.0, 9));
       double required_runtime_for_just_reads =
-	num_bytes_just_read / (read_bandwidth * pow(10.0, 9));
+  	num_bytes_just_read / (read_bandwidth * pow(10.0, 9));
       double total_required_runtime =
-	required_runtime_for_read_writes + required_runtime_for_just_reads;
+  	required_runtime_for_read_writes + required_runtime_for_just_reads;
       double best_speedup = serial_baseline / (total_required_runtime * 1000.0);
       av_best_speedup += best_speedup;
     }
@@ -681,6 +691,23 @@ void bandwidth_bound_tests() {
   cout<<"\\end{axis}"<<endl<<"\\end{tikzpicture}"<<endl<<"}"<<endl;
 }
 
+int64_t check_num_preds(int64_t* array, int64_t n, int64_t pivot) {
+  int64_t num_preds = 0;
+  for (int i = 0; i < n; i++) {
+    if (array[i] <= pivot) num_preds++;
+  }
+  for (int i = 0; i < num_preds; i++) {
+    if (array[i] > pivot) {
+      cout<<n<<" "<<pivot<<" "<<array[i]<<" "<<i<<endl;
+      for (int j = 0; j < n; j++) cout<<array[j]<<" ";
+      cout<<endl;
+    }
+    assert(array[i] <= pivot);
+  }
+  return num_preds;
+}
+
+
 int main() {
   srand (time(NULL)); // initialize random seed
   // BLOCK_SIZE needs to be a power of two:
@@ -699,11 +726,31 @@ int main() {
   // partition function you're testing.
   // run_parallel_partition_for_cache_misses (0, (1 << 28), false);
   //return 0;
+
+  for (int i = 0; i < 1000; i++) {
+    uint64_t n = 10;
+    int64_t *array = (int64_t*) malloc(sizeof(int64_t) * n);
+    for (int j = 0; j < n; j++) array[j] = rand();
+    uint64_t pivot = array[n / 2];
+    uint64_t num_preds = groupedPartition(array, n, pivot);
+    uint64_t real_num = check_num_preds(array, n, pivot);
+    cout<<num_preds<<" "<<real_num<<endl;
+
+      for (int j = 0; j < n; j++) cout<<array[j]<<" ";
+      cout<<endl;
+      cout<<pivot<<endl;
+
+    assert (num_preds == real_num);
+  }
+  return 0;
   
   // We begin by running tests of correctness on the functions
   test_prefix_sum();
   test_libc_quicksort((1<<20));
   test_sort(1, (1<<20), NUM_THREADS_DEFAULT);
+  test_sort(2, (1<<20), NUM_THREADS_DEFAULT);
+  test_sort(3, (1<<5), NUM_THREADS_DEFAULT);
+  return 0;
   test_partition(-2, 141123, false, NUM_THREADS_DEFAULT); // Make sure to test on a non-power of two here for completeness.
   test_partition(-1, 141123, false, NUM_THREADS_DEFAULT); 
   test_partition(0, 141123, false, NUM_THREADS_DEFAULT);
@@ -714,52 +761,8 @@ int main() {
   test_partition(4, 141123, false, NUM_THREADS_DEFAULT);
   cout << "% ran the tests " << endl;
 
-  uint64_t size_to_run_on = (1 << 29);
-  uint64_t num_threads = 1;
-
-   
-  // cout<<"High-Span Algorithm: (size "<<size_to_run_on<<", num_threads "<<num_threads<<")"<<endl;
-  // cout<<test_partition(3, size_to_run_on, false, num_threads)<<endl;
-  // cout<<"Cache Friendly Algorithm: (size "<<size_to_run_on<<", num_threads "<<num_threads<<")"<<endl;
-  // cout<<test_partition(4, size_to_run_on, false, num_threads)<<endl;
-
- 
-  // cout<<"Our Serial Partition: (size "<<size_to_run_on<<")"<<endl;
-  // cout<<test_partition(-3, size_to_run_on, false, num_threads)<<endl;
-  // cout<<"LibC Serial Partition: (size "<<size_to_run_on<<")"<<endl;
-  // cout<<test_partition(-1, size_to_run_on, false, num_threads)<<endl;
-
-
-  for (size_to_run_on = (1 << 26); size_to_run_on *= 2; size_to_run_on <= (1 << 30)) {
-    cout<<"----------------------------------------"<<endl;
-    num_threads = 18;
-	cout<<"High-Span Algorithm: (size "<<size_to_run_on<<", num_threads "<<num_threads<<")"<<endl;
-	cout<<test_partition(3, size_to_run_on, false, num_threads)<<endl;
-    cout<<"Cache Friendly Algorithm: (size "<<size_to_run_on<<", num_threads "<<num_threads<<")"<<endl;
-    cout<<test_partition(4, size_to_run_on, false, num_threads)<<endl;
-    
-    cout<<"%% Cache-Friendly Bandwidth Bound"<<endl;
-    int64_t num_cores = num_threads;
-    double read_bandwidth = sequential_access_bandwidth(num_cores, true, false);
-    double both_bandwidth = sequential_access_bandwidth(num_cores, true, true);
-    double num_bytes_read_and_written = size_to_run_on * sizeof(int64_t) * 1;
-    double num_bytes_just_read =  0;
-    // The next two lines account for the fact that a small fraction
-    // of reads and writes are by sheer luck already in cache; the
-    // fraction is as determined using cachegrind.
-    //num_bytes_read_and_written *=  124.2 / 134.3;
-    //num_bytes_just_read *=  124.2 / 134.3;
-    double required_runtime_for_read_writes =
-      num_bytes_read_and_written  / (both_bandwidth * pow(10.0, 9));
-    double required_runtime_for_just_reads =
-      num_bytes_just_read / (read_bandwidth * pow(10.0, 9));
-    double total_required_runtime =
-      required_runtime_for_read_writes + required_runtime_for_just_reads;
-    cout<<(int) (total_required_runtime * 1000)<<endl;
-  }
-
-  return 0;
-
+  // uint64_t size_to_run_on = (1 << 29);
+  // uint64_t num_threads = 1;
   
 
 #ifdef USE_CILK

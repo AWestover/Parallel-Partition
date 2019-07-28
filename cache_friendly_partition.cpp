@@ -40,6 +40,7 @@
 #include <iostream>
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
+#include "libc_partition.h"
 using namespace std;
 
 #define equalDelta false
@@ -62,6 +63,7 @@ int64_t computeS(int64_t n, double delta){
     return (int64_t)(log2(n) / (2*delta*delta));
 }
 
+// TODO: Define what the input and output are for this function
 // we partition sufficiently small arrays in serial, because at this point the overhead is too big to make parallelizing it make sense 
 int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
     int64_t low = 0; int64_t high = n-1;
@@ -87,6 +89,7 @@ int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
     return low;
 }
 
+// TODO: Define more carefully what the inputs and outputs are for this function. Same for other functions.
 // this is our implementation of a parallel for loops with spawning recursive subproblems
 // it outputs vmin, vmax
 Vs serialGroupPartitions(int64_t y, int64_t groupsLeftLoop, int64_t* A, int64_t pivotVal, int64_t* X, int64_t s, int64_t logB, int64_t b, int64_t g, int64_t XdeltaAdelta){
@@ -311,3 +314,72 @@ int64_t groupedPartition(int64_t* A, int64_t N0, int64_t pivotVal){
     return middle;
 }
 
+// This is for testing correctness of the partition function when invoked by the sort function. Right now it is not passing!
+// TODO: Comment out the use of this in final version.
+int64_t get_num_preds(int64_t* array, int64_t n, int64_t pivot) {
+  int64_t num_preds = 0;
+  for (int i = 0; i < n; i++) {
+    if (array[i] <= pivot) num_preds++;
+  }
+  for (int i = 0; i < num_preds; i++) {
+    if (array[i] > pivot) {
+      cout<<n<<" "<<pivot<<endl;
+      for (int j = 0; j < n; j++) cout<<array[j]<<endl;
+    }
+    assert(array[i] <= pivot);
+  }
+  return num_preds;
+}
+
+/*
+ * Parallel quicksort implementation using our cache-friendly parallel
+ * partition. This is called internally by the parallel_quicksort with
+ * fewer arguments. Once problem-sizes get to size_cutoff or smaller,
+ * we swap to serial.
+ */
+void parallel_quicksort_cache_friendly(int64_t* array, uint64_t num_elts, uint64_t size_cutoff) {
+  if (num_elts <= 1) return;
+  if (num_elts <= size_cutoff) {
+    libc_quicksort(array, num_elts);
+  } else {
+    int64_t pivot = select_pivot(array, num_elts);
+    int64_t num_preds = groupedPartition(array, num_elts, pivot);
+
+    assert(num_preds == get_num_preds(array, num_elts, pivot));
+    // Now we handle an important edge case. If it turns out that the
+    // vast majority (i.e. more than a constant fraction) of the
+    // elements equal the pivot, then the partition done in the
+    // previous step won't have been very useful. To detect that the
+    // pivot was very common, we select a new pivot from the
+    // predecessors P of the partition we just performed. If the new
+    // pivot equals the old one, then we perform another partition on
+    // P in which we partition on pivot - 1 (or for a more general
+    // sort implementation, we would partition based on < pivot
+    // instead of <= pivot). This places the elements equal to pivot
+    // in their final destination. Folowing the convention used in
+    // libc-qsort we use deterministic instead of random pivots; see
+    // http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.14.8162&rep=rep1&type=pdf
+    int64_t second_pivot = array[num_preds / 2];
+    if (second_pivot == pivot) {
+      parallel_spawn parallel_quicksort_cache_friendly(array + num_preds, num_elts - num_preds, size_cutoff);
+      int64_t num_true_preds = groupedPartition(array, num_preds, pivot - 1);
+      assert(num_true_preds == get_num_preds(array, num_preds, pivot - 1));
+      parallel_spawn parallel_quicksort_cache_friendly(array, num_true_preds, size_cutoff);
+    } else {
+      parallel_spawn parallel_quicksort_cache_friendly(array, num_preds, size_cutoff);
+      parallel_spawn parallel_quicksort_cache_friendly(array + num_preds, num_elts - num_preds, size_cutoff);
+    }
+    parallel_sync;
+  }
+}
+
+/*
+ * Parallel quicksort implementation using our cache-friendly parallel
+ * partition. We swap to serial algorithm once problem sizes get to
+ * size n / 10 num-threads or smaller.
+ */
+void parallel_quicksort_cache_friendly (int64_t* array, uint64_t num_elts) {
+  int64_t num_threads =  __cilkrts_get_nworkers();
+  int64_t size_cutoff = num_elts / (num_threads * 8); 
+  parallel_quicksort_cache_friendly(array, num_elts, size_cutoff);
+}
