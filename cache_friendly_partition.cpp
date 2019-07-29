@@ -63,7 +63,11 @@ int64_t computeS(int64_t n, double delta){
     return (int64_t)(log2(n) / (2*delta*delta));
 }
 
-// TODO: Define what the input and output are for this function
+// TODO: Define what the input and output are for this function -- Alek's IO description is below
+/*
+ * INPUT: an array A of size n, the size n, and the pivotVal which the array will be partitioned with respect to
+ * OUTPUT: the function partitions the array A in place and returns the number of predecessors in the 
+ * */
 // we partition sufficiently small arrays in serial, because at this point the overhead is too big to make parallelizing it make sense 
 int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
     int64_t low = 0; int64_t high = n-1;
@@ -78,11 +82,14 @@ int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
         int64_t tmp = A[low];
         A[low] = A[high];
         A[high] = tmp;
+
+		// this is messed up right now...
 		// we know already that 
 		// A[low] <= pivotVal, A[high] > pivotVal, this saves us 1 check of the while loops above
-		low++; high--;
+		// low++; high--;
     }
-	low--; // shouldn't have incremented on the last itteration of the while loop, this neutralizes the final low++
+	// also part of messed up thing
+	// low--; // shouldn't have incremented on the last itteration of the while loop, this neutralizes the final low++
     if(A[low] <= pivotVal){
         low++;
     }
@@ -92,6 +99,21 @@ int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
 // TODO: Define more carefully what the inputs and outputs are for this function. Same for other functions.
 // this is our implementation of a parallel for loops with spawning recursive subproblems
 // it outputs vmin, vmax
+/* ALEKS IO ATTEMPT:
+ * INPUT: 
+ *	int64_t y the starting index for the collection of groups in this part of the recursion
+ *	int64_t groupsLeftLoop the number of groups left in this part of the recursion
+ *	i.e. we are going to compute min vy and max vy among groups G_y, G_y+1, ... G_y+groupsLeftLoop-1 
+ *
+ *	A the array
+ *	pivotVal what we are partitioning with respect to
+ *	X tells groups which parts of the array they get
+ *	s size of X
+ *	logB is the log of the block size
+ *	b is the block size
+ *	g is the number of the groups
+ *  XdeltaAdelta g*b
+ * */
 Vs serialGroupPartitions(int64_t y, int64_t groupsLeftLoop, int64_t* A, int64_t pivotVal, int64_t* X, int64_t s, int64_t logB, int64_t b, int64_t g, int64_t XdeltaAdelta){
 	if (groupsLeftLoop == 1){
 		// XLowIdx indicates which chunk low is currently in
@@ -312,7 +334,7 @@ int64_t groupedPartition(int64_t* A, int64_t N0, int64_t pivotVal){
 
     int64_t middle = groupedPartitionRecursive(A, N0, pivotVal, s, logB, delta);
 
-	if (A[middle] <= pivotVal && middle < N0-1)
+	if (A[middle] <= pivotVal && middle < N0)
 		middle++;
 
     return middle;

@@ -726,21 +726,23 @@ int main() {
   // partition function you're testing.
   // run_parallel_partition_for_cache_misses (0, (1 << 28), false);
   //return 0;
-
+  
   for (int i = 0; i < 1000; i++) {
     uint64_t n = 10;
     int64_t *array = (int64_t*) malloc(sizeof(int64_t) * n);
-    for (int j = 0; j < n; j++) array[j] = rand();
+    for (int j = 0; j < n; j++) array[j] = rand()%100;
     uint64_t pivot = array[n / 2];
-    uint64_t num_preds = groupedPartition(array, n, pivot);
+	uint64_t num_preds_grouped = groupedPartition(array, n, pivot);
+	uint64_t num_preds_serial = serialPartitioner(array, n, pivot);
     uint64_t real_num = check_num_preds(array, n, pivot);
-    cout<<num_preds<<" "<<real_num<<endl;
+	cout<<"num_preds_grouped: "<<num_preds_grouped<<" num_preds_serial: "<<num_preds_serial<<" real_num: "<<real_num<<endl;
 
-      for (int j = 0; j < n; j++) cout<<array[j]<<" ";
-      cout<<endl;
-      cout<<pivot<<endl;
+  	for (int j = 0; j < n; j++) cout<<array[j]<<" ";
+  	cout<<endl;
+  	cout<<pivot<<endl;
 
-    assert (num_preds == real_num);
+	assert (num_preds_serial == real_num);
+	assert (num_preds_grouped == real_num);
   }
   return 0;
   
