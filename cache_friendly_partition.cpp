@@ -66,10 +66,10 @@ int64_t computeS(int64_t n, double delta){
 // TODO: Define what the input and output are for this function -- Alek's IO description is below
 /*
  * INPUT: an array A of size n, the size n, and the pivotVal which the array will be partitioned with respect to
- * OUTPUT: the function partitions the array A in place and returns the number of predecessors in the 
+ * OUTPUT: the function partitions the array A in place and returns the number of predecessors in the array
  * */
 // we partition sufficiently small arrays in serial, because at this point the overhead is too big to make parallelizing it make sense 
-int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
+int64_t serialPartition(int64_t* A, int64_t n, int64_t pivotVal) {
     int64_t low = 0; int64_t high = n-1;
     while(low < high){
         while(A[low] <= pivotVal && low < high) { // we have to check low < high because otherwise [1 2 3 4 5] with pivot value 10 would cause a problem
@@ -90,7 +90,7 @@ int64_t serialPartitioner(int64_t* A, int64_t n, int64_t pivotVal) {
     }
 	// also part of messed up thing
 	// low--; // shouldn't have incremented on the last itteration of the while loop, this neutralizes the final low++
-    if(A[low] <= pivotVal){
+    if(low < n && A[low] <= pivotVal){
         low++;
     }
     return low;
@@ -311,7 +311,7 @@ int64_t groupedPartitionRecursive(int64_t* A, int64_t n, int64_t pivotVal, int64
         return middle;
     }
     else { // if the input is really small, delegate to a serial partitioner
-        return serialPartitioner(A, n, pivotVal);   
+        return serialPartition(A, n, pivotVal);   
     }
 }
 
@@ -334,7 +334,7 @@ int64_t groupedPartition(int64_t* A, int64_t N0, int64_t pivotVal){
 
     int64_t middle = groupedPartitionRecursive(A, N0, pivotVal, s, logB, delta);
 
-	if (A[middle] <= pivotVal && middle < N0)
+	if (middle < N0 && A[middle] <= pivotVal)
 		middle++;
 
     return middle;

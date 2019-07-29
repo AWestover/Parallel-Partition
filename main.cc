@@ -21,6 +21,7 @@
 #include "partition.h"
 #include "libc_partition.h"
 #include "cache_friendly_partition.h"
+#include "stridedAlg.h"
 
 
 using namespace std;
@@ -733,14 +734,16 @@ int main() {
     for (int j = 0; j < n; j++) array[j] = rand()%100;
     uint64_t pivot = array[n / 2];
 	uint64_t num_preds_grouped = groupedPartition(array, n, pivot);
-	uint64_t num_preds_serial = serialPartitioner(array, n, pivot);
+	uint64_t num_preds_serial = serialPartition(array, n, pivot);
+	uint64_t num_preds_strided = stridedPartition(array, n, pivot);
     uint64_t real_num = check_num_preds(array, n, pivot);
-	cout<<"num_preds_grouped: "<<num_preds_grouped<<" num_preds_serial: "<<num_preds_serial<<" real_num: "<<real_num<<endl;
+	cout<< "num_preds_strided: "<<num_preds_strided << " num_preds_grouped: "<<num_preds_grouped<<" num_preds_serial: "<<num_preds_serial<<" real_num: "<<real_num<<endl;
 
   	for (int j = 0; j < n; j++) cout<<array[j]<<" ";
   	cout<<endl;
   	cout<<pivot<<endl;
 
+	assert(num_preds_strided == real_num);
 	assert (num_preds_serial == real_num);
 	assert (num_preds_grouped == real_num);
   }
