@@ -311,6 +311,10 @@ int64_t groupedPartition(int64_t* A, int64_t N0, int64_t pivotVal){
     }   
 
     int64_t middle = groupedPartitionRecursive(A, N0, pivotVal, s, logB, delta);
+
+	if (A[middle] <= pivotVal && middle < N0-1)
+		middle++;
+
     return middle;
 }
 
