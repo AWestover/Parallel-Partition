@@ -38,9 +38,10 @@ Vs serialStridedPartitions(int64_t startPi, int64_t numPs, int64_t *A, int64_t p
 		// getting seg faults here !!!!
 		int64_t low = startPi*b;
 		int64_t blockBoundaryLow = low + b;
-		int64_t blockBoundaryHigh = (((startPi*b + t*b * (((n/b)-startPi)/t)) <= n-b) ? (startPi*b + t*b * (((n/b)-startPi)/t)) : (startPi*b + t*b*( (((n/b)-startPi)/t) - 1 ))) - 1;
-		int64_t high = blockBoundaryHigh + b;
-		assert(high < n);
+		int64_t blockBoundaryHigh = (((((n-1)/b)-startPi)/t) - 1)*t*b + startPi*b - 1;
+		blockBoundaryHigh += t*b*((blockBoundaryHigh+t*b) < n-1);
+		blockBoundaryHigh += t*b*((blockBoundaryHigh+t*b) < n-1); // does this ever happen???
+		int64_t high = std::min(blockBoundaryHigh + b, n-1);
 		while(low < high){
 			while(A[low] <= pivotVal && low < high) { // we have to check low < high because otherwise [1 2 3 4 5] with pivot value 10 would cause a problem
 				low++;
@@ -60,6 +61,7 @@ Vs serialStridedPartitions(int64_t startPi, int64_t numPs, int64_t *A, int64_t p
 			int64_t tmp = A[low];
 			A[low] = A[high];
 			A[high] = tmp;
+			assert((low < n) && (high < n));
 		}
 		if(A[low] <= pivotVal && low + (t-1)*b <= n){
 			low++;
@@ -94,21 +96,21 @@ int64_t stridedPartition(int64_t* A, int64_t n, int64_t pivotVal) {
 
 	if (n > 2*t*b){
 		Vs vsfinal = serialStridedPartitions(0, t, A, pivotVal, b, n, t);
-		// std::cout << "vmin: " << vsfinal.vmin << ", vmax: " << vsfinal.vmax << std::endl;
-		for (int i = 0; i < vsfinal.vmin; i++) {
-			if(A[i]>pivotVal){
-				std::cout << i << std::endl;
-				assert(false);
-			}
-		}
+		// for (int i = 0; i < vsfinal.vmin; i++) { if(A[i]>pivotVal){ std::cout << "broke at " << i << std::endl; assert(false); } }
+		// for (int i = vsfinal.vmax; i < n; i++) { if(A[i]<=pivotVal){ std::cout << "broke at " << i << " which is " << A[i] << std::endl; assert(false); } }
 		int64_t num_preds = vsfinal.vmin + serialPartition(A+vsfinal.vmin, vsfinal.vmax - vsfinal.vmin, pivotVal);
 		if(num_preds < n && A[num_preds] <= pivotVal){
 			num_preds += 1;
 		}
+		// for (int i = 0; i < num_preds; ++i) { if(A[i]>pivotVal){ std::cout << "broke at " << i << std::endl; assert(false); } }
+		// for (int i = num_preds; i < n; ++i) { if(A[i]<=pivotVal){ std::cout << "broke at " << i << std::endl; assert(false); } }
 		return num_preds;
 	}
 	else{ // problem size is too small to merit a parallel alg
-		return serialPartition(A, n, pivotVal);
+		int64_t num_preds = serialPartition(A, n, pivotVal);
+		// for (int i = 0; i < num_preds; ++i) { if(A[i]>pivotVal){ std::cout << "broke at " << i << std::endl; assert(false); } }
+		// for (int i = num_preds; i < n; ++i) { if(A[i]<=pivotVal){ std::cout << "broke at " << i << std::endl; assert(false); } }
+		return num_preds;
 	}
 }
 
@@ -119,6 +121,7 @@ int64_t stridedPartition(int64_t* A, int64_t n, int64_t pivotVal) {
  * we swap to serial.
  */
 void parallel_quicksort_strided_partition (int64_t* array, uint64_t num_elts, uint64_t size_cutoff) {
+	// std::cout << "QUICKSORT RUNNING WITH n=" << num_elts << std::endl;
   if (num_elts <= 1) return;
   if (num_elts <= size_cutoff) {
     libc_quicksort(array, num_elts);
@@ -162,6 +165,8 @@ void parallel_quicksort_strided_partition (int64_t* array, uint64_t num_elts, ui
 void parallel_quicksort_strided_partition (int64_t* array, uint64_t num_elts) {
   int64_t num_threads =  __cilkrts_get_nworkers();
   int64_t size_cutoff = num_elts / (num_threads * 8); 
+  // std::cout << "size_cutoff: " << size_cutoff << std::endl;
+  // std::cout << "num_threads: " << num_threads << std::endl;
   parallel_quicksort_strided_partition(array, num_elts, size_cutoff);
 }
 
