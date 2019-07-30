@@ -732,7 +732,9 @@ int64_t check_num_preds(int64_t* array, int64_t n, int64_t pivot) {
 
 int main() {
   srand (time(NULL)); // initialize random seed
-  cout<<test_sort(4, (1<<16), NUM_THREADS_DEFAULT)<<endl;
+  for (int i = 0; i < 1000; ++i) {
+	cout<<test_sort(4, (rand() % (1<<20)), NUM_THREADS_DEFAULT)<<endl;
+  }
   return 0;
 
   // BLOCK_SIZE needs to be a power of two:

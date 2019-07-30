@@ -33,27 +33,27 @@ struct Vs {
  *	n is the size of A
  *	t is the offset determining the elts in each P_i
  * */
-Vs serialStridedPartitions(int64_t startPi, int64_t numPs, int64_t *A, int64_t pivotVal, int64_t b, int64_t n, int64_t t){
+Vs serialStridedPartitions(int64_t startPi, int64_t numPs, int64_t *A, int64_t pivotVal, int64_t b, int64_t n, int64_t t, int64_t tb){
 	if(numPs == 1){
 		// getting seg faults here !!!!
 		int64_t low = startPi*b;
 		int64_t blockBoundaryLow = low + b;
-		int64_t blockBoundaryHigh = (((((n-1)/b)-startPi)/t) - 1)*t*b + startPi*b - 1;
-		blockBoundaryHigh += t*b*((blockBoundaryHigh+t*b) < n-1);
-		blockBoundaryHigh += t*b*((blockBoundaryHigh+t*b) < n-1); // does this ever happen???
+		int64_t blockBoundaryHigh = (((((n-1)/b)-startPi)/t) - 1)*tb + startPi*b - 1;
+		blockBoundaryHigh += tb*((blockBoundaryHigh+tb) < n-1); // note the bool is either 0 or 1 i.e. add or don't add
+		blockBoundaryHigh += tb*((blockBoundaryHigh+tb) < n-1); // does this ever happen??? - I think it's possible, but I'm not sure. At any rate its a very rare occurence if it does ever happen. Luckily this precautionary step adds almost nothing to the running time for the program, so it doesn't matter.
 		int64_t high = std::min(blockBoundaryHigh + b, n-1);
 		while(low < high){
 			while(A[low] <= pivotVal && low < high) { // we have to check low < high because otherwise [1 2 3 4 5] with pivot value 10 would cause a problem
 				low++;
 				if(low == blockBoundaryLow){
-					blockBoundaryLow += t*b;
+					blockBoundaryLow += tb;
 					low = blockBoundaryLow - b;
 				}
 			}
 			while (A[high] > pivotVal && low < high){
 				high--;
 				if (high == blockBoundaryHigh){
-					blockBoundaryHigh -= t*b;
+					blockBoundaryHigh -= tb;
 					high = blockBoundaryHigh + b;
 				}
 			}
@@ -61,12 +61,11 @@ Vs serialStridedPartitions(int64_t startPi, int64_t numPs, int64_t *A, int64_t p
 			int64_t tmp = A[low];
 			A[low] = A[high];
 			A[high] = tmp;
-			assert((low < n) && (high < n));
 		}
-		if(A[low] <= pivotVal && low + (t-1)*b <= n){
+		if(A[low] <= pivotVal && low + tb-b <= n){
 			low++;
 			if(low == blockBoundaryLow){
-				blockBoundaryLow += t*b;
+				blockBoundaryLow += tb;
 				low = blockBoundaryLow - b;
 			}
 		}
@@ -76,8 +75,8 @@ Vs serialStridedPartitions(int64_t startPi, int64_t numPs, int64_t *A, int64_t p
 		return vscur;
 	}
 	else{
-		Vs vsleft = parallel_spawn serialStridedPartitions(startPi, numPs/2, A, pivotVal, b, n, t);
-		Vs vsright = serialStridedPartitions(startPi + numPs/2, numPs/2+(numPs&1), A, pivotVal, b, n, t);
+		Vs vsleft = parallel_spawn serialStridedPartitions(startPi, numPs/2, A, pivotVal, b, n, t, tb);
+		Vs vsright = serialStridedPartitions(startPi + numPs/2, numPs/2+(numPs&1), A, pivotVal, b, n, t, tb);
 		parallel_sync;
 		Vs vsaggregate;
 		vsaggregate.vmin = std::min(vsleft.vmin, vsright.vmin);
@@ -93,24 +92,18 @@ Vs serialStridedPartitions(int64_t startPi, int64_t numPs, int64_t *A, int64_t p
 int64_t stridedPartition(int64_t* A, int64_t n, int64_t pivotVal) {
 	int64_t b = 1<<9;
 	int64_t t = (int64_t)pow(n, 0.333333);
+	int64_t tb = t*b; 
 
-	if (n > 2*t*b){
-		Vs vsfinal = serialStridedPartitions(0, t, A, pivotVal, b, n, t);
-		// for (int i = 0; i < vsfinal.vmin; i++) { if(A[i]>pivotVal){ std::cout << "broke at " << i << std::endl; assert(false); } }
-		// for (int i = vsfinal.vmax; i < n; i++) { if(A[i]<=pivotVal){ std::cout << "broke at " << i << " which is " << A[i] << std::endl; assert(false); } }
+	if (n > 2*tb){
+		Vs vsfinal = serialStridedPartitions(0, t, A, pivotVal, b, n, t, tb);
 		int64_t num_preds = vsfinal.vmin + serialPartition(A+vsfinal.vmin, vsfinal.vmax - vsfinal.vmin, pivotVal);
 		if(num_preds < n && A[num_preds] <= pivotVal){
 			num_preds += 1;
 		}
-		// for (int i = 0; i < num_preds; ++i) { if(A[i]>pivotVal){ std::cout << "broke at " << i << std::endl; assert(false); } }
-		// for (int i = num_preds; i < n; ++i) { if(A[i]<=pivotVal){ std::cout << "broke at " << i << std::endl; assert(false); } }
 		return num_preds;
 	}
 	else{ // problem size is too small to merit a parallel alg
-		int64_t num_preds = serialPartition(A, n, pivotVal);
-		// for (int i = 0; i < num_preds; ++i) { if(A[i]>pivotVal){ std::cout << "broke at " << i << std::endl; assert(false); } }
-		// for (int i = num_preds; i < n; ++i) { if(A[i]<=pivotVal){ std::cout << "broke at " << i << std::endl; assert(false); } }
-		return num_preds;
+		return serialPartition(A, n, pivotVal);
 	}
 }
 
@@ -121,7 +114,6 @@ int64_t stridedPartition(int64_t* A, int64_t n, int64_t pivotVal) {
  * we swap to serial.
  */
 void parallel_quicksort_strided_partition (int64_t* array, uint64_t num_elts, uint64_t size_cutoff) {
-	// std::cout << "QUICKSORT RUNNING WITH n=" << num_elts << std::endl;
   if (num_elts <= 1) return;
   if (num_elts <= size_cutoff) {
     libc_quicksort(array, num_elts);
@@ -165,8 +157,6 @@ void parallel_quicksort_strided_partition (int64_t* array, uint64_t num_elts, ui
 void parallel_quicksort_strided_partition (int64_t* array, uint64_t num_elts) {
   int64_t num_threads =  __cilkrts_get_nworkers();
   int64_t size_cutoff = num_elts / (num_threads * 8); 
-  // std::cout << "size_cutoff: " << size_cutoff << std::endl;
-  // std::cout << "num_threads: " << num_threads << std::endl;
   parallel_quicksort_strided_partition(array, num_elts, size_cutoff);
 }
 
