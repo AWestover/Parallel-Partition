@@ -83,6 +83,7 @@ int64_t serialPartition(int64_t* A, int64_t n, int64_t pivotVal) {
         A[low] = A[high];
         A[high] = tmp;
 
+		// this is passing when we don't try to be fancy
 		// this is messed up right now...
 		// we know already that 
 		// A[low] <= pivotVal, A[high] > pivotVal, this saves us 1 check of the while loops above
@@ -348,11 +349,11 @@ int64_t get_num_preds(int64_t* array, int64_t n, int64_t pivot) {
     if (array[i] <= pivot) num_preds++;
   }
   for (int i = 0; i < num_preds; i++) {
-    if (array[i] > pivot) {
-      cout<<n<<" "<<pivot<<endl;
-      for (int j = 0; j < n; j++) cout<<array[j]<<endl;
-    }
-    assert(array[i] <= pivot);
+    // if (array[i] > pivot) {
+    //   // cout<<n<<" "<<pivot<<endl;
+    //   // for (int j = 0; j < n; j++) cout<<array[j]<<endl;
+    // }
+	assert(array[i] <= pivot);
   }
   return num_preds;
 }
