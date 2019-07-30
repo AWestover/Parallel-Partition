@@ -353,7 +353,12 @@ int64_t get_num_preds(int64_t* array, int64_t n, int64_t pivot) {
     //   // cout<<n<<" "<<pivot<<endl;
     //   // for (int j = 0; j < n; j++) cout<<array[j]<<endl;
     // }
-	assert(array[i] <= pivot);
+    if (array[i] > pivot) {
+      cout<<n<<endl;
+      cout<<i<<endl;
+      cout<<num_preds<<endl;
+    }
+    assert(array[i] <= pivot);
   }
   return num_preds;
 }
