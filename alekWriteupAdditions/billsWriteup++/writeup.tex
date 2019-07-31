@@ -650,6 +650,8 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 	Let $\epsilon \in (0, 1)$ be a failure probability; 
 	Let $\delta \in (0, 1)$;
 	Set algorithm parameter $s\defeq \frac{\log (2n) - \log(b\epsilon)}{2\delta^2}$.
+	%% hmm, I guess s isn't quite this, because s had better be an integer and this doesn't look like an integer...
+	%% but I don't really want to just put this in big O, maybe put an explicit less than, or just do a floor
 
 	The Cache-Efficient Partial-Partition Algorithm, when executed on array $A$: 
 	achieves work $O(n)$; 
@@ -729,17 +731,17 @@ We now establish the following theorem about the Cache-Efficient Full-Partition 
 % also delta seems _way_ too big, (it can't be bigger than 1, but it looks bigger than 1 for reasonable problem sizes). I guess the constants save us by eating b, but still
 \begin{theorem}
 	\label{thm:fullPartition}
-	The Cache-Efficient Full-Partition Algorithm algorithm using parameter $\delta\in(0,1)$: has work $O(n)$, and with high probability in $n$, achieves span $$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}},$$
-and incurs fewer than 
-	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + n\delta}$$
-cache misses.\\\\
-OR -----------------\\
+%   The Cache-Efficient Full-Partition Algorithm algorithm using parameter $\delta\in(0,1)$: has work $O(n)$, and with high probability in $n$, achieves span $$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}},$$
+% and incurs fewer than 
+% $$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + \frac{n\delta}{b}}$$
+% cache misses.\\\\
+% OR --------------------\\
 The Cache-Efficient Full-Partition Algorithm algorithm using parameter $\alpha \in \mathbb{Z}_{\geq 0}$, and choosing some $\delta \in (0,1)$ such that 
 $$\delta \in O\paren*{\sqrt{\frac{b}{\log \log n \log ^ \alpha n}}}:$$
  has work $O(n)$, and with high probability in $n$, achieves span 
-	$$O\paren*{\log^{\alpha} n \log\log n \log n}, $$
+	$$O\paren*{\log^{\alpha+1} n \log\log n}, $$
 and incurs fewer than 
-	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + n\delta}$$
+$$\frac{n}{b}+O\paren*{\frac{n\delta}{b}}$$
 cache misses.
 \end{theorem}
 
@@ -748,33 +750,55 @@ One interesting corollary of the above theorem is what happens when we chose $\d
 This can be done with an extreme setting of $\delta$.
 Nevertheless, this is very interesting because it shows that it is possible to achieve low span along with a small number of cache misses.
 \begin{corollary}[Corollary of Theorem \ref{thm:fullPartition}]
-	\label{cor:fullPartition}
-	The Cache-Efficient Full-Partition Algorithm algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, for $n,b$ such that $\log \log n$ dominates $b$ i.e.  $b/\log\log n = o(1)$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $\frac{1}{b}(n+o(n))$ cache misses.\\\\
-OR -----------------\\
-	The Cache-Efficient Full-Partition Algorithm algorithm using $\alpha = 0$, for $n,b$ such that $\log \log n$ dominates $b$ i.e.  $b/\log\log n = o(1)$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $\frac{1}{b}(n+o(n))$ cache misses.\\\\
+%   \label{cor:fullPartition}
+%   The Cache-Efficient Full-Partition Algorithm algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $\frac{1}{b}(n+o(n))$ cache misses.\\\\
+% OR -----------------\\
+	The Cache-Efficient Full-Partition Algorithm algorithm using $\alpha = 0$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $\frac{1}{b}(n+o(n))$ cache misses.\\\\
 \end{corollary}
 
+% \begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
+%   Using Proposition \ref{prop:generalResult}, we find the relevant statistics for the top layer where we apply the Cache-Efficient Partial-Partition Algorithm. 
+%   The top layer has work $O(n)$, span 
+%   $$O(b\cdot s) = O\Big(b\frac{\log(2n)-\log(b\epsilon))}{\delta^2}\Big)=O\paren*{\frac{b\log(n/b)}{\delta^2}},$$ and incurs fewer than 
+%   $$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}}$$ 
+%   cache misses.
+%   The subproblem has size less than $4n\delta$, so using the algorithm described by Theorem \ref{thminplace}, we achieve span
+%   $O(\log n\delta \log\log n\delta)$ and work $O(n\delta) < O(n)$ in solving the subproblem.
+%   Thus the total work is $O(n)$, and the total span is 
+%   $$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}}.$$
+%   In solving the subproblem the number of cache misses that we incur is linearly dependent on the size of the subarray, so the total number of cache misses is 
+%   $$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + \frac{n\delta}{b}}.$$ 
+% \end{proof}
 \begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
 	Using Proposition \ref{prop:generalResult}, we find the relevant statistics for the top layer where we apply the Cache-Efficient Partial-Partition Algorithm. 
 	The top layer has work $O(n)$, span 
-	$$O(b\cdot s) = O\Big(\frac{b\log(2n/(b\epsilon))}{\delta^2}\Big)=O\paren*{\frac{b\log(n/b)}{\delta^2}},$$ and incurs fewer than 
-	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}}$$ 
+	$$O(b\cdot s) = O\Big(b\frac{\log(2n)-\log(b\epsilon)}{\delta^2}\Big)= O(\log^{\alpha+1}n \log\log n),$$ 
+	and incurs fewer than 
+	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}} < \frac{n}{b}+O(\log^{\alpha+1}n\log\log n)$$ 
 	cache misses.
 	The subproblem has size less than $4n\delta$, so using the algorithm described by Theorem \ref{thminplace}, we achieve span
 	$O(\log n\delta \log\log n\delta)$ and work $O(n\delta) < O(n)$ in solving the subproblem.
 	Thus the total work is $O(n)$, and the total span is 
-	$$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}}.$$
+	$$O\paren*{\log n\delta \log\log n\delta + \log^{\alpha + 1}n \log\log n} = O(\log^{\alpha + 1}n \log\log n).$$
 	In solving the subproblem the number of cache misses that we incur is linearly dependent on the size of the subarray, so the total number of cache misses is 
-	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + n\delta}.$$ 
+	%%% note: O(\log^{\alpha}n + n/\log^{\alpha} n) = O(n/\log^\alpha{n}) because logs are really slow, more precisely, \log^{2\alpha} \in o(n)
+	$$\frac{n}{b}+O\paren*{\log^{\alpha+1} n \log\log n} + O\paren*{\frac{n\delta}{b}} = \frac{n}{b} + O\paren*{\frac{n\delta}{b}}.$$ 
 \end{proof}
+% \begin{proof}[Proof of Corollary \ref{cor:fullPartition}]
+%   We use $\delta = \sqrt{b/\log\log n}$ in the result proved in \ref{thm:fullPartition}. \\
+%   The work in this case is $O(n)$. 
+%   The span is
+%   $$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}} = O(\log n\log\log n).$$
+%   The number of cache misses is fewer than 
+%   $$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + \frac{n\delta}{b}} = \frac{n}{b} + O\paren*{\frac{\log (n/b)\log \log n}{b^2} + \frac{n}{\sqrt{b\log\log n}}}.$$ 
+%   Simplifying, we find that the number of cache misses is fewer than $$\frac{1}{b}(n+o(n)). $$
+%   %% explain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)
+% \end{proof}
 \begin{proof}[Proof of Corollary \ref{cor:fullPartition}]
-	We use $\delta = \sqrt{b/\log\log n}$ in the result proved in \ref{thm:fullPartition}. \\
-	The work in this case is $O(n)$. 
-	The span is
-	$$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}} = O(\log n\log\log n).$$
+	We use $\alpha = 0$, and thus $\delta = \sqrt{b/\log\log n}$, in the result proved in \ref{thm:fullPartition}. \\
+	The work in this case is $O(n)$. The span is $O(\log n \log \log n)$.
 	The number of cache misses is fewer than 
-	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + n\delta} = \frac{n}{b} + O\paren*{\frac{\log (n/b)\log \log n}{b^2} + n\sqrt{b/\log\log n}}.$$ 
-	Simplifying using our assumption that $b/\log\log n = o(1)$ we find that the number of cache misses is fewer than $$\frac{1}{b}(n+o(n)).$$
+	$$\frac{n}{b}+O\paren*{\frac{n}{\sqrt{b \log\log n}}}=\frac{1}{b}(n+o(n)).$$
 	%% explain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)
 \end{proof}
 
