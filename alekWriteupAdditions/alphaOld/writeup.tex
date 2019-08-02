@@ -700,7 +700,9 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 	This concentration of all $v_y$s implies that with probability $1-\epsilon$, 
 	$$v_{max}-v_{min}<n(2\cdot\delta) + g\cdot b.$$ 
 	We express this in terms of the algorithm's parameters, using the fact that $g\cdot b = n/s$, 
-	$$v_{max}-v_{min}<n\paren*{2\cdot\delta + \frac{2\delta^2}{\log (n/(b\epsilon/2))}} < 4n\delta.$$ 
+	$$v_{max}-v_{min}<n\paren*{2\cdot\delta + \frac{2\delta^2}{\log (n/(b\epsilon/2))}}.$$ 
+	Note that $\frac{2\delta^2}{\log (n/(b\epsilon/2))} < 2\delta$, so this so more concicesly expressed as,
+	$$v_{max}-v_{min}<4\cdot n\delta$$
 	This is the size of the recursive subproblem because for any index $i < v_{min}$, $A[i]$ is a predecessor, and for any index $i \geq v_{max}$, $A[i]$ is a successor, so by partitioning $A[v_{min}], \ldots, A[v_{max}-1]$ the partitioning of the array is complete.
 \end{proof}
 We can use this result to analyze two full Parallel Partition algorithms that use the Cache-Efficient Partial-Partition Algorithm.
@@ -710,93 +712,114 @@ We can use this result to analyze two full Parallel Partition algorithms that us
 	\item The \defn{Grouped Partition Algorithm} is slightly suboptimal in terms of span, but has a very small number of cache misses, and is exceptionally simple to implement.
 \end{enumerate}
 
-Both algorithms start by using the Cache-Efficient Partial-Partition algorithm with parameters $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta$ which can be toggled to achieve a trade off between span and cache misses. 
-The 2 algorithms then partition the unpartitioned subarray left with their own methods.
+%% these 2 paragraphs are pretty redundant
+%% I wish I could say that both the algs will have param delta that does the same thing, and both have whp in $n$ guarantees
 
-The Cache-Efficient Full-Partition Algorithm uses the algorithm given by Theorem \ref{thminplace} which has span $O(\log\log n \log n)$ to partition the subarray.
-This approach is motivated by the observation that once the problem size has been reduced cache behavior is less important, so we can switch to the algorithm that optimizes span rather than cache misses to solve the subproblem.
+The \defn{Cache-Efficient Full-Partition Algorithm} algorithm first partially partitions $A$ with the Cache-Efficient Partial-Partition algorithm using parameters $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta $ which can be toggled in order to achieve a trade off between performance as measured by span and cache misses on the upper level of recursion and the size of the subarray to partition i.e. performance in the recursive subproblem.
+The algorithm then partitions the unpartitioned subarray using the algorithm given by Theorem \ref{thminplace} that has span $O(\log\log n \log n)$.
+Once the problem size has been reduced, the cache behavior is less important, so we can switch to the algorithm that optimizes span rather than cache misses.
 
-The Grouped Partition Algorithm partitions the subarray by repeatedly applying the Cache-Efficient Partial-Partition algorithm. 
-The recursive Cache-Efficient Partial-Partition algorithms use the same parameter $\epsilon$ as the top-level, in order to still guarantee success with high probability in $n$, and uses $\delta = 1/8$ in order to at least half the size of the problem each time. 
-% Using this higher value of $\delta$ is ok because the lower levels of recursion are small, so it doesn't matter a lot what you do with them.
-
+%%% is very simple 
+%%% hard code in to the description lower delta = 1/8
+We also analyze a second algorithm that is simple to implement in practice.
+The \defn{Grouped Partition Algorithm} first partially partitions the array $A$ using the Cache-Efficient Partial-Partition Algorithm with parameter $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta$ which can be toggled in order to achieve a trade off between performance as measured by span and cache misses on the upper level of recursion and the size of the subarray to partition i.e. performance in the recursive subproblem. 
+The Grouped Partition Algorithm then recursively partitions the unpartitioned subarray using the Grouped Partition Algorithm. 
+It is important to note that when recursing with the Grouped Partition the same parameter $\epsilon$ is used, because if we repeatedly updated the failure probability to be $1/n^c$ where $n$ was the size of the subproblem at a certain level then we would not achieve high probability in $n$. 
+This increases the span of lower levels of recursion, but the lower levels of recursion are small, so the overall span of the algorithm is not affected.
 
 We now establish the following theorem about the Cache-Efficient Full-Partition Algorithm algorithm in general and a corollary about an interesting setting of the parameters.
+% also delta seems _way_ too big, (it can't be bigger than 1, but it looks bigger than 1 for reasonable problem sizes). I guess the constants save us by eating b, but still
 \begin{theorem}
 	\label{thm:fullPartition}
-	The Cache-Efficient Full-Partition Algorithm algorithm using parameter $\delta\in(0,1)$ satisfying $\delta \ge \Omega(n^{-1/4})$: has work $O(n)$, and with high probability in $n$, achieves span $$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}},$$
+%   The Cache-Efficient Full-Partition Algorithm algorithm using parameter $\delta\in(0,1)$: has work $O(n)$, and with high probability in $n$, achieves span $$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}},$$
+% and incurs fewer than 
+% $$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + \frac{n\delta}{b}}$$
+% cache misses.\\\\
+% OR --------------------\\
+The Cache-Efficient Full-Partition Algorithm algorithm using parameter $\alpha \in \mathbb{Z}_{\geq 0}$, and choosing some $\delta \in (0,1)$ such that 
+$$\delta \in O\paren*{\sqrt{\frac{b}{\log \log n \log ^ \alpha n}}}:$$
+ has work $O(n)$, and with high probability in $n$, achieves span 
+	$$O\paren*{\log^{\alpha+1} n \log\log n}, $$
 and incurs fewer than 
-$$(n+O(n\delta))/b$$
+$$\frac{n}{b}+O\paren*{\frac{n\delta}{b}}$$
 cache misses.
 \end{theorem}
 
-%% note: b/loglogn > 1, but the constant factors make it so that delta is still < 1
+%% note that delta \in 0, 1, so the choice of delta here is very worrying!!! (log log n is small, but b is big!!, so delta is only less than 1 because of some constants, anyways this seems not good, but its a nice theoretical result)
 One interesting corollary of the above theorem is what happens when we chose $\delta$ to optimize span.
 This can be done with an extreme setting of $\delta$.
 Nevertheless, this is very interesting because it shows that it is possible to achieve low span along with a small number of cache misses.
 \begin{corollary}[Corollary of Theorem \ref{thm:fullPartition}]
-	\label{cor:fullPartition}
-	The Cache-Efficient Full-Partition Algorithm algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$, where $b$ is chosen to satisfy $\sqrt{b/\log\log n} = o(1)$: achieves work $O(n)$, and with high probability in $n$, achieves span $$O(\log n \log\log n)$$ and incurs fewer than $(n+o(n))/b$ cache misses.\\\\
+%   \label{cor:fullPartition}
+%   The Cache-Efficient Full-Partition Algorithm algorithm using $\delta = \Theta\Big(\sqrt{b/\log\log n}\Big)$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $\frac{1}{b}(n+o(n))$ cache misses.\\\\
+% OR -----------------\\
+	The Cache-Efficient Full-Partition Algorithm algorithm using $\alpha = 0$: achieves work $O(n)$, and with high probability in $n$ achieves span $O(\log n \log\log n)$ and incurs fewer than $\frac{1}{b}(n+o(n))$ cache misses.\\\\
 \end{corollary}
 
+% \begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
+%   Using Proposition \ref{prop:generalResult}, we find the relevant statistics for the top layer where we apply the Cache-Efficient Partial-Partition Algorithm. 
+%   The top layer has work $O(n)$, span 
+%   $$O(b\cdot s) = O\Big(b\frac{\log(2n)-\log(b\epsilon))}{\delta^2}\Big)=O\paren*{\frac{b\log(n/b)}{\delta^2}},$$ and incurs fewer than 
+%   $$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}}$$ 
+%   cache misses.
+%   The subproblem has size less than $4n\delta$, so using the algorithm described by Theorem \ref{thminplace}, we achieve span
+%   $O(\log n\delta \log\log n\delta)$ and work $O(n\delta) < O(n)$ in solving the subproblem.
+%   Thus the total work is $O(n)$, and the total span is 
+%   $$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}}.$$
+%   In solving the subproblem the number of cache misses that we incur is linearly dependent on the size of the subarray, so the total number of cache misses is 
+%   $$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + \frac{n\delta}{b}}.$$ 
+% \end{proof}
 \begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
 	Using Proposition \ref{prop:generalResult}, we find the relevant statistics for the top layer where we apply the Cache-Efficient Partial-Partition Algorithm. 
 	The top layer has work $O(n)$, span 
-	$$O(b\cdot s) = O\Big(b\frac{\log(2n)-\log(b\epsilon))}{\delta^2}\Big) = O\paren*{\frac{b\log n}{\delta^2}},$$ 
+	$$O(b\cdot s) = O\Big(b\frac{\log(2n)-\log(b\epsilon)}{\delta^2}\Big)= O(\log^{\alpha+1}n \log\log n),$$ 
 	and incurs fewer than 
-	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}}$$ 
+	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2}} < \frac{n}{b}+O(\log^{\alpha+1}n\log\log n)$$ 
 	cache misses.
 	The subproblem has size less than $4n\delta$, so using the algorithm described by Theorem \ref{thminplace}, we achieve span
-	$$O(\log n\delta \log\log n\delta) = O(\log n \log\log n)$$
-	and work $O(n\delta) \le O(n)$ in solving the subproblem.
+	$O(\log n\delta \log\log n\delta)$ and work $O(n\delta) < O(n)$ in solving the subproblem.
 	Thus the total work is $O(n)$, and the total span is 
-	$$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}}.$$
+	$$O\paren*{\log n\delta \log\log n\delta + \log^{\alpha + 1}n \log\log n} = O(\log^{\alpha + 1}n \log\log n).$$
 	In solving the subproblem the number of cache misses that we incur is linearly dependent on the size of the subarray, so the total number of cache misses is 
-	$$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + \frac{n\delta}{b}}.$$ 
-	Note that $\delta > \Omega(n^{-1/4})$ implies 
-	$$O\left(  \frac{\log(n/b)}{\delta^2} \right) < O\left(\frac{n^{1/8}}{\delta^2}\right) < O\left(n^{1/2+1/8}\right) < O\left(n^{3/4}\right) < O(n\delta) $$
-	so the number of cache misses simplifies to 
-	$$(n+O(n\delta))/b.$$
+	%%% note: O(\log^{\alpha}n + n/\log^{\alpha} n) = O(n/\log^\alpha{n}) because logs are really slow, more precisely, \log^{2\alpha} \in o(n)
+	$$\frac{n}{b}+O\paren*{\log^{\alpha+1} n \log\log n} + O\paren*{\frac{n\delta}{b}} = \frac{n}{b} + O\paren*{\frac{n\delta}{b}}.$$ 
 \end{proof}
-
+% \begin{proof}[Proof of Corollary \ref{cor:fullPartition}]
+%   We use $\delta = \sqrt{b/\log\log n}$ in the result proved in \ref{thm:fullPartition}. \\
+%   The work in this case is $O(n)$. 
+%   The span is
+%   $$O\paren*{\log n\delta \log\log n\delta +\frac{b\log (n/b)}{\delta^2}} = O(\log n\log\log n).$$
+%   The number of cache misses is fewer than 
+%   $$\frac{n}{b}+O\paren*{\frac{\log (n/b)}{b\delta^2} + \frac{n\delta}{b}} = \frac{n}{b} + O\paren*{\frac{\log (n/b)\log \log n}{b^2} + \frac{n}{\sqrt{b\log\log n}}}.$$ 
+%   Simplifying, we find that the number of cache misses is fewer than $$\frac{1}{b}(n+o(n)). $$
+%   %% explain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)
+% \end{proof}
 \begin{proof}[Proof of Corollary \ref{cor:fullPartition}]
-	We use $\delta = \sqrt{b/\log\log n}$ in the result proved in Theorem \ref{thm:fullPartition}. \\
-	First note that the assumptions of Theorem \ref{thm:fullPartition} are satisfied because $$O(\sqrt{b/\log\log n}) > \Omega(n^{-1/4}).$$
-	The algorithm achieves work $O(n)$. 
-	With high probability in $n$ the algorithm achieves span 
-	$$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}} = O(\log n\log\log n).$$
-	With high probability in $n$ the algorithm incurs fewer than 
-	$$(n+O(n\delta))/b = (n+O(n\sqrt{b/\log\log n}))/b.$$ 
-	By assumption $\sqrt{b/\log\log n} = o(1)$ so this reduces to 
-	$$(n+o(n))/b$$
-	cache misses.
+	We use $\alpha = 0$, and thus $\delta = \sqrt{b/\log\log n}$, in the result proved in \ref{thm:fullPartition}. \\
+	The work in this case is $O(n)$. The span is $O(\log n \log \log n)$.
+	The number of cache misses is fewer than 
+	$$\frac{n}{b}+O\paren*{\frac{n}{\sqrt{b \log\log n}}}=\frac{1}{b}(n+o(n)).$$
 	%% explain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)
 \end{proof}
 
-
-%%%%%%%%%%%%%%%% THIS IS SOOOOOOOOOOOO BROKKKKKKKKKKKENNNNNNNNNNN claim: you can get better cache behavior and better span by messing with delta_0 pf: NO THIS IS SO WRONG
 %%% Should make the distinction between n and the array size of subproblems more clear
 %%% n allways reffers to the size of the top level
 %%% 2^{-i} delta n refers to size of a subproblem
 \begin{theorem}
 	\label{thm:groupedPartitionAlg}
-	The Grouped Partition Algorithm using parameter $\delta_0\in(0,1)$ satisfying $\delta_0 \ge \Omega(n^{-1/4})$: achieves work $O(n)$, and with high probability in $n$, attains span 
-	$$O\left(b\left(\log^2 n + \frac{\log n}{\delta_0^2}\right)\right)$$
-	and incurs $(n+O(n \delta_0))/b$ cache misses. 
+	The Grouped Partition Algorithm using parameter $\delta_0\in(0,1)$ on the top level of recursion, and then using the parameter $\delta'=1/8$ on lower levels of recursion: achieves work $O(n)$; and with high probability in $n$, attains span $O(b\log^2 (n\delta_0))$ and incurs $\frac{1}{b}(n+O(n \delta_0))$ cache misses. 
 \end{theorem}
 
 \begin{corollary}[Corollary of Theorem \ref{thm:groupedPartitionAlg}]
 	\label{cor:groupedPartitionAlg}
-	The Grouped Partition Algorithm using parameter $\delta_0=1/\sqrt{\log n}$:
-	achieves work $O(n)$, and with high probability in $n$, attains span $O(b\log^2 n)$ and incurs $\frac{1}{b}(n+o(n))$ cache misses. 
+	The Grouped Partition Algorithm using parameter $\delta_0=1/\sqrt{\log n}$ on the top level of recursion, and then using the parameter $\delta'=1/8$ on lower levels of recursion:
+	achieves work $O(n)$; and with high probability in $n$, attains span $O(b\log^2 n)$ and incurs $\frac{1}{b}(n+o(n))$ cache misses. 
 \end{corollary}
 
 \begin{proof}[Proof of Theorem \ref{thm:groupedPartitionAlg}]
-	By Theorem \ref{prop:generalResult}, the top level of the algorithm has work $O(n)$, span 
-	$$O\Big(b\frac{\log(n/b)}{\delta_0^2}\Big),$$
-	and incurs $$\frac{s+n}{b} + O(1)$$ cache misses.  
+	By Theorem \ref{prop:generalResult}, the top level of the algorithm has work $O(n)$, span $O\Big(b\frac{\log(n/b)}{\delta_0^2}\Big),$ and incurs $$\frac{s+n}{b} + O(1)$$ cache misses.  
 	On the top layer of recursion the algorithm reduces the problem size by at least a factor of $4\delta$. 
-	On lower layers of recursion with high probability in $n$ the algorithm reduces the problem size by at least a factor of $1/2$ at each itteration by our choice of $\delta'=1/8$ as the parameter for lower levels of the Cache-Efficient Partial-Partition algorithm.
+	On lower layers of recursion the algorithm reduces the problem size by at least a factor of $1/2$ at each iteration because $\delta' = 1/8$.
 	The size of the problem on lower levels thus is bounded above by
 	$$2^2n\delta_0, 2^1n\delta_0,2^0n\delta_0, 2^{-1}n\delta_0, \ldots$$
 	This sequence of sizes terminates, but the sum of the terms in the infinite sequence with terms of the form $\{2^{2-i}n\delta\}_{i=0}^{\infty}$ is an upper bound for the sum of the sizes of the lower levels of recursion. 
@@ -808,28 +831,15 @@ Nevertheless, this is very interesting because it shows that it is possible to a
 	Thus, level $i$ contributes
 	$$O(b\cdot s)=O\Big(b\frac{\log(2^{-i}n\delta_0/b)}{(\delta')^2}\Big)=O(b(\log(n\delta_0/b)-i))$$ to the span.
 	Now note that because the algorithm at least cuts the problem size in half each time we will reduce the problem size to the base case in at most $\log (4n\delta_0)$ levels.
-	Thus, to get the total span on the lower levels of recursion, we must add together $O(\log(n\delta_0))$ terms of the form $O(b(\log (n\delta_0/b) - i))$.
-	This makes the total span on lower levels of recursion $O(b\log^2 (n\delta_0))=O(b\log^2 n)$, and the total span for the algorithm 
-	$$O\left(b\left(\log^2 n + \frac{\log n}{\delta_0^2}\right)\right).$$
+	Thus, to get the total span, we must add together $O(\log(n\delta_0))$ terms of the form $O(b(\log (n\delta_0/b) - i))$.
+	This makes the total span $O(b\log^2 (n\delta_0))$.
 	To compute the total number of cache misses of the algorithm, we add together $\frac{1}{b}(n+s)+O(1)$ for the top level, and then at most
-	$$\sum_{0 \leq i<\log 4n\delta}\frac{1}{b}\cdot O\paren*{2^{2-i}n\delta_0 + \frac{\log 2^{2-i}n\delta_0/b}{(1/8)^2}}$$
-	for lower levels.
-	The first term is the sum of a geometric series and thus is $O(n\delta_0)/b$. 
-	We can bound the second term by $O(\log^2 n)/b$ by taking a larger term at each index in the sum. 
-	Then the total number of cache misses for the algorithm is 
-	$$\left(n+\frac{\log n}{\delta_0^2 }\right)/b + O(1) + O(\log^2 n) / b + O(n\delta_0) / b = (n+O(n\delta_0))/b.$$
+	$$\sum_{0 \leq i<\log 4n\delta}\frac{1}{b}\cdot O\paren*{2^{2-i}n\delta_0 + \frac{\log 2^{2-i}n\delta_0/b}{(\delta')^2}} < \frac{1}{b}(n+O(n\delta_0))$$
+	% To compute the total number of cache misses of the algorithm, we again add the sizes of all arrays at all levels of recursion, which yields $n+4n/\sqrt{\log n}$, which is $n(1+o(1))$.
 \end{proof}
 
 \begin{proof}[Proof of Corollary \ref{cor:groupedPartitionAlg}]
-	We use $\delta_0 = 1/\sqrt{\log n}$ in the result proved in Theorem \ref{thm:groupedPartitionAlg}.
-	First note that the assumptions of Theorem \ref{thm:groupedPartitionAlg} are satisfied because 
-	$$\delta_0=1/\sqrt{\log n} \ge \Omega(n^{-1/4}).$$
-	The algorithm has work $O(n)$. 
-	With high probability in $n$ the algorithm has span 
-	$$O\left(b\left(\log^2 n + \frac{\log n}{\delta_0^2}\right)\right) =  O(\log^2 n),$$ 
-	and incurs 
-	$$(n+O(n\delta_0))/b = (n+O(n/\sqrt{\log n}))/b = (n+o(n))/b$$ 
-	cache misses.
+	By Theorem \ref{thm:groupedPartitionAlg}, if we set $\delta_0=1/\sqrt{\log n}$, then this algorithm has work $O(n)$, and with high probability in $n$ has span $O(\log^2 n\delta_0) = O(\log^2 n)$, and incurs $$\frac{1}{b}(n+O(n/\sqrt{\log n})) = \frac{1}{b}(n+o(n))$$ cache misses.
 \end{proof}
 
 % In addition to these desirable theoretical guarantees, these algorithms performs well in practice, as shown in the experimental section.
