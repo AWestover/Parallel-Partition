@@ -638,7 +638,11 @@ Let $s=|X|$.
 \end{itemize}
 To complete the partitioning of the array a subarray must be partitioned. 
 Define $v_y$ to be the index of the first successor in $U_y$, and define $v_{min}=\min{v_y}$,  $v_{max}=\max{v_y}$. 
-[[[ADD footnote about recursive thing to calculate vys]]]
+\footnote{When calculating $v_{max}$ and $v_{min}$ we do not want to store the $v_y$s because there are $g$ of them. 
+In order to avoid storing the $v_y$, we can compute the $v_{max}$ and $v_{min}$ as we proceed in the process of partitioning each group in parallel.
+We implement this parallel for loop with a divide-and-conquer strategy. 
+We have a function that takes in a subset of the groups, and partitions each of these groups and returns $v_{max}, v_{min}$.
+This function operates by divide-and-conquer, i.e. it recurses on the first half and the second half of the subset of groups that it is given in parallel, and then computes the total $v_{min}, v_{max}$ as the $\min$ of the $v_{min}$s reported by the subproblem and the $\max$ of the $v_{max}$s reported by the subproblems.}
 After partitioning the subarray ${A[v_{min}],\ldots,A[v_{max}-1]}$ the array is fully partitioned.
 
 \paragraph{Algorithm Analysis}
@@ -664,7 +668,7 @@ We now prove the following general theorem about the Cache-Efficient Partial-Par
 	Recall that by the Resource Augmentation Theorem we can assume small arrays and values that are repeatedly used to be pinned to cache.
 	The contribution to the algorithm's cache misses are then:
 	$n/b$ from accessing each element of $A$, $s/b$ for instantiating the array $X$, and $O(1)$ for performing various other tasks that require a constant number of cache misses. 
-	This results in the total number of cache misses being $$\frac{n+s}{b} + O(1).$$
+	This results in the total number of cache misses being $$\frac{n+O(s)}{b}.$$
 	The algorithm has span $$O(n/g) = O(b\cdot s) $$
 	because of the $g$ serial partitions of groups that it performs in parallel on arrays of size $b\cdot s$.
 	To show that with probability $1-\epsilon$ the algorithm leaves a subarray of size $v_{max}-v_{min} < 4\cdot n\delta$, we consider the fraction of elements in each collection $U_y$ that are predecessors, which we denote by $\mu_y$.
@@ -774,9 +778,8 @@ Nevertheless, this is very interesting because it shows that it is possible to a
 \end{proof}
 
 
-%%%%%%%%%%%%%%%% THIS IS SOOOOOOOOOOOO BROKKKKKKKKKKKENNNNNNNNNNN claim: you can get better cache behavior and better span by messing with delta_0 pf: NO THIS IS SO WRONG
 %%% Should make the distinction between n and the array size of subproblems more clear
-%%% n allways reffers to the size of the top level
+%%% n always refers to the size of the top level
 %%% 2^{-i} delta n refers to size of a subproblem
 \begin{theorem}
 	\label{thm:groupedPartitionAlg}
@@ -796,7 +799,7 @@ Nevertheless, this is very interesting because it shows that it is possible to a
 	$$O\Big(b\frac{\log(n/b)}{\delta_0^2}\Big),$$
 	and incurs $$\frac{s+n}{b} + O(1)$$ cache misses.  
 	On the top layer of recursion the algorithm reduces the problem size by at least a factor of $4\delta$. 
-	On lower layers of recursion with high probability in $n$ the algorithm reduces the problem size by at least a factor of $1/2$ at each itteration by our choice of $\delta'=1/8$ as the parameter for lower levels of the Cache-Efficient Partial-Partition algorithm.
+	On lower layers of recursion with high probability in $n$ the algorithm reduces the problem size by at least a factor of $1/2$ at each iteration by our choice of $\delta'=1/8$ as the parameter for lower levels of the Cache-Efficient Partial-Partition algorithm.
 	The size of the problem on lower levels thus is bounded above by
 	$$2^2n\delta_0, 2^1n\delta_0,2^0n\delta_0, 2^{-1}n\delta_0, \ldots$$
 	This sequence of sizes terminates, but the sum of the terms in the infinite sequence with terms of the form $\{2^{2-i}n\delta\}_{i=0}^{\infty}$ is an upper bound for the sum of the sizes of the lower levels of recursion. 
