@@ -100,7 +100,7 @@ int64_t serialPartition(int64_t* A, int64_t n, int64_t pivotVal) {
 // TODO: Define more carefully what the inputs and outputs are for this function. Same for other functions.
 // this is our implementation of a parallel for loops with spawning recursive subproblems
 // it outputs vmin, vmax
-/* ALEKS IO ATTEMPT:
+/* 
  * INPUT: 
  *	int64_t y the starting index for the collection of groups in this part of the recursion
  *	int64_t groupsLeftLoop the number of groups left in this part of the recursion
