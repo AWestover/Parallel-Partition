@@ -1,6 +1,6 @@
 
 // AUTHOR: Alek Westover
-// Grouped Partition Algorithm
+// Grouped Partition Algorithm (and Cache-Efficient Partial-Partition Algorithm)
 // 
 // TODO: TOGGLE THE FOLLOWING IN EXPERIMENTS:
 // * delta 

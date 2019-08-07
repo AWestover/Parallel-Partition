@@ -1,4 +1,10 @@
 
+// AUTHOR: Alek Westover
+// Strided Algorithm
+//
+// This is included as a baseline to compare our algorithm's performance to
+// Note that this algorithm does have theoretical guarantees for the random inputs that we are giving it
+
 #include "params.h"
 #include <stdio.h>
 #include <stdint.h> // we are sorting int64_t

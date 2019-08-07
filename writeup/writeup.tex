@@ -774,15 +774,15 @@ This is interesting because it shows that it is possible to achieve low span alo
 
 \end{proof}
 
-\begin{proof}[Proof of Corollary \ref{cor:fullPartition}]
-	We use $\delta = \sqrt{b/\log\log n}$ in the result proved in Theorem \ref{thm:fullPartition}. \\
+\begin{proof}[Proof of Corollary \ref{cor:fullPartition}] We use $\delta = \sqrt{b/\log\log n}$ in the result proved in Theorem \ref{thm:fullPartition}. \\
 	First note that the assumptions of Theorem \ref{thm:fullPartition} are satisfied because $$O(\sqrt{b/\log\log n}) > \Omega(n^{-1/4}).$$
 	The algorithm achieves work $O(n)$. 
 	With high probability in $n$ the algorithm achieves span 
 	$$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}} = O(\log n\log\log n).$$
 	With high probability in $n$ the algorithm incurs fewer than 
-	$$(n+O(n\delta))/b = (n+O(n\sqrt{b/\log\log n}))/b.$$ 
-	By assumption $\sqrt{b/\log\log n} = o(1)$ so this reduces to 
+	$$(n+O(n\delta))/b = (n+O(n\sqrt{b/\log\log n}))/b$$ 
+	cache misses.
+	By assumption $\sqrt{b/\log\log n} = o(1)$, so this reduces to 
 	$$(n+o(n))/b$$
 	cache misses.
 	%% explain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)

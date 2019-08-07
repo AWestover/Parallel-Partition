@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Parallel Partition Visualization</title>
+
+		<script src="pkgs/jquery/jquery.min.js" charset="utf-8"></script>
+		<script src="pkgs/popper.js/popper.min.js" charset="utf-8"></script>
+		<script src="pkgs/bootstrap/bootstrap.min.js" charset="utf-8"></script>
+		<script src="pkgs/p5/p5.min.js" charset="utf-8"></script>
+		<script src="pkgs/bootstrap-notify/bootstrap-notify.min.js" charset="utf-8"></script>
+
+		<link rel="stylesheet" href="pkgs/bootstrap/bootstrap.min.css" type="text/css">
+	</head>
+	<body>
+		<div style="padding-left: 3%; padding-right: 3%;">
+		<h2>This is a visualization of the parallel step of the strided algorithm. Rectangles heights correspond to the values in the array A that we are partitioning. There are t levels that are interleaved. These are the P_i in the strided algorithm. A rectangle is colored red if it is currently being processed, black if it was processed and did not need to be swapped, yellow if it was processed and did need to be swapped, and white if it has not yet been processed. The fact that the different levels tend to end up at about the same index is evidence that the strided algorithm works (i.e. all the P_is have about the same middle, so the recursive subproblem is small).</h2>
+		</div>
+		<div style="padding-left: 3%; padding-right: 3%; width: 40%">
+			<div class="form-group">
+				<select multiple name="atype" id="atype" class="form-control">
+					<option value="normal">normal</option>
+					<option value="predecessor heavy">predecessor heavy</option>
+					<option value="adversarial">adversarial</option>
+				</select>
+			</div>
+			<script charset="utf-8">
+				$('#atype').change(function(){ 
+					$.notify("Next run A will be " + $(this).val());
+					A_type = $(this).val();
+				});
+			</script>
+		</div>
+		
+		<script src="sketch.js" charset="utf-8"></script>
+		<div id="cnv-parent" style="padding-left: 2%; padding-right: 2%">
+		</div>
+	</body>
+</html>
