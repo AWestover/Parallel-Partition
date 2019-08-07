@@ -18,6 +18,10 @@
 		<h2>This is a visualization of the parallel step of the strided algorithm. Rectangles heights correspond to the values in the array A that we are partitioning. There are t levels that are interleaved. These are the P_i in the strided algorithm. A rectangle is colored red if it is currently being processed, black if it was processed and did not need to be swapped, yellow if it was processed and did need to be swapped, and white if it has not yet been processed. The fact that the different levels tend to end up at about the same index is evidence that the strided algorithm works (i.e. all the P_is have about the same middle, so the recursive subproblem is small).</h2>
 		</div>
 		<div style="padding-left: 3%; padding-right: 3%; width: 40%">
+			<label>next N:</label>
+			<input type="number" value="300" name="nextN" id="nextN"/>
+			<label>speed:</label>
+			<input type="number" value="200" name="speed" id="speed"/>
 			<div class="form-group">
 				<select multiple name="atype" id="atype" class="form-control">
 					<option value="normal">normal</option>
@@ -26,6 +30,14 @@
 				</select>
 			</div>
 			<script charset="utf-8">
+				$('#nextN').change(function(){ 
+					$.notify("Next run N (the size of the array A) " + $(this).val());
+					nextN = $(this).val();
+				});
+				$('#speed').change(function(){ 
+					$.notify("speed is now " + $(this).val());
+					speed = $(this).val();
+				});
 				$('#atype').change(function(){ 
 					$.notify("Next run A will be " + $(this).val());
 					A_type = $(this).val();

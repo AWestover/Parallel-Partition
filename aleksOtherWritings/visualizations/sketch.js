@@ -1,13 +1,16 @@
 
-let n = 300;
+let n = 400;
 let t = 4;
 let A; 
 let lows, highs;
 let pivotVal;
 let swapFlags; // true at index i if rect i came from a swap (color these yellow)
 let A_type = "normal";
+let nextN = n;
+let speed = 200;
 
 function resetAnimation() {
+	n = nextN;
 	A = [];
 	swapFlags = [];
 	for(let i = 0; i < n; i++){
@@ -47,14 +50,16 @@ function resetAnimation() {
 			highs.push(lowerBound);
 		}
 	}
-	let pivotCandidates = [];
-	let NUM_CANDS = 10;
-	for (let i = 0; i < NUM_CANDS; i++){
-		pivotCandidates.push(A[Math.floor(Math.random()*n)]);
-	}
-	pivotCandidates.sort();
-	pivotVal = pivotCandidates[NUM_CANDS/2];
-	setTimeout(partitionAnimation, 200);
+	// median of sample pivot selection
+	// let pivotCandidates = [];
+	// let NUM_CANDS = 10;
+	// for (let i = 0; i < NUM_CANDS; i++){
+	//   pivotCandidates.push(A[Math.floor(Math.random()*n)]);
+	// }
+	// pivotCandidates.sort();
+	// pivotVal = pivotCandidates[NUM_CANDS/2];
+	pivotVal = Math.random()*0.5+0.25;
+	setTimeout(partitionAnimation, speed*1);
 }
 
 function finish(vmin, vmax){
@@ -74,7 +79,7 @@ function finish(vmin, vmax){
 	}
 	fill(0,255,0, 100);
 	rect(0,(1-pivotVal)*height,width,10);
-	setTimeout(resetAnimation, 7000);
+	setTimeout(resetAnimation, speed*20);
 }
 
 function setup(){
@@ -87,24 +92,14 @@ function partitionAnimation(){
 	let resetCt = 0;
 	background(200,200,200); // grey
 	noStroke();
+	push();
+	translate(0, height*0.25);
+	scale(1,0.75);
 	let vmin = n-1; let vmax = 0;
 	for (let ti = 0; ti < t; ti++){
 		push();
 		translate(0, (ti/t)*height);
 		scale(1, 1/t);
-		if (A[lows[ti]] <= pivotVal){
-			lows[ti]+=t;
-		}
-		else if(A[highs[ti]]>pivotVal){
-			highs[ti]-=t;
-		}
-		else{
-			let tmp = A[highs[ti]];
-			A[highs[ti]] = A[lows[ti]];
-			A[lows[ti]] = tmp;
-			swapFlags[lows[ti]] = true;
-			swapFlags[highs[ti]] = true;
-		}
 
 		if(lows[ti] >= highs[ti]){
 			resetCt ++;
@@ -112,34 +107,74 @@ function partitionAnimation(){
 			vmax = Math.max(vmax, lows[ti]);// this is approximate!!!!!! -- ie a bug bug bug BUG BUG BUG
 		}
 		else{
-			for(let i = ti; i < n; i+=t){
-				if (i == lows[ti] || i == highs[ti]){
-					fill(255,0,0); // red
-				}
-				else if(swapFlags[i]){
-					fill(255,255,0, 100);
-				}
-				else if (i < lows[ti] || i > highs[ti]) {
-					fill(0,0,0); // black
-				}
-				else {
-					fill(255,255,255); // white
-				}
-				rect(i*width/n, height*(1-A[i]), width/n, height*A[i]);
+			if (A[lows[ti]] <= pivotVal){
+				lows[ti]+=t;
 			}
-			// pivot value
-			fill(0,255,0, 100);
-			rect(0,(1-pivotVal)*height,width,10);
+			else if(A[highs[ti]]>pivotVal){
+				highs[ti]-=t;
+			}
+			else{
+				let tmp = A[highs[ti]];
+				A[highs[ti]] = A[lows[ti]];
+				A[lows[ti]] = tmp;
+				swapFlags[lows[ti]] = true;
+				swapFlags[highs[ti]] = true;
+			}
 		}
+
+		for(let i = ti; i < n; i+=t){
+			if (i == lows[ti] || i == highs[ti]){
+				fill(255,0,0); // red
+			}
+			else if(swapFlags[i]){
+				fill(255,255,0, 100);
+			}
+			else if (i < lows[ti] || i > highs[ti]) {
+				fill(0,0,0); // black
+			}
+			else {
+				fill(255,255,255); // white
+			}
+			rect(i*width/n, height*(1-A[i]), width/n, height*A[i]);
+		}
+		// pivot value
+		fill(0,255,0, 250); // green
+		rect(0,(1-pivotVal)*height,width,10);
 
 		pop();
 	}
+	pop();
+
+	for(let ti = 0; ti < t; ti++){
+		for(let i = ti; i < n; i+=t){
+			if (i == lows[ti] || i == highs[ti]){
+				fill(255,0,0); // red
+			}
+			else if(swapFlags[i]){
+				fill(255,255,0, 100);
+			}
+			else if (i < lows[ti] || i > highs[ti]) {
+				fill(0,0,0); // black
+			}
+			else {
+				fill(255,255,255); // white
+			}
+			rect(i*width/n, 0.25*height*(1-A[i]), width/n, 0.25*height*A[i]);
+		}
+	}
+	// pivot value
+	fill(0,255,0, 250);// green
+	rect(0,(1-pivotVal)*height*0.25,width,10*0.25);
+
+
 	if(resetCt == t){
-		$.notify("Finished partial partition");
-		finish(vmin, vmax);
+		setTimeout(function(){
+			$.notify("Finished partial partition");
+			finish(vmin, vmax);
+		}, speed*35);
 	}
 	else{
-		setTimeout(partitionAnimation, 200);
+		setTimeout(partitionAnimation, speed*1);
 	}
 }
 
