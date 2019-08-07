@@ -548,7 +548,7 @@ the preceding element).
 
 \section{A Cache Efficient Parallel Partition}
 
-The algorithm described above is bottlenecked by cache misses in practice, as we show in the experiments section. 
+The algorithm described above is bottlenecked in practice by cache misses, as we show in the experiments section. 
 In this section we address this by developing an algorithm with provably good cache behavior. 
 The new algorithm continues to have polylogarithmic span, while exhibiting optimal cache behavior up to low order factors.
 
@@ -617,7 +617,7 @@ Our construction of $U_y$s makes it so that the fraction of predecessors in each
 The elements in each $U_y$ are spread out in $A$ so that each section of a certain size in the array will contain the same number of elements from $U_y$. 
 Define $v_y$ to be the index of the first successor in $U_y$--this is similar to the definition of the splitting position in the Strided Algorithm.
 Because of this uniformity in how the elements of $U_y$ are spread out, and the guarantee that the fraction of successors in each $U_y$ will cluster closely around the fraction of successors in $A$, the index $v_y$ of the first successor in collection $U_y$ will be close to all other indices $v_{y'}$.
-This means that after each $U_y$ is partitioned, $A$ will be partially partitioned, in the sense that for all $i < \min_y{v_y}$ $A[i]$ is a predecessor and for all $i \ge \max_y{v_y}$ $A[i]$ is a successor.
+This means that after each $U_y$ is partitioned, $A$ will be partially partitioned, in the sense that $A[i]$ is a predecessor for all $i < \min_y{v_y}$, and $A[i]$ is a successor for all $i \ge \max_y{v_y}$.
 Furthermore, the size of the unpartitioned subarray $A[\min_y{v_y}],\ldots,A[\max_y{v_y}-1]$ will be very small relative to $n$. 
 
 \paragraph{Algorithm Description}
@@ -631,7 +631,7 @@ This means that $g\cdot b \cdot s < n$.
 We handle the array of size $n-g\cdot b \cdot s$ separately from the array of size $g\cdot b \cdot s$ that is the focus of our analysis.
 Thus for simplicity in the analysis we say that $n=g\cdot b\cdot s$.
 It is straightforward to deal with the $n-g\cdot b\cdot s$ elements.
-This is done by simply by swapping the extra elements with the first $n-g\cdot b\cdot s$ successors, and then increasing the size of the subproblem to solve to include these new elements.
+This is done by swapping the extra elements with the first $n-g\cdot b\cdot s$ successors, and then increasing the size of the subproblem to include these new elements.
 Because $n-g\cdot b\cdot s$ is very small, this step is not relevant to the analysis, but this is an important detail to handle in order to make the algorithm work. }.
 The algorithm performs the following procedure:
 
@@ -651,7 +651,7 @@ In order to avoid storing the $v_y$, we compute $v_{\text{max}}$ and $v_{\text{m
 To facilitate this, we implement a parallel for loop with a recursive divide-and-conquer strategy. 
 We have a function that takes in a subset of the $U_y$, partitions these $U_y$ in parallel, and then returns the minimum and maximum $v_y$ among the $U_y$ that the function partitioned.
 This function operates by divide-and-conquer, i.e. it spawns processes that in parallel recursively apply this function to 2 disjoint, approximately equal sized, subsets of the subset of $U_y$s that the function was given, and then the function computes its $v_{\text{min}}, v_{\text{max}}$ as the $\min$ of the $v_{\text{min}}$s reported by the subprocesses and the $\max$ of the $v_{\text{max}}$s reported by the subprocesses.}. 
-Note that the array is partially partitioned, i.e. for all $i < v_{\text{min}}$ $A[i]$ is a predecessor, and for all $i \ge v_\text{max}$ $A[i]$ is a successor.
+Note that the array is partially partitioned, i.e. $A[i]$ is a predecessor for all $i < v_{\text{min}}$, and $A[i]$ is a successor for all $i \ge v_\text{max}$.
 \end{itemize}
 
 %% note: g > s should hold
@@ -670,37 +670,35 @@ We now prove the following general proposition about the Cache-Efficient Partial
 	achieves work $O(n)$; 
 	achieves span $O\paren*{b \cdot s}$; 
 	incurs $\frac{s+n}{b} + O(1)$ cache misses (assuming the array $X$ is pinned to cache); 
-	and leaves an unpartitioned subarray $A[v_{\text{min}}],\ldots, A[v_{\text{max}}-1]$ which, with probability $1-\epsilon$, has size $$v_{\text{max}}-v_{\text{min}} < 4\cdot n \delta.$$
+	and leaves an unpartitioned subarray $A[v_{\text{min}}],\ldots, A[v_{\text{max}}-1]$ which, with probability $1-\epsilon$, has size $$v_{\text{max}}-v_{\text{min}} < 4 n \delta.$$
 \end{proposition}
 \begin{proof}
-	The algorithm accesses each element of the array once, resulting in its work $O(n)$.
+	The algorithm accesses each element of the array once, resulting in work $O(n)$.
 	Recall that by the Resource Augmentation Theorem we can assume small arrays and values that are repeatedly used to be pinned to cache.
 	The contribution to the algorithm's cache misses are then:
 	$n/b$ from accessing each block of $A$, $s/b$ for instantiating the array $X$, and $O(1)$ for performing various other tasks that require a constant number of cache misses. 
 	This results in the total number of cache misses being $$\frac{n+s}{b}+O(1).$$
 	The algorithm has span $$O(n/g) = O(b\cdot s) $$
 	because of the $g$ serial partitions of groups that it performs in parallel on arrays of size $b\cdot s$.
-	To show that with probability $1-\epsilon$ the size of the unpartitioned subarray is bounded above by $4\cdot n\delta$, we consider the fraction of elements in each collection $U_y$ that are predecessors, which we denote by $\mu_y$.
+	To show that with probability $1-\epsilon$ the size of the unpartitioned subarray is bounded above by $4n\delta$, we consider the fraction of elements in each collection $U_y$ that are predecessors, which we denote by $\mu_y$.
 	Note that each $\mu_y$ is the average of $s$ independent random variables, where random variable $i$ is the fraction of $P_{G_y[i]}$ that is composed of predecessors, a random variable in $[0, 1]$.
 	The groups are constructed in a symmetric way such that for each group, the probability of the group getting any specific block is the same as the probability of any other group getting that block. 
 	Because of this symmetry, $\E[\mu_y]$--a characteristic on the group--is the same for all $y$.
 	Furthermore, $\E[\mu_y] = \mu$ for all $y \in \{0,\ldots,g-1\}$ because the average of the fraction of predecessors in each group is the fraction of predecessors in the entire array.	
 	Thus we can apply Hoeffding's inequality (i.e. A Chernoff Bound for a random variable on $[0,1]$ rather than on $\{0,1\}$) to each $\mu_y$ to show that they are concentrated around their shared expected value $\mu$, i.e.
 	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp(-2s\delta^2). $$
-	The parameter $\epsilon$ specifies that 
-	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \epsilon.$$
-	To show that this constraint is satisfied it suffices to show that 
-	$$\Pr[|\mu_y - \mu| \geq \delta] \leq \epsilon/g $$ for all $y\in \{0,\ldots,g-1\}$, because
-	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \sum_{y=0}^{g-1} \Pr[|\mu_y - \mu| \geq \delta].$$
-	We can show that this is satisfied by considering the bound on $\Pr[|\mu_y - \mu| \geq \delta]$ given by Hoeffding's inequality. 
-	Substituting in $s$ which was chosen $s > \frac{\log (2n) -\log (b\epsilon)}{2\delta^2}$, this becomes
-	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp(-2s\delta^2) < 2\exp\Big({-2} \frac{\log (2n/(b\epsilon))}{2\delta^2} \delta^2\Big). $$
-	Simplifying we find that  
-	$$2\exp\Big({-2} \frac{\log (2n/(b\epsilon))}{2\delta^2} \delta^2\Big) = \frac{\epsilon}{n/b} < \frac{\epsilon}{g},$$
-	which proves that 
-	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \epsilon.$$
-	Then, because the elements in each group are distributed evenly throughout the array, $\mu_y\cdot n$ approximately determines $v_y$ (with probability $1-\epsilon$), so we can bound $v_y-\mu\cdot n$. 
-	Specifically, the index for the block of group $G_y$ that contains $v_y$ is $$G_y[\mu_y\cdot s]= (X[\mu_y \cdot s] + y) \bmod g + \mu_y \cdot s\cdot g.$$
+	Substituting in $s$ which was chosen $s > \frac{\log (2n) -\log (b\epsilon)}{2\delta^2}$, we find that for all $y \in \{0,\ldots, g-1\}$, 
+	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp\Big({-2} \frac{\log (2n/(b\epsilon))}{2\delta^2} \delta^2\Big) = \frac{\epsilon}{n/b} < \frac{\epsilon}{g}. $$
+	We use this bound on the probability of any individual group $U_y$ failing to meet the condition $|\mu-\mu_y| < \delta$ to bound the probability that at least one of the groups $U_0, \ldots, U_{g-1}$ fails to meet the condition.
+	Note that the probability of at least one group failing is: 
+	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big].$$
+	This is bounded by 
+	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \sum_{y=0}^{g-1} \Pr[|\mu_y - \mu| \geq \delta] < \epsilon.$$
+Thus the event occurs with probability bounded above by $\epsilon$, the specified failure probability.
+To complete the proof we will show that the occurrence of the event that all $y$ simultaneously satisfy $|\mu - \mu_y| < \delta$ implies that the size of the unpartitioned subarray is bounded above by $4n\delta$.
+
+	Intuitively, because the elements in each group are distributed evenly throughout the array, $\mu_y\cdot n$ approximately determines $v_y$, so we can bound $v_y-\mu\cdot n$ for all $y$ using our bound on $|\mu-\mu_y|$. 
+	The index for the block of group $G_y$ that contains $v_y$ is $$G_y[\mu_y\cdot s]= (X[\mu_y \cdot s] + y) \bmod g + \mu_y \cdot s\cdot g.$$
 	Because the entries of $X$ are random, we chose to bound $G_y[\mu_y\cdot s]$ without referencing $X$, only referencing parameters and variables of the problem.
 	This bound is, 
 	$$ \mu_y \cdot s\cdot g \leq G_y[\mu_y\cdot s] \leq  \mu_y \cdot s\cdot g + g-1.$$
@@ -729,7 +727,7 @@ The Cache-Efficient Full-Partition Algorithm uses the algorithm given by Theorem
 This approach is motivated by the observation that once the problem size has been reduced cache behavior is less important, so we can switch to the algorithm that optimizes span rather than cache misses to solve the subproblem.
 
 The Grouped Partition Algorithm partitions the subarray by repeatedly applying the Cache-Efficient Partial-Partition algorithm. 
-The recursive Cache-Efficient Partial-Partition algorithms use the same parameter $\epsilon$ as the top-level, in order to still guarantee success with high probability in $n$, and use $\delta = 1/8$ in order to at least half the size of the problem size at each iteration. 
+The recursive Cache-Efficient Partial-Partition algorithms use the same parameter $\epsilon$ as the top-level, in order to still guarantee success with high probability in $n$, and use $\delta = 1/8$ in order to at least halve the size of the problem size at each iteration. 
 % Using this higher value of $\delta$ is ok because the lower levels of recursion are small, so it doesn't matter a lot what you do with them.
 
 
@@ -743,7 +741,7 @@ cache misses.
 \end{theorem}
 
 %% note: b/loglogn > 1 in reality, but the constant factors make it so that delta is still < 1
-One interesting corollary of the above theorem is what happens when we chose $\delta$ to optimize span.
+An interesting corollary of the above theorem concerns what happens when we chose $\delta$ to optimize span.
 This can be done with an extreme setting of $\delta$.
 This is interesting because it shows that it is possible to achieve low span along with a small number of cache misses.
 \begin{corollary}[Corollary of Theorem \ref{thm:fullPartition}]
@@ -789,9 +787,9 @@ This is interesting because it shows that it is possible to achieve low span alo
 \end{proof}
 
 
-%%% Should make the distinction between n and the array size of subproblems more clear
+%%% Should make the distinction between n and the array size of subproblems more clear?
 %%% n always refers to the size of the top level
-%%% 2^{-i} delta n refers to size of a subproblem
+%%% 2^{-i} delta n refers to an upper bound on the size of a subproblem
 \begin{theorem}
 	\label{thm:groupedPartitionAlg}
 	The Grouped Partition Algorithm using parameter $\delta_0\in(0,1)$ satisfying $\delta_0 \ge \Omega(n^{-1/4})$: achieves work $O(n)$, and with high probability in $n$, attains span 
