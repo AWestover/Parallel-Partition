@@ -42,7 +42,7 @@
 \bibfield{author}{\bibinfo{person}{Umut~A Acar} {and} \bibinfo{person}{Guy
   Blelloch}.} \bibinfo{year}{2016}\natexlab{}.
 \newblock \bibinfo{title}{Algorithm design: Parallel and sequential}.
-\newblock
+\newblock   (\bibinfo{year}{2016}).
 \newblock
 
 
