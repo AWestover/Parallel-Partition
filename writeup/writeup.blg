@@ -1,4 +1,4 @@
-This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2019)
 Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: writeup.aux
 The style file: ACM-Reference-Format.bst
@@ -33,37 +33,37 @@ Warning--empty address in ShunGu15
 Warning--empty publisher in TsigasZh03
 Warning--empty address in TsigasZh03
 You've used 27 entries,
-            5733 wiz_defined-function locations,
-            1486 strings with 19064 characters,
-and the built_in function-call counts, 33121 in all, are:
-= -- 4420
+            5719 wiz_defined-function locations,
+            1484 strings with 19012 characters,
+and the built_in function-call counts, 32958 in all, are:
+= -- 4418
 > -- 1066
 < -- 0
 + -- 361
 - -- 392
-* -- 2210
-:= -- 3262
+* -- 2203
+:= -- 3261
 add.period$ -- 136
 call.type$ -- 27
 change.case$ -- 176
 chr.to.int$ -- 27
 cite$ -- 49
-duplicate$ -- 2936
-empty$ -- 2068
+duplicate$ -- 2906
+empty$ -- 2038
 format.name$ -- 476
-if$ -- 8168
+if$ -- 8107
 int.to.chr$ -- 2
 int.to.str$ -- 1
 missing$ -- 109
 newline$ -- 248
 num.names$ -- 216
-pop$ -- 1062
+pop$ -- 1033
 preamble$ -- 1
 purify$ -- 419
 quote$ -- 0
-skip$ -- 1029
+skip$ -- 1028
 stack$ -- 0
-substring$ -- 2598
+substring$ -- 2597
 swap$ -- 320
 text.length$ -- 0
 text.prefix$ -- 0
@@ -72,5 +72,5 @@ type$ -- 572
 warning$ -- 22
 while$ -- 250
 width$ -- 0
-write$ -- 498
+write$ -- 497
 (There were 22 warnings)

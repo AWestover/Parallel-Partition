@@ -1,6 +1,8 @@
 \documentclass[sigplan, 10pt]{acmart}
 
 
+\newcommand{\alek}[1]{\textcolor{red}{#1}}
+
 \usepackage{booktabs} % For formal tables
 
 
@@ -604,13 +606,14 @@ The original \defn{Strided Algorithm} consists of two steps:
   parameter, and assume for simplicity that $gb \mid n$. Partition the
   array $A$ into $\frac{n}{gb}$ chunks $C_1, \ldots, C_{n / gb}$,
   each consisting of $g$ cache lines of size $b$.
+	\alek{what if we make everything, \emph{even the entries in X} be indexed from 1? making the entries of $X$ be indexed from $1$ actually seems surprisingly straightforward: because $X$ is a bunch of shifts in $\mod g$, it doesn't matter whether $X[i]\in \{0,1,\ldots, g-1\}$ or if we say $X[i]\in\{1,2,\ldots, g\}\equiv \{1,2,\ldots, g-1, 0\}\mod g$ because $X[i]$ never occurs outside of a $\mod g$ expression! If we don't do this, I think that we should definitely put in a footnote saying that the entries $X[i]$ are the only 0 indexed quantities that the reader has to worry about}
   %% \footnote{In this
   %%   gection we zero-index arrays in order to enable modular arithmetic
   %%   on array indices.}
-  For $i \in \{1, 2, \ldots, t\}$, define
+	For $i \in \{1, 2, \ldots, t\}$, define \alek{this should be For $i \in \{1, 2, \ldots, g\}$, because $t$ no longer exists }
   $P_i$ to consist of the $i$-th cache line from each of the
   chunks $C_1, \ldots, C_{n / gb}$. One can think of the $P_i$'s
-  as forming a strided partition of array $A$, in which which
+	as forming a strided partition of array $A$, in \alek{which} which
   consecutive cache lines in $P_i$ are always separated by a fixed
   stride of $g - 1$ other cache lines.
 
@@ -623,7 +626,7 @@ The original \defn{Strided Algorithm} consists of two steps:
   partitioned) $P_i$. Define $v_{\text{min}} = \min\{v_1, \ldots,
   v_{g}\}$ and define $v_{\text{max}} = \max\{v_1, \ldots, v_{g}\}$. Then the
   second step of the algorithm is to perform a serial partition on the
-  sub-array \\$A[v_{\text{min}}],\ldots, A[v_{\text{max}}-1]$. This completes the   
+	sub-array \\$A[v_{\text{min}}],\ldots, A[v_{\text{max}}-1]$. \alek{everywhere else that you take a subarray of $A$ you use the notation $A[v_{\text{min}}, v_{\text{max}}-1]$. Also, if the colon notation that you used to have here is common (anyone who programs in python knows it as slicing) and doesn't include the upper index (like in python array slicing), then I like it a lot better than the comma notation, and it is somewhat nicer because we don't have to have the $-1$ all over the place, i.e. Suggestion is to replace $A[v_{\text{min}}, v_{\text{max}}-1]$ everywhere with $A[v_{\text{min}} : v_{\text{max}}]$ } This completes the   
     full partition.
 \end{itemize}
 
@@ -665,7 +668,7 @@ $U_1, U_1, \ldots, U_{g}$ (which play a role analogous to $P_1,
 \ldots, P_g$ in the Strided Algorithm) so that each $U_i$
 contains one randomly selected cache line from each of $C_1, C_2,
 \ldots, C_{n / gb}$ (rather than containing the $i$-th cache
-line of each $C_j$). The key property that this ensures is that the
+line of each $C_j$). \alek{repeated "that" sounds bad. suggested replacement: "This ensures that the number of predecessors in each $U_i$ is a sum of independent random variables with values in $\{0, 1, \ldots, b\}$, the key property required to apply Hoeffding's Inequality."} The key property that this ensures is that the
 number of predecessors in each $U_i$ is a sum of independent random
 variables with values in $\{0, 1, \ldots, b\}$.
 
@@ -698,7 +701,7 @@ natural approach might be to store for each $U_i$ and each $C_j$ the
 index of the cache line in $C_j$ that $U_i$ contains. This would require
 the storage of $\Theta(n / b)$ numbers as metadata, however,
 preventing the algorithm from being in-place. To save space, the key
-insight is to select a random offset $X_j \in \{0, 1, 2, \ldots, g - 1\}$ within each $C_j$, and then to assign the $(X_j + i \pmod g) + 1$-th cache line of $C_j$ to $U_i$ for $i \in \{1, 2, \ldots, g\}$. This allows for us to construct the $U_i$'s using only
+insight is to select a random offset \alek{kind of a general note, I think it would look better if we allways gave the same number of numbers in an array before doing ldots. i.e. $X_j \in \{0,1,\ldots, g-1\}$ (the 2 is not really needed to understand the pattern) and then do the same thing every time (sometimes we have just 0,\ldots sometimes 0,1,\ldots sometimes 0,1,2,\ldots,)} $X_j \in \{0, 1, 2, \ldots, g - 1\}$ within each $C_j$, and then to assign the $(X_j + i \pmod g) + 1$-th cache line of $C_j$ to $U_i$ for $i \in \{1, 2, \ldots, g\}$. This allows for us to construct the $U_i$'s using only
 $O\left(\frac{n}{gb}\right)$ machine words storing the metadata $X_1, X_2, \ldots, X_{n / gb}$. By setting
 $g$ to be relatively large, so that $\frac{n}{gb} \le
 \operatorname{polylog}(n)$, we can obtain an in-place algorithm that
@@ -707,7 +710,7 @@ incurs $n (1 + o(1))$ cache misses.
 The recursive structure of the Smoothed Striding Algorithm allows for
 the algorithm to achieve polylogarithmic span. As an alternative to
 recursing, one can also use the in-place algorithm from Section
-\ref{secalg} in order to sort $A[v_{\text{min}},
+\ref{secalg} in order to sort \alek{I think you meant partition...} $A[v_{\text{min}},
   v_{\text{max}} - 1]$. This results in an improved span (since the
 algorithm from Section \ref{secalg} has span only $O(\log n \log \log
 n)$), while still incurring only $n (1 + o(1))$ cache misses (since
@@ -751,7 +754,7 @@ We assume for simplicity that that $n$ is divisible by
 $gb$, and we define $s = \frac{n}{gb}$.\footnote{This assumption can be made without loss of generality
   by treating $A$ as an array of size $n' = n + {(gb - n \pmod
     {gb})}$, and then treating the final $gb - n \pmod {gb}$ elements
-  of the array as being successors (which consequently the algorithm
+		of the array as being successors\alek{we are not treating the final "extra" elements as successors, we are ignoring them while all the serial partitions happen, and then swapping the final "extra" elements with the first $n-gb$ successors to add the extra elements to the recursive subproblem.} (which consequently the algorithm
   needs not explicitly access).}
 
 The \defn{Partial Partition Step} if the algorithm partitions the
@@ -767,27 +770,27 @@ Formally, the Partial Partition Step performs the following procedure:
   independently selected elements of $\{0, 1, 2, \ldots, g - 1\}$. For
   $i \in \{0, 1, 2, \ldots, g - 1\}$, and for each $j \in \{0, 1, 2,
   \ldots, s - 1\}$, define
-  $$G_i(j) = (X[j] + i \pmod g) + jg + 1.$$ Using this terminology, we
-  define each $U_i$ for $i \in \{0, \ldots, g - 1\}$ to contain the
+	$$G_i(j) = (X[j] + i \pmod g) + jg + 1.$$ \alek{because $X$ is 1 indexed the $jg$ should really be $(j-1)g$}Using this terminology, we
+	define each $U_i$ for $i \in \{0, \ldots, g - 1\}$ \alek{should be $\{1, \ldots, g\}$} to contain the
   $G_i(j)$-th cache line of $A$ for each $j \in \{0, 1, 2, \ldots, s -
-  1\}$. That is, $G_i(j)$ denotes the index of the $j$-th cache line
+	1\}$\alek{X is indexed by $1$, i.e. this should be $j \in \{1,2,\ldots s\}$}. That is, $G_i(j)$ denotes the index of the $j$-th cache line
   from array $A$ to be contained in $U_i$.
 
   Note that, to compute the index of the $j$-th cache line in $U_i$,
   one needs only the value of $X[j]$. Thus the only metadata needed by
-  the algorithm to determine the $U_0, \ldots, U_s$ is the array
+	the algorithm to determine the \alek{this is wrong, should be $U_1, \ldots, U_g$} $U_0, \ldots, U_s$ is the array
   $X$. If $|X| = s = \frac{n}{gb} \le \operatorname{polylog}(n)$, then the algorithm is in-place.
   
 \item The algorithm performs an in-place (serial) partition on each
   $U_i$ (and performs these partitions in parallel with one
   another). In doing so, the algorithm, also collects
   $v_{\text{min}}=\min_i{v_i}$, $v_{\text{max}}=\max_i{v_i}$, where
-  each $v_i$ with $i \in \{1, \ldots, s\}$ is defined to be the index
+	each $v_i$ with $i \in \{1, \ldots, s\}$ \alek{this is wrong, $i \in \{1,\ldots, g\}$ ($g$ is big, $s$ is small, if there were only $s$ $v_y$s then it wouldn't be a problem to store all the $v_y$s (see footnote) because we wouldn't incur asymptotically more cache misses than we do for storign $X$)} is defined to be the index
   of the first successor in $A$ (or $n + 1$ if no such successor
   exists).\footnote{One can calculate $v_{\text{min}}$ and
     $v_{\text{max}}$ without explicitly storing each of $v_1, \ldots,
-    v_{s}$ as follows. Rather than using a standard $s$-way parallel
-    for-loop to partition each of $U_1, \ldots, U_{s}$, one can
+		v_{s}$ \alek{this should be $v_1, \ldots, v_g$} as follows. Rather than using a standard $s$-way\alek{g-way} parallel
+		for-loop to partition each of $U_1, \ldots, U_{s}$, \alek{$U_1, \ldots, U_g$} one can
     manually implement the parallel for-loop using a recursive
     divide-and-conquer approach. Each recursive call in the
     divide-and-conquer can then simply collect the maximum and minimum
@@ -868,7 +871,7 @@ $Y_i(j)$ is the fraction of elements in the $G_i(j)$-th cache line of
 $A$ that are predecessors. Since, by construction, $G_i(j)$ has the
 same probability distribution for all $i$, it follows that $Y_i(j)$
 has the same distribution for all $i$, and thus that $\E[\mu_i]$ is
-independent of $i$. Since the average of the $\mu_i$'s is $\mu$, it
+independent of $i$. Since the average of the $\mu_i$'s \alek{is there supposed to be an apostrophe here ($\mu_i$ isn't possessing anything...)?} is $\mu$, it
 follows that $\E[\mu_i] = \mu$ for all $i \in \{1, 2, \ldots, g\}$.
 
 Since each $\mu_i$ is the average of $s$ independent $[0, 1]$-random
@@ -898,7 +901,12 @@ that all $y$ simultaneously satisfy $|\mu - \mu_y| < \delta$ implies
 that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
 
 Let $U_i(j)$ denote the index in $A$ of the $i$-th cache line in
-$U_i$. Note that $U_i(j)$ satisfies
+$U_i$ \alek{should be Let... denote the index in $A$ of the $j$-th cache line in $U_i$}. 
+\alek{i'm kind of confused by this derivation. I think you should add some explanation}
+\alek{also, I think that the bounds that you get on $U_i(j)$ shouldn't be symmetric}
+\alek{in fact, here is what I think the derivation should look like: }
+\alek{Recall that $G_i(j)$ denotes the $j$ th cache-line contained in $U_i$ from $A$. Because of how the algorithm spreads out the cache-lines that it takes from the array we can bound $G_i(j)$ by $$jg + 1 \le G_i(j) \le jg+g.$$ Note that $v_i$ will occur in the $s\mu_i$-th cache-line of $U_i$ because $U_i$ is composed of $s$ cache lines. Thus, we can bound $v_i$ as $$(s\mu_i g + 1)b+1 \le v_i \le (s\mu_i g+g+1)b.$$ Note that $sgb = n$, so this means that $$b + 1 \le v_i - n\mu_i \le (g+1)b.$$ Then we can use our bound on $|\mu - \mu_i|$ to attain that for all $i$, $$b+1 -n\delta\le v_i - n\mu \le (g+1)b + n\delta.$$ Thus $$v_{\text{max}} - v_{\text{min}} \le 2n\detla + bg < 4 n \delta$$}
+Note that $U_i(j)$ satisfies
 $$gj - bg + 1 \le U_i(j) \le gj + bg - 1$$ for all $j$. It follows
 that $v_i = U_i(\mu_i \cdot |U_i|)$ is within less than $bg$ of $g
 \mu_j \cdot |U_i| = \mu_j n$. Therefore,
@@ -1002,7 +1010,7 @@ The next theorem analyzes the span of the Recursive Smoothed Striding Algorithm.
 A particularly natural parameter setting for the Recursive algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
 \begin{corollary}[Corollary of Theorem \ref{thm:groupedPartitionAlg}]
   \label{cor:groupedPartitionAlg}
-  With high probability in $n$, the Grouped Partition Algorithm using parameter $\delta=1/\sqrt{\log n}$:
+	With high probability in $n$, the \alek{its now called the Recursive Smoothed Striding Algorithm (not Grouped Partition)}Grouped Partition Algorithm using parameter $\delta=1/\sqrt{\log n}$:
   achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log n}))$ cache misses. 
 \end{corollary}
 
@@ -1314,7 +1322,7 @@ If we compare the number of instructions performed by the three
 parallel implementations, then the medium-space algorithm would seem
 to be the clear winner. Using Cachegrind to profile the number of
 instructions performed in a (serial) execution on an input of size
-$2^{28}$,\footnote{This smaller problem size is used to compensate for the fact that Cachegrind can somewhat slow.} the high-space, medium-space, and low-space implementations
+$2^{28}$,\footnote{This smaller problem size is used to compensate for the fact that Cachegrind can \alek{be} somewhat slow.} the high-space, medium-space, and low-space implementations
 perform 4.4 billion, 2.9 billion, and 4.6 billion instructions,
 respectively.
 
