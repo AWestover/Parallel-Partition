@@ -1,7 +1,7 @@
 
 % Alek Westover writeup draft 
 
-\documentclass[twocolumn, twoside, 12pt]{article}
+\documentclass[twocolumn, twoside, 11pt]{article}
 \author{\vspace{-2ex}Alek Westover\vspace{-2ex}}
 \title{\vspace{-8ex}Cache Efficient Parallel Partition\vspace{-2ex}}
 \date{\vspace{-2ex}June 26, 2019\vspace{-2ex}}
@@ -41,21 +41,21 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Quicksort is a very important problem to which a fast solution is desirable. 
-By utilizing parallel processing it is possible to perform quicksort much faster than a serial implementation could. 
-Quicksort consists of partitioning an array according to some pivot value such that the elements with value at most the pivot value occur before the elements with value greater than the pivot value, and then recursively sorting each of these parts of the array. 
-Thus, parallel partition is the important algorithm to make fast in order to make quicksort fast. 
-Parallel partition is also an important problem in its own right, which further motivates exploration of parallel algorithms for performing a partition. 
-	In this paper we present an algorithm for parallel partition that has low span, is fast in practice, incurs only $n(1+o(1))$ cache misses, is in place, and has theoretical guarantees for arbitrary inputs.
+% do I need to mention that it is "in-place" or is that part of being cache efficient?
+	We present a cache-efficient algorithm for parallel partition that has work $O(n)$ and span $O(\log n \log\log n)$.
+	This imediately gives us a cache-efficient quicksort algorithm with work $O(n\log n)$ and span $O(\log^2 n \log\log n)$.	
+
+	We also present an exceptionally simple cache-efficient algorithm for parallel partition that has work $O(n)$ and span $O(\log^2 n)$. Despite its slightly worse span, we show that this algorithm performs well in practice.
 \end{abstract}
 
 \section{Introduction}
 \paragraph{Serial Partition Problem}
-We describe the serial partition problem and the solution which is used extensively in parallel partition algorithms. 
-The serial partition problem takes in an array, and then reorders the array according to a decider function.
-The serial partition algorithm, which runs fully in-place, has the end result of the array being partitioned such that all elements labelled predecessors by the decider function occur before the elements labelled successors by the decider function.
-In the case of the decider function "$A[i] \leq pivotValue$", as is the case in the partition used for quicksort to sort an array in ascending order, this corresponds to placing all elements with values less than or equal to the pivot value before the elements with values greater than or equal to the pivot value.
-Thus, upon recursively sorting the predecessors and the successors the entire sorting problem is solved. This is because the predecessor portion of the array is sorted, the successor portion of the array is sorted, and the predecessors occur before the successors, so the whole array is sorted.
+We breifly describe the serial partition problem and the solution which is used extensively in our parallel partition algorithms. 
+The serial partition problem takes in an array, and then reorders the array according to a decider function and returns the number of predecessors in the array.
+Upon completion of the serial partition algorithm, which runs fully in-place, if $k$ is the number of predecessors in the array then for all $i < k$, $A[i]$ is a predecessor, and for all $i \ge k$, $A[i]$ is a successor. 
+In the case of the decider function "$A[i] \leq \text{pivot value}$", as is the case in the partition used for quicksort to sort an array in ascending order, this corresponds to placing all elements with values less than or equal to the pivot value before the elements with values greater than or equal to the pivot value.
+Thus, by recursively sorting the predecessors and the successors, the entire array is sorted. 
+This is because the predecessor portion of the array is sorted, the successor portion of the array is sorted, and the predecessors occur before the successors, so the whole array is sorted.
 The serial partition algorithm works as follows: 
 
 % \begin{samepage}
@@ -69,7 +69,8 @@ The serial partition algorithm works as follows:
 \end{enumerate}
 % \end{samepage}
 
-See Algorithm \ref{alg:serialPartition} for a pseudocode implementation of this algorithm. Note that the serial partition described makes a single pass over the $n$ elements in the array meaning that it incurs $O(n)$ cache misses, and also it has running time $O(n)$.
+See Algorithm \ref{alg:serialPartition} for a pseudocode implementation of this algorithm. 
+Note that the serial partition described makes a single pass over the $n$ elements in the array meaning that it incurs $O(n)$ cache misses, and also it has running time (i.e. work) $O(n)$.
 
 \vspace{5mm}
 \begin{samepage}
@@ -95,7 +96,7 @@ See Algorithm \ref{alg:serialPartition} for a pseudocode implementation of this 
 \end{samepage}
 
 \paragraph{Further Preliminaries}
-Here we introduce some key ideas in analysis of the algorithms presented in this article.
+We introduce some key ideas in analysis of the algorithms presented in this article.
 Many of the algorithms we present have worst case performances that are highly unlikely to be realized.
 For instance, if in quicksort a random selection of a pivot value results in only 1 element being labelled a successor, then the recursive subproblems are very unevenly sized.
 If the size of the problems is $n, n-1, n-2,\ldots,2$ then quicksort performs at its worst case performance, which is $O(n^2)$.
@@ -103,46 +104,73 @@ This however is very unlikely.
 We can formalize this with the notion of saying that the event does not happen \defn{with high probability}.
 An event is said to happen with high probability in $n$ if the probability of the event occurring is $1-n^{-c}$ for some $c>0$.
 Intuitively, if we can show that our algorithm has a certain span with high probability, then we are confident that the algorithm achieves this span.
+
 We define throughout our analysis $\mu$ to be the fraction of predecessors in the array $A$.
 In implementing the partition algorithm we do not have control over the pivot value, it is an input to our problem.
-The pivot value in conjunction with the array $A$ and the decider function determine the fraction $\mu$.
-Throughout our analysis we assume that $\mu$ is a constant not dependent on $n$ which would be quite adversarial.
+The pivot value together with the array $A$ and the decider function determine the fraction $\mu$.
+Throughout our analysis we assume that $\mu$ is a constant not dependent on $n$.
 
 \paragraph{Factors to Consider}
 We now describe the desirable characteristics of a parallel partition algorithm.
 The \defn{work} of an algorithm, $T_1$, is the running time of the algorithm in serial. 
 The \defn{span} of an algorithm, $T_\infty$ is the running time of the algorithm when run on an infinite number of processors.
 The running time of the algorithm on $p$ processors, $T_p$, is determined by its work and span.
-Brent's theorem states that $$T_p = \Theta \paren*{T_\infty + \frac{T_1}{p}}$$ which shows why optimizing the algorithms span and work will optimize its performance on $p$ processors.
-Another important consideration is auxiliary memory usage. It is desirable to be as close to in-place as possible because a user might not have any extra space that our algorithm can use if the array to be partitioned takes up nearly all of their machine's memory.
-Finally, it is important to analyze whether or not the algorithm is cache efficient, because this determines the \defn{memory bandwidth bound} on the algorithm.
+This is formally expressed in Brent's theorem which asserts that
+$$\frac{T_1}{p} \le T_p \le \frac{T_1}{p} + T_\infty.$$ 
+Thus optimizing the work and span of an algorithm will optimize its performance on $p$ processors.
+Another important consideration is auxiliary memory usage. 
+It is desirable to be as close to in-place as possible because a user might not have any extra space that our algorithm can use if the array to be partitioned takes up nearly all of their machine's memory.
+Finally, it is important to analyze whether or not the algorithm is cache efficient, which dependends on if the algorithm is in-place, because this determines the \defn{memory bandwidth bound} on the algorithm.
 A \defn{cache miss} is when the algorithm must access a value that is not in the cache already.
 Doing this takes time, and the memory banks on a computer can only service a limited number of memory access attempts per interval of time, so if there are lots of requests to the memory bank happening then the algorithm slows down, and we say it is memory bandwidth bound.
-For the partition problem each element must be read at least once, so there are at least $1\cdot n$ cache misses.
+For the partition problem each element must be read at least once, so there are at least $n$ cache misses.
 We consider all of these properties in our development of a parallel partition algorithm, and our algorithm does well according to all of these metrics.
 
 \paragraph{Prior Work}
 Prior work has been done on the parallel partition problem.
 William Kuszmaul developed an in-place parallel partition algorithm.
 Unfortunately, despite theoretical guarantees, his algorithm was outperformed by an optimized but higher span algorithm.
-The problem with this parallel partition algorithm in terms of actual speed is memory bandwidth bound.
+The problem with this parallel partition algorithm in terms of speed in practice is its memory bandwidth bound.
 The reason for the memory bandwidth bound is the number of cache misses that the algorithm incurs.
 Thus reducing the number of cache misses is a promising place to look in order to speed up parallel partition, which motivates our algorithm.
 
-	
-\section{Algorithm With Desirable Guarantees On Random Inputs}
-There is an algorithm for performing parallel partition developed by Francis and Pannan, which we call the \defn{Strided Algorithm}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INSERTING MY THING HERE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Note: recopy stuff not integrated in after Bill edits my thing!!! This is mostly just in here atm so I can delete stuff from my old writeup
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% THIS SECTION GOES WITH THE PARAGRAPH ON OUR CACHE MODEL (that paragraph gets prepended to this)
+\section{Cache Efficient Parallel Partition for Random Inputs}
+We now present an algorithm for parallel partiition developed by Francis and Pannan, which we call the \defn{Strided Algorithm}.
 The Strided Algorithm is thought to use very few passes over the array, although we could not find any accurate theoretical analysis of the algorithm.
 Having a low number of cache misses is desirable because it makes the algorithm run much faster, overcoming the problem of memory bandwidth bound.
 The Strided Algorithm does not achieve a small number of cache misses for all inputs, but it does achieve this when used on random inputs.
-We now present a proof of the following theorem regarding the algorithm.
+We introduce our model of cache misses and then prove that the Strided Algorithm incurs very few cache misses for random inputs.
 
-\begin{theorem}
-Given an array $A[0], A[1], \ldots, A[n-1]$ where each $A[i]$ is chosen randomly independently to be either $0$ or $1$, and a decider function that labels each element with value $0$ a predecessor, and each element with the value $1$ a successor, the Strided Algorithm partitions the array in span that is, with high probability in n, $O(\frac{n}{t}+\sqrt{n\cdot t\cdot\log n})$ where $t$ is a parameter of our choice indicating the number of parts that we break $A$ into, incurring $n\cdot(1+o(1))$ cache misses.
-\label{thm:stridedAlg}
+\paragraph{Modelling Cache Misses}
+We treat memory as being accessed in some fixed cache-line size $b$. 
+In our model each processor's cache is composed of a set of $\operatorname{polylog}{n}$ cache lines.
+A cache miss occurs when the line being accessed is not currently in cache, in which case some other line is evicted from cache to make room for the new entry.
+Each cache is managed with a LRU (Least Recently Used) eviction policy and we assume that child threads inherit their cache contents from their parent.
+
+In the analysis of our algorithm it will be useful to assume that certain small arrays are pinned in cache (i.e. their entries are never evicted from cache).
+This assumption is without loss of generality in the sense that LRU eviction is competitive (up to resource augmentation) with the optimal off-line eviction strategy OPT (i.e. Furthest in the Future).
+Formally this is due to the following theorem by Sleator and Tarjan:
+\begin{theorem}{Resource Augmentation Theorem \cite{SleatorTa85}}
+	LRU operating on a cache of size $K\cdot M$ for some $K>1$ will incur at most $1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on a cache of size $M$, for the same series of memory accesses.
 \end{theorem}
 
-\paragraph{Definitions}
+We assume caches of size $\log^c n$ for $c$ a constant of our choice. 
+Up to changes in $c$ LRU incurs no more than a $1+\frac{1}{\operatorname{polylog}{n}}$ factor more cache misses than OPT incurs.
+
+\paragraph{Strided Algorithm Description}
 Now we describe the algorithm.
 The algorithm is given an input array $A[0],A[1],\ldots,A[n-1]$ where for all $i$, $A[i] \in \{0, 1\}$.
 The values in the array $A$ were determined independently, and randomly with an equal probability of being either $0$ or $1$.
@@ -162,8 +190,15 @@ Define $v_{min} = \min_i{v_i}$ and $v_{max} = \max_i {v_i}$.
 Note that after the partitioning all elements in the array $A$ with index less than $v_{min}$ are predecessors, and all elements after and including $v_{max}$ are successors, so to finish the partitioning of the array $A$ we only need to partition a subarray of size $v_{max}-v_{min}$.
 Note that we cannot recursively apply the Strided Algorithm to solve the sub problem, because it would behave very poorly on the subarray, and also because, as we demonstrate, the size of the subarray should be very small relative to $n$.
 Also note that if we can show that $v_{max} - v_{min}$ is small relative to $n$ then the partition algorithm uses very few passes over the array.
-We proceed to prove the following lemma.
 
+\paragraph{Strided Algorithm Analysis}
+We now prove the following theorem about the Strided Algorithm's performance:
+\begin{theorem}
+Given an array $A[0], A[1], \ldots, A[n-1]$ where each $A[i]$ is chosen randomly independently to be either $0$ or $1$, and a decider function that labels each element with value $0$ a predecessor, and each element with the value $1$ a successor, the Strided Algorithm partitions the array in span that is, with high probability in n, $O(\frac{n}{t}+\sqrt{n\cdot t\cdot\log n})$ where $t$ is a parameter of our choice indicating the number of parts that we break $A$ into, incurring $n\cdot(1+o(1))$ cache misses.
+\label{thm:stridedAlg}
+\end{theorem}
+
+To do this, we first prove the following lemma:
 \begin{lemma}
 With high probability in $n$, the size of the recursive subproblem, $v_{max} - v_{min}$, is $O(\sqrt{t\cdot n\log n}).$
 \label{lem:epsSmallFP}
@@ -261,8 +296,9 @@ So we once again get the same bound on $v_{max}-v_{min}$, which doesn't actually
 $$v_{max}-v_{min} = O(\sqrt{t\cdot n\log n}).$$
 
 \paragraph{Summary}
-It is not fully satisfactory that this algorithm only has these theoretical guarantees for the restrictive case of random inputs.
+It is not satisfactory that this algorithm does not have theoretical guarantees for arbitrary arrays. 
 We use the ideas of this algorithm to create a new algorithm that has have theoretical guarantees on arbitrary inputs.
+
 
 \section{Key Algorithmic Ideas}
 We add randomization to the Strided Algorithm to make a new algorithm that has theoretical guarantees for arbitrary inputs while remaining cache efficient and in-place.
@@ -314,6 +350,260 @@ When the cache block size is $b$ instead of $1$ it is convenient to still have p
 Thus, we now refer to $P_j$ as a block, and it is defined to contain elements $A[b\cdot j],\ldots, A[b\cdot (j+1) - 1]$.
 Changing the role of the $P_j$s is desirable because it adds simplicity to the algorithm and reduces overhead without sacrificing any desirable characteristics of the algorithm.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INTEGRATE THIS PARAGRAPH INTO THE SECTION CONTAINING IT
+\paragraph{Algorithm Concept}
+We now present the \defn{Cache-Efficient Partial-Partition Algorithm} which, like the parallel step of the Strided Algorithm, partitions subsets of the array in parallel such that partitioning the subsets and then a small subarray results in a fully partitioned array. 
+However, unlike the parallel step of the Strided Algorithm, the Cache-Efficient Partial-Partition Algorithm has high probability guarantees on the size of the unpartitioned subarray for arbitrary inputs. 
+The Strided Algorithm has guarantees on some inputs, for instance randomly ordered inputs, but the Cache-Efficient Partial-Partition Algorithm uses randomization in the algorithm to obviate the need for any specific type of input. 
+
+Interestingly, because the Cache-Efficient Partial-Partition Algorithm has guarantees on arbitrary inputs, the Cache-Efficient Partial-Partition Algorithm can be used to partition the subarray that it generates, unlike in the Strided Algorithm where recursing with the parallel step of the Strided Algorithm would not successfully partition the subarray.
+This is because the subarray generated in the parallel step of the Strided Algorithm is non-random in a problematic way: subsequences composed of every $t$-th element in the subarray would already be partitioned, so the parallel step of the Strided Algorithm would not change the array as it partitions these subsequences that are already partitioned, and thus could not finish the partitioning of the array.
+
+The Cache-Efficient Partial-Partition Algorithm forms collections $U_y$, which are similar to the Strided Algorithm's $P_j$s, and performs a serial partition of each $U_y$ in parallel.
+We cannot explicitly store each $U_y$, because this would require $O(n)$ memory (or $O(n/b)$ if we use indices of blocks of the array) which would make the algorithm not in-place, and eliminate the algorithm's desirable cache behavior. 
+However, we can represent all $U_y$s with very little space by making each $U_y$ random, but not independent of other $U_{y'}$s. 
+
+Our construction of $U_y$s makes it so that the fraction of predecessors in each $U_y$ will cluster closely around the fraction of predecessors in $A$.
+The elements in each $U_y$ are spread out in $A$ so that each section of a certain size in the array will contain the same number of elements from $U_y$. 
+Define $v_y$ to be the index of the first successor in $U_y$--this is similar to the definition of the splitting position in the Strided Algorithm.
+Because of this uniformity in how the elements of $U_y$ are spread out, and the guarantee that the fraction of successors in each $U_y$ will cluster closely around the fraction of successors in $A$, the index $v_y$ of the first successor in collection $U_y$ will be close to all other indices $v_{y'}$.
+This means that after each $U_y$ is partitioned, $A$ will be partially partitioned, in the sense that $A[i]$ is a predecessor for all $i < \min_y{v_y}$, and $A[i]$ is a successor for all $i \ge \max_y{v_y}$.
+Furthermore, the size of the unpartitioned subarray $A[\min_y{v_y}],\ldots,A[\max_y{v_y}-1]$ will be very small relative to $n$. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+\section{Cache-Efficient Parallel Partition for Arbitrary Inputs}
+\paragraph{Algorithm Description}
+We now describe the algorithm in more detail.
+Let $b$ be the size of a cache line.
+Let $X$ be an array such that $X[i] \in \{0,1,\ldots,g-1\}$ determines which chunk of size $b$ from the array belongs to any group $G_y$ from section $i$ of size $g\cdot b$ in the array.
+Let $s = |X|$.
+Then $g$, the number of groups $G_y$ the algorithm will form, is determined by $g=\frac{n}{b\cdot s}$
+\footnote{If $n \not\equiv 0 \mod b\cdot s$, then we define $g$ as $\Big\lfloor \frac{n}{b\cdot s}\Big\rfloor $. 
+This means that $g\cdot b \cdot s < n$. 
+We handle the array of size $n-g\cdot b \cdot s$ separately from the array of size $g\cdot b \cdot s$ that is the focus of our analysis.
+Thus for simplicity in the analysis we say that $n=g\cdot b\cdot s$.
+It is straightforward to deal with the $n-g\cdot b\cdot s$ elements.
+This is done by swapping the extra elements with the first $n-g\cdot b\cdot s$ successors, and then increasing the size of the subproblem to include these new elements.
+Because $n-g\cdot b\cdot s$ is very small, this step is not relevant to the analysis, but this is an important detail to handle in order to make the algorithm work. }.
+The algorithm performs the following procedure:
+
+\begin{itemize}
+	\item Logically partition the array $A$ into blocks $P_j$ each of $b$ adjacent elements, i.e. $${P_j = \{A[b\cdot j], A[b\cdot j + 1], \ldots, A[b\cdot (j+1)-1]\}}.$$
+	\item Form the array $X$, where each element $X[i]$ is an integer chosen randomly at uniform from $[0, g-1].$
+	\item The values in $X$ determine $g$ groups $G_y$ each of $s$ indices to $P_j$s. The index for block $i$ of group $G_y$ is determined by
+		$$G_y[i] = (X[i] + y) \bmod g + i\cdot g.$$
+		Note that we do not need to store the indices of the members of each group even though the groups are random, because the constituent blocks of a group are determined by the group index and the array $X$. 
+		This means that as long as $|X|$ is made small, which it will be, we do not use significant extra space in creating this array.  
+	\item Define $U_y$ to be the union of all blocks that belong to group $G_y$. That is,
+			$$U_y = \bigcup_{j\in G_y} P_j.$$ 
+		The algorithm performs a serial partition on each $U_y$ in parallel.
+	\item Define $v_y$ to be the index of the first successor in $U_y$, and define $v_{\text{min}}=\min_y{v_y}$,  $v_{\text{max}}=\max_y{v_y}$
+		\footnote{When calculating $v_{\text{max}}$ and $v_{\text{min}}$ we do not want to store the $v_y$s because this would require $O(g)$ memory. 
+In order to avoid storing the $v_y$, we compute $v_{\text{max}}$ and $v_{\text{min}}$ while partitioning each $U_y$ in parallel.
+To facilitate this, we implement a parallel for loop with a recursive divide-and-conquer strategy. 
+We have a function that takes in a subset of the $U_y$, partitions these $U_y$ in parallel, and then returns the minimum and maximum $v_y$ among the $U_y$ that the function partitioned.
+This function operates by divide-and-conquer, i.e. it spawns processes that in parallel recursively apply this function to 2 disjoint, approximately equal sized, subsets of the subset of $U_y$s that the function was given, and then the function computes its $v_{\text{min}}, v_{\text{max}}$ as the $\min$ of the $v_{\text{min}}$s reported by the subprocesses and the $\max$ of the $v_{\text{max}}$s reported by the subprocesses.}. 
+Note that the array is partially partitioned, i.e. $A[i]$ is a predecessor for all $i < v_{\text{min}}$, and $A[i]$ is a successor for all $i \ge v_\text{max}$.
+\end{itemize}
+
+%% note: g > s should hold
+\paragraph{Algorithm Analysis} 
+We now prove the following general proposition about the Cache-Efficient Partial-Partition Algorithm:
+\begin{proposition}
+	\label{prop:generalResult}
+	Let $A$ be an array of size $n$; 
+	Let $\mu$ be the fraction of predecessors in $A$; 
+	Let $b$, the size of a cache line, be $O(\operatorname{polylog}{n})$; 
+	Let $\epsilon \in (0, 1)$ be a failure probability; 
+	Let $\delta \in (0, 1)$;
+	Let $s \in \Theta\left(\frac{\log (n/\epsilon)}{\delta^2}\right)$ satisfying $s>\frac{\log(2n) - \log(b\epsilon)}{2\delta^2}$.
+
+	The Cache-Efficient Partial-Partition Algorithm, when executed on array $A$: 
+	achieves work $O(n)$; 
+	achieves span $O\paren*{b \cdot s}$; 
+	incurs $\frac{s+n}{b} + O(1)$ cache misses (assuming the array $X$ is pinned to cache); 
+	and leaves an unpartitioned subarray $A[v_{\text{min}}],\ldots, A[v_{\text{max}}-1]$ which, with probability $1-\epsilon$, has size $$v_{\text{max}}-v_{\text{min}} < 4 n \delta.$$
+\end{proposition}
+\begin{proof}
+	The algorithm accesses each element of the array once, resulting in work $O(n)$.
+	Recall that by the Resource Augmentation Theorem we can assume small arrays and values that are repeatedly used to be pinned to cache.
+	The contribution to the algorithm's cache misses are then:
+	$n/b$ from accessing each block of $A$, $s/b$ for instantiating the array $X$, and $O(1)$ for performing various other tasks that require a constant number of cache misses. 
+	This results in the total number of cache misses being $$\frac{n+s}{b}+O(1).$$
+	The algorithm has span $$O(n/g) = O(b\cdot s) $$
+	because of the $g$ serial partitions of groups that it performs in parallel on arrays of size $b\cdot s$.
+	To show that with probability $1-\epsilon$ the size of the unpartitioned subarray is bounded above by $4n\delta$, we consider the fraction of elements in each collection $U_y$ that are predecessors, which we denote by $\mu_y$.
+	Note that each $\mu_y$ is the average of $s$ independent random variables, where random variable $i$ is the fraction of $P_{G_y[i]}$ that is composed of predecessors, a random variable in $[0, 1]$.
+	The groups are constructed in a symmetric way such that for each group, the probability of the group getting any specific block is the same as the probability of any other group getting that block. 
+	Because of this symmetry, $\E[\mu_y]$--a characteristic on the group--is the same for all $y$.
+	Furthermore, $\E[\mu_y] = \mu$ for all $y \in \{0,\ldots,g-1\}$ because the average of the fraction of predecessors in each group is the fraction of predecessors in the entire array.	
+	Thus we can apply Hoeffding's inequality (i.e. A Chernoff Bound for a random variable on $[0,1]$ rather than on $\{0,1\}$) to each $\mu_y$ to show that they are concentrated around their shared expected value $\mu$, i.e.
+	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp(-2s\delta^2). $$
+	Substituting in $s$ which was chosen $s > \frac{\log (2n) -\log (b\epsilon)}{2\delta^2}$, we find that for all $y \in \{0,\ldots, g-1\}$, 
+	$$\Pr[|\mu_y - \mu| \geq \delta] < 2\exp\Big({-2} \frac{\log (2n/(b\epsilon))}{2\delta^2} \delta^2\Big) = \frac{\epsilon}{n/b} < \frac{\epsilon}{g}. $$
+	We use this bound on the probability of any individual group $U_y$ failing to meet the condition $|\mu-\mu_y| < \delta$ to bound the probability that at least one of the groups $U_0, \ldots, U_{g-1}$ fails to meet the condition.
+	Note that the probability of at least one group failing is: 
+	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big].$$
+	This is bounded by 
+	$$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \sum_{y=0}^{g-1} \Pr[|\mu_y - \mu| \geq \delta] < \epsilon.$$
+Thus the event occurs with probability bounded above by $\epsilon$, the specified failure probability.
+To complete the proof we will show that the occurrence of the event that all $y$ simultaneously satisfy $|\mu - \mu_y| < \delta$ implies that the size of the unpartitioned subarray is bounded above by $4n\delta$.
+
+	Intuitively, because the elements in each group are distributed evenly throughout the array, $\mu_y\cdot n$ approximately determines $v_y$, so we can bound $v_y-\mu\cdot n$ for all $y$ using our bound on $|\mu-\mu_y|$. 
+	The index for the block of group $G_y$ that contains $v_y$ is $$G_y[\mu_y\cdot s]= (X[\mu_y \cdot s] + y) \bmod g + \mu_y \cdot s\cdot g.$$
+	Because the entries of $X$ are random, we chose to bound $G_y[\mu_y\cdot s]$ without referencing $X$, only referencing parameters and variables of the problem.
+	This bound is, 
+	$$ \mu_y \cdot s\cdot g \leq G_y[\mu_y\cdot s] \leq  \mu_y \cdot s\cdot g + g-1.$$
+	Then, because block $P_{G_y[i]} = \{A[b\cdot i], \ldots, A[b\cdot i + b-1]\}$, we can bound $v_y$ as $$\mu_y\cdot s\cdot g\cdot b \leq v_y \leq (\mu_y \cdot s\cdot g + g-1)\cdot b + b-1.$$
+	Note that $n=s\cdot g\cdot b$. 
+	Rearranging, we have 
+	$$0 \leq v_y - \mu_y\cdot n < g\cdot b.$$
+	We desire to bound $v_y - \mu\cdot n$, which can be done using our bound on $|\mu_y - \mu|$ as follows:
+	$$ - \delta\cdot n \leq v_y - \mu\cdot n < \delta\cdot n + g\cdot b.$$
+	Thus, the concentration of all $v_y$s implies that with probability $1-\epsilon$, 
+	$$v_{\text{max}}-v_{\text{min}}<n(2\delta) + g\cdot b.$$ 
+	We express this in terms of the algorithm's parameters, using the fact that $g\cdot b = n/s$, 
+	$$v_{\text{max}}-v_{\text{min}}<n\paren*{2\delta + \frac{2\delta^2}{\log (2n) - \log(b\epsilon)}} < 4n\cdot\delta.$$ 
+\end{proof}
+We can use this result to analyze two Parallel full Partition algorithms that use the Cache-Efficient Partial-Partition Algorithm.
+
+\begin{enumerate}
+	\item The \defn{Cache-Efficient Full-Partition Algorithm} algorithm achieves the best theoretical span and cache efficiency for appropriate parameter choice.
+	\item The \defn{Grouped Partition Algorithm} has slightly higher span, but has a very small number of cache misses, and is exceptionally simple to implement.
+\end{enumerate}
+
+Both algorithms start by using the Cache-Efficient Partial-Partition algorithm with parameters $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) and parameter $\delta$ which can be toggled to achieve a trade off between span and cache misses. 
+The algorithms then partition the unpartitioned subarray with their own methods.
+
+The Cache-Efficient Full-Partition Algorithm uses the algorithm given by Theorem \ref{thminplace} which has span $O(\log\log n \log n)$ to partition the subarray.
+This approach is motivated by the observation that once the problem size has been reduced cache behavior is less important, so we can switch to the algorithm that optimizes span rather than cache misses to solve the subproblem.
+
+The Grouped Partition Algorithm partitions the subarray by repeatedly applying the Cache-Efficient Partial-Partition algorithm. 
+The recursive Cache-Efficient Partial-Partition algorithms use the same parameter $\epsilon$ as the top-level, in order to still guarantee success with high probability in $n$, and use $\delta = 1/8$ in order to at least halve the size of the problem size at each iteration. 
+% Using this higher value of $\delta$ is ok because the lower levels of recursion are small, so it doesn't matter a lot what you do with them.
+
+
+We now establish the following theorem about the Cache-Efficient Full-Partition Algorithm algorithm in general and a corollary about an interesting setting of its parameters.
+\begin{theorem}
+	\label{thm:fullPartition}
+	The Cache-Efficient Full-Partition Algorithm algorithm using parameter $\delta\in(0,1)$ satisfying $\delta \ge \Omega(n^{-1/4})$: has work $O(n)$, and with high probability in $n$, achieves span $$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}},$$
+and incurs fewer than 
+$$(n+O(n\delta))/b$$
+cache misses.
+\end{theorem}
+
+%% note: b/loglogn > 1 in reality, but the constant factors make it so that delta is still < 1
+An interesting corollary of the above theorem concerns what happens when we chose $\delta$ to optimize span.
+This can be done with an extreme setting of $\delta$.
+This is interesting because it shows that it is possible to achieve low span along with a small number of cache misses.
+\begin{corollary}[Corollary of Theorem \ref{thm:fullPartition}]
+	\label{cor:fullPartition}
+	The Cache-Efficient Full-Partition Algorithm algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, where $b$ is chosen to satisfy $\sqrt{b/\log\log n} = o(1)$: achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.\\\\
+\end{corollary}
+
+\begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
+	Using Proposition \ref{prop:generalResult}, we find the relevant statistics for the step of this algorithm where we apply the Cache-Efficient Partial-Partition Algorithm. 
+	Note that by our choice of $\epsilon$, $s=O\left(\frac{\log n}{\delta^2}\right)$.
+	The top layer has work $O(n)$, span $O\paren*{\frac{b\log n}{\delta^2}},$
+	and incurs fewer than 
+	$$\frac{n}{b}+O\paren*{\frac{\log n}{b\delta^2}}+O(1)$$ 
+	cache misses.
+	The subproblem has size less than $4n\delta$, so using the algorithm described by Theorem \ref{thminplace}, we achieve span
+	$$O(\log n\delta \log\log n\delta) = O(\log n \log\log n)$$
+	and work $O(n\delta) \le O(n)$ in solving the subproblem.
+	Thus the total work is $O(n)$, and the total span is 
+	$$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}}.$$
+	In solving the subproblem the number of cache misses that we incur is linearly dependent on the size of the subarray, so the total number of cache misses is 
+	$$\frac{n}{b}+O\paren*{\frac{\log n}{b\delta^2} + \frac{n\delta}{b}}+O(1).$$ 
+	Note that $\delta > \Omega(n^{-1/4})$ implies 
+	$$O\left(  \frac{\log n}{\delta^2} \right) < O\left(\frac{n^{1/8}}{\delta^2}\right) < O\left(n^{1/2+1/8}\right) < O\left(n^{3/4}\right) < O(n\delta) $$
+	so the number of cache misses simplifies to 
+	$$(n+O(n\delta))/b + O(1).$$
+	Recall that $b \le O(\operatorname{polylog}{n})$, so $n\delta / b \ge \Omega(1)$, which makes the total number of cache misses
+	$$(n+O(n\delta))/b.$$
+
+\end{proof}
+
+\begin{proof}[Proof of Corollary \ref{cor:fullPartition}] We use $\delta = \sqrt{b/\log\log n}$ in the result proved in Theorem \ref{thm:fullPartition}. \\
+	First note that the assumptions of Theorem \ref{thm:fullPartition} are satisfied because $$O(\sqrt{b/\log\log n}) > \Omega(n^{-1/4}).$$
+	The algorithm achieves work $O(n)$. 
+	With high probability in $n$ the algorithm achieves span 
+	$$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}} = O(\log n\log\log n).$$
+	With high probability in $n$ the algorithm incurs fewer than 
+	$$(n+O(n\delta))/b = (n+O(n\sqrt{b/\log\log n}))/b$$ 
+	cache misses.
+	By assumption $\sqrt{b/\log\log n} = o(1)$, so this reduces to 
+	$$(n+o(n))/b$$
+	cache misses.
+	%% explain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)
+\end{proof}
+
+
+%%% Should make the distinction between n and the array size of subproblems more clear?
+%%% n always refers to the size of the top level
+%%% 2^{-i} delta n refers to an upper bound on the size of a subproblem
+\begin{theorem}
+	\label{thm:groupedPartitionAlg}
+	The Grouped Partition Algorithm using parameter $\delta_0\in(0,1)$ satisfying $\delta_0 \ge \Omega(n^{-1/4})$: achieves work $O(n)$, and with high probability in $n$, attains span 
+	$$O\left(b\left(\log^2 n + \frac{\log n}{\delta_0^2}\right)\right)$$
+	and incurs $(n+O(n \delta_0))/b$ cache misses. 
+\end{theorem}
+
+\begin{corollary}[Corollary of Theorem \ref{thm:groupedPartitionAlg}]
+	\label{cor:groupedPartitionAlg}
+	The Grouped Partition Algorithm using parameter $\delta_0=1/\sqrt{\log n}$:
+	achieves work $O(n)$, and with high probability in $n$, attains span $O(b\log^2 n)$ and incurs $(n+o(n))/b$ cache misses. 
+\end{corollary}
+
+\begin{proof}[Proof of Theorem \ref{thm:groupedPartitionAlg}]
+	By Theorem \ref{prop:generalResult}, the top level of the algorithm has work $O(n)$, span $O\Big(b\frac{\log n}{\delta_0^2}\Big),$
+	and incurs $$\frac{s+n}{b} + O(1)$$ cache misses.  
+	On the top layer of recursion the algorithm reduces the problem size by at least a factor of $4\delta$. 
+	On lower layers of recursion with high probability in $n$ the algorithm reduces the problem size by at least a factor of $1/2$ at each iteration by our choice of $\delta'=1/8$ as the parameter for lower levels of the Cache-Efficient Partial-Partition algorithm.
+	The size of the problem on lower levels thus is bounded above by
+	$$2^2n\delta_0, 2^1n\delta_0,2^0n\delta_0, 2^{-1}n\delta_0, \ldots$$
+	This sequence of sizes terminates, but the sum of the terms in the infinite sequence with terms of the form $\{2^{2-i}n\delta\}_{i=0}^{\infty}$ is an upper bound for the sum of the sizes of the lower levels of recursion. 
+	 The bound is
+	 $$\sum_{i=0}^{\infty}2^{2-i}n\delta_0 = 8n\delta_0.$$
+	This means that the total work of the algorithm is bounded above by $O(8n\delta_0) + O(n)$, so the total work is $O(n)$.
+	
+	In order to compute the span of the algorithm, we apply Proposition \ref{prop:generalResult} to the subarray, which has size bounded above by $2^{2-i}n\delta_0$, and has parameter $\delta'=1/8$. 
+	Thus, level $i$ contributes
+	$$O(b\cdot s)=O\Big(b\frac{\log(2^{-i}n\delta_0/b)}{(\delta')^2}\Big)=O(b(\log(n\delta_0/b)-i))$$ to the span.
+	Now note that because the algorithm at least cuts the problem size in half each time we will reduce the problem size to the base case in at most $\log (4n\delta_0)$ levels.
+	Thus, to get the total span on the lower levels of recursion, we must add together $O(\log(n\delta_0))$ terms of the form $O(b(\log (n\delta_0/b) - i))$.
+	This makes the total span on lower levels of recursion $O(b\log^2 (n\delta_0))=O(b\log^2 n)$, and the total span for the algorithm 
+	$$O\left(b\left(\log^2 n + \frac{\log n}{\delta_0^2}\right)\right).$$
+	To compute the total number of cache misses of the algorithm, we add together $(n+s)/b+O(1)$ for the top level, and then at most
+	$$\sum_{0 \leq i<\log 4n\delta}\frac{1}{b}\cdot O\paren*{2^{2-i}n\delta_0 + \frac{\log 2^{2-i}n\delta_0/b}{(1/8)^2}}$$
+	for lower levels.
+	The first term is the sum of a geometric series and thus is $O(n\delta_0)/b$. 
+	We can bound the second term by $O(\log^2 n)/b$ by taking a larger term at each index in the sum. 
+	Then the total number of cache misses for the algorithm is 
+	$$\frac{1}{b}\left(n+\frac{\log n}{\delta_0^2 }\right) + O(1) + O(\log^2 n) / b + O(n\delta_0) / b = (n+O(n\delta_0))/b.$$
+\end{proof}
+
+\begin{proof}[Proof of Corollary \ref{cor:groupedPartitionAlg}]
+	We use $\delta_0 = 1/\sqrt{\log n}$ in the result proved in Theorem \ref{thm:groupedPartitionAlg}.
+	First note that the assumptions of Theorem \ref{thm:groupedPartitionAlg} are satisfied because 
+	$$\delta_0=1/\sqrt{\log n} \ge \Omega(n^{-1/4}).$$
+	The algorithm has work $O(n)$. 
+	With high probability in $n$ the algorithm has span 
+	$$O\left(b\left(\log^2 n + \frac{\log n}{\delta_0^2}\right)\right) =  O(\log^2 n),$$ 
+	and incurs 
+	$$(n+O(n\delta_0))/b = (n+O(n/\sqrt{\log n}))/b = (n+o(n))/b$$ 
+	cache misses.
+\end{proof}
+
+% In addition to these desirable theoretical guarantees, these algorithms performs well in practice, as shown in the experimental section.
+% Also, because the Cache-Efficient Partial-Partition Algorithm achieves an optimal number of cache misses up to lower order terms, its bandwidth bound is optimal.
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% START OF STUFF THAT SHOULD GET ADDED BACK IN maybe integrate some of this stuff back into the above 
 \section{Analysis of Grouped Partition}
 In this section we give a more detailed description of our final algorithm, which we call the \defn{Grouped Partition Algorithm} and prove some key results regarding its performance and number of caches misses. 
 
@@ -428,11 +718,12 @@ See Figure \ref{alg:parallelPartition} for a pseudocode implementation of the al
 	\end{algorithmic}	
 \end{figure*}
 
-Now we prove the following lemma to simultaneously bound $|\mu - \mu_y|$ for all $y$. 
-\begin{lemma}
-Given $n, \mu$, For our choice of $b, \delta$, if $s=\Theta(\frac{\log n}{\delta^2})$ and $g = \frac{n}{b\cdot s}$ then the Grouped Partition Algorithm forms $g$ such that, with high probability in $n$, for all $y$, $|\mu - \mu_y| < \delta$.
-\label{lem:groupedAlgDelta}
-\end{lemma}
+% Now we prove the following lemma to simultaneously bound $|\mu - \mu_y|$ for all $y$. 
+% \begin{lemma}
+% Given $n, \mu$, For our choice of $b, \delta$, if $s=\Theta(\frac{\log n}{\delta^2})$ and $g = \frac{n}{b\cdot s}$ then the Grouped Partition Algorithm forms $g$ such that, with high probability in $n$, for all $y$, $|\mu - \mu_y| < \delta$.
+% \label{lem:groupedAlgDelta}
+% \end{lemma}
+
 
 \begin{proof}[Proof of Lemma \ref{lem:groupedAlgDelta}]
 $ $\\
@@ -456,130 +747,8 @@ Because $G_y[i]$ is an integer random variable which assumes an index uniformly 
 $$\E(\mu_y) = \frac{1}{s\cdot b}\sum_{i=0}^{s-1}\sum_{k=0}^{g-1}\frac{1}{g}\pred(k+i\cdot g).$$
 	But the argument to $\pred$ assumes all possible values from $[0, s\cdot g -1]$, so we can rewrite the sum as
 $$\E(\mu_y) = \frac{1}{b\cdot s \cdot g}\sum_{j=0}^{s\cdot g-1}\pred(j) = \frac{n \cdot \mu}{b \cdot s \cdot g} = \mu.$$ 
-We are looking for the probability that 
-$$\Big | \mu_y - \mu \Big | \geq \delta.$$
-	Note that $\mu_y$ is the average of the $s$ independent random variables $$\frac{1}{b}\pred(G_y[i]) \in [0, 1]$$ by Equation \eqref{eqn:emui}, so we can apply Hoeffding's inequality.
-Let $M_y$ be the event that $|\mu_y-\mu| \geq \delta$. 
-Hoeffding's inequality gives us that the probability of $\mu_y$ deviating from its expected value, which was calculated to be $\mu$, by more than $\delta$ is
-	$$\Pr(M_y) \leq \exp(-2s\delta^2).$$
-We have found this bound for each group $G_y$ by themselves, but we need the bound to apply to all groups at once. 
-To extend the bound to apply to all groups at once we use the idea of the union bound, which says that if a collection of events each individually do not happen with high probability, then the union of all of these events also does not occur with high probability.
-We wish to make $$\Pr\paren*{\bigcup_{y=0}^{g-1} M_y } < \epsilon.$$ 
-Using the fact that 
-	$$\Pr\paren*{\bigcup_{y=0}^{g-1} M_y } \leq \sum_{y\in [0,g-1]} \Pr(M_y), $$
-	we see that by making each $$\Pr(M_y) <\epsilon / g,$$ we can make the probability of any of the events $M_0,\ldots,M_{g-1}$ occurring less than $\epsilon$.
-	We established an upper bound for $\Pr(M_y)$ above with Hoeffding's inequality, so to ensure that $\Pr(M_y)$ is less than $\epsilon / g$ it suffices to make the upper bound less than $\epsilon / g$. That is,
-	$$\Pr(M_y) < \exp(-2s\delta^2) \leq \frac{\epsilon}{g}.$$
-Solving for the necessary size of $s$ we find that  
-	$$s \geq \frac{\ln(g / \epsilon)}{2\delta^2}.$$
-If we want all events $M_y$ to not occur with high probability in $n$, then we must set $\epsilon = 1/n^c$. 
-Thus,
-	$$s \geq \frac{\ln(g \cdot n^c)}{2\delta^2}.$$
-	%% HEY maybe do the version that is parameterized by epsilon...
-Larger values of $s$ hurt our span however, so we will chose $\delta$ to be just big enough to ensure that $M_y$ all happen with high probability in $n$.
-Thus we chose 
-	$$s = \Theta \paren*{ \frac{\log n}{\delta^2}}$$
-	to ensure that with high probability in $n$ ${|\mu - \mu_y| < \delta}$ for all $y$.
-\end{proof}
 
-\paragraph{Grouped Partition Subproblem Analysis}
-Once the Grouped Partition algorithm has made a single pass over the array there is a subproblem left to solve.
-Lemma \ref{lem:groupedAlgDelta} can be used to find out how much smaller we can expect the subarray to be relative to the original array, from which we can derive the span and cache efficiency of the Grouped Partition Algorithm.
-There are two options for solving the recursive subproblem, and we calculate the span of the algorithm given each approach.
-
-\begin{proposition}
-By first applying the Grouped Partition algorithm to the top level of recursion for the partition problem, and then solving the remaining subproblem problem with an already existing algorithm for parallel partition, the algorithm achieves span
-	$$T_\infty(n) = O\paren*{\paren*{\frac{b}{\delta^2} + \log\log n} \log n},$$ and makes $(1+
-\delta)\cdot n$ cache misses.
-\end{proposition}
-\begin{proof}
-From previous work we know that it is possible to perform a parallel partition of an array of size $\delta\cdot n$ with span $O(\log(n\delta)\log\log(n\delta)).$ 
-With this method our algorithm consists of first sorting each of the $g$ groups in serial, which will take time $O(s\cdot b)$ for each group because serial partition is has linear run time in the input size and $|U_y|=|G_y|\cdot |P_j| = s \cdot b$. 
-After this the algorithm will have, with high probability in $n$, a subarray of size $n \cdot \delta$ to partition, which it does in parallel with the other algorithm. 
-In computing the span of our algorithm, all of the groups can be partitioned in serial at the same time. 
-This makes the span of our algorithm, with this choice of a recursive technique, 
-	$$T_\infty(n) = O(s\cdot b + \log(n\delta)\log\log(n\delta)).$$ 
-	By Lemma \ref{lem:groupedAlgDelta} we choose $s = \Theta(\frac{\log n}{\delta^2})$, so the span becomes 
-	$$T_\infty(n)=  O\paren*{b \cdot \frac{\log n}{\delta ^2} + \log(n\delta)\log\log(n\delta)}.$$
-Note that $\log(n\delta) = \log(n) - \log(\frac{1}{\delta}) < \log n$ so we can simplify the span to
-	$$T_\infty(n) = O\paren*{\paren*{\frac{b}{\delta^2} + \log\log n} \log n}.$$
-
-	Now we compute the number of cache misses incurred. 
-	On the top level, the algorithm incurs $n$ cache misses for the serial partitions of all the groups.
-	%%%%%% CHECK THISSSSSSSSSSS
-	When recursing on an array of size $\delta \cdot n$ the algorithm incurs $\delta \cdot n$ cache misses. 
-	Thus, in total the algorithm incurs $(\delta + 1) \cdot n$ cache misses.
-\end{proof}
-
-\paragraph{Recursing With the Same Algorithm}
-We could instead recurse with the Grouped Partition algorithm.
-Note that with Francis and Pannan's algorithm which only performs well on random inputs we could not do this because their algorithm works poorly on the subarray generated, but our algorithm's performance is guaranteed for arbitrary inputs so we can recurse with our algorithm.
-There are two ways we can do this. 
-We could applying special treatment to the top level of recursion because it is by far the biggest problem, or we could treat all levels the same.
-
-\begin{proposition}
-If we use the same allowable deviation $\delta$ for $|\mu_y - \mu|$ at all levels of recursion then the algorithm has span $$T_{\infty}(n) = \Theta(b\log^2 n),$$ and incurs approximately $2n$ cache misses.
-\end{proposition}
-
-\begin{proof}
-If we choose some constant $\delta$, then by Lemma \ref{lem:groupedAlgDelta} choosing $s = \Theta(\log n)$ makes ${|\mu - \mu_y| < \delta}$ for all $y$ with high probability in $n$. 
-Then,
-$$\mu - \delta < \mu_y < \mu + \delta$$
-for all $y$, so 
-	$$\max{\mu_y} - \min(\mu_y) < 2\delta. $$
-%% The evasion of a hard inequality with the theta stuff is probably bad, especially given that the real inequality isn't too nasty and is pretty informative	
-%% here is a sketch of the math for the real stuff
-%% $$|\mu - \mu_y|<\delta$$
-%% index of the group P_j that v_y lies in is 
-%% G_y[\mu_y s] = g \mu_y s + ((X[\mu_y s] + y)%g)
-%% g\mu_y s \leq G_y[\mu_y s] < g\mu_y s + g
-%% v_y is then within one of these blocks
-%% ie   g\mu_y s b \leq   v_y < (g \mu_y s +g)b + b
-%% note n = gsb
-%% so this is    n \mu_y \leq v_y < n \mu_y + (g+1)b
-%% \mu_y n \leq v_y < \mu_y n + (g+1)b
-%% $$v_{max} < n(\mu +\delta) + (g+1)b$$
-%% v_{min} > n(\mu - \delta)
-%% v_{max} - v_{min} < 2n\delta +(g+1)b
-We can compute $v_y$ from $\mu_y$, because $\lfloor \mu_y\cdot s \rfloor$ gives the number of parts $P_j$ where $j \in G_y$ that are completely filled with predecessors once the collection $U_y$ is partitioned. 
-There are $s$ portions of size $g\cdot b$ in the array, so to find the index of the start of the portion of index $\lfloor \mu_y\cdot s \rfloor$, we compute
-	$$v_y = \Theta((\mu_y \cdot s)\cdot (g\cdot b)).$$
-	But this is just 
-	$$v_y = \Theta(\mu_y \cdot n).$$
-	Thus, we can compute the difference ${v_{max} - v_{min}}$ as 
-	$$v_{max} - v_{min} = \Theta(n \cdot (\max{\mu_y} - \min{\mu_y}))$$
-which is
-	$$v_{max} - v_{min} = \Theta\paren*{\delta\cdot n}$$
-	Thus for an appropriate constant choice of $\delta$ the algorithm could be made to reduce the problem size by half at each step. We can compute the span of the algorithm given this choice of $\delta$
-$$T_{\infty}(n) = \Theta(b\cdot s)+T_{\infty}(n/2).$$
-	Note that the $\Theta(b\cdot s)$ term incurred from the serial partitioning of the groups in parallel can be re-expressed as $\Theta(b \log n)$ because we chose $s=\Theta(\log n)$.
-Thus we can recursively express the span as 
-$$T_{\infty}(n) = \Theta(b\cdot \log n)+T_{\infty}(n/2).$$
-	The depth of the recursion is $\Theta(\log n)$ because the input size is reduced by half at each level. Thus, by adding up the $\log n$ terms of the form $$b \cdot \log (n/2^i) = b\cdot (\log n - i), $$
-we get the span of the algorithm, which is 
-	$$T_{\infty}(n) = \Theta(b\log^2 n).$$
-
-	The number of cache misses is approximately
-	$$n + n/2^1 + n/2^2 + \cdots = 2n .$$
-\end{proof}
-
-\begin{proposition}
-	If we take $\delta = O(1 / \sqrt{\log n})$ on the top level of recursion and then use a constant $\delta$ on lower levels of recursion, then the algorithm has span $\Theta(b\log^2 n)$.
-\end{proposition}
-\begin{proof}
-We could potentially achieve better performance by using a smaller $\delta$ initially, and then using a larger $\delta$ at lower levels of recursion.
-This means that the algorithm will reduce the size of the problem significantly on the top level of recursion and then use a $\delta$ that does not hurt its span on lower levels where it is not critical that the size gets reduced a lot.
-We can compute the span of the algorithm when run on the initial input $n_0$,
-$$T_\infty(n_0) = b\cdot \Theta(\frac{\log n_0}{\delta ^2})+T_\infty(\delta n_0)$$
-and for all $n<n_0$, where we use $\delta_{fake} = \frac{1}{2}$
-$$T_\infty(n) =  b\cdot \Theta(\log n_0)+T_\infty(\delta_{fake} n).$$
-From the previous part we have shown that once we are using $\delta_{fake}$ we get span $\Theta(b\log^2 n)$, so we can have $\delta = \frac{1}{\sqrt{\log n}}$ to get span $\Theta(b\log^2 n)$, but this is much better than before. 
-The improvement can be seen in the cache behavior analysis.
-The algorithm incurs $n$ cache misses on the top layer, and then at lower layers the algorithm incurs less than
-	$$\frac{1}{\sqrt{\log n}} + \frac{1}{2\sqrt{\log n}} + \cdots = \frac{2}{\sqrt{\log n}}.$$
-	Thus, the total number of cache misses is $$(1+o(1))n$$ because $\frac{2}{\log n} \in o(1)$.
-
-\end{proof}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END OF STUFF THAT MIGHT GET ADDED BACK IN
 	
 	
 \section{Systems Performance}
