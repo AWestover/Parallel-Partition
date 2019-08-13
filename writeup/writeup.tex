@@ -98,7 +98,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 
 \begin{document}
-\title[]{Simple and Space-Efficient Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
+\title[]{In-Place Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
 \subtitle{}
 
 \author{William Kuszmaul}
@@ -119,27 +119,11 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 
 \begin{abstract}
-We present a simple in-place algorithm for parallel partition that has
-work $O(n)$ and span $O(\log n \cdot \log \log n)$. The algorithm uses
-only exclusive read/write shared variables, and can be implemented
-using parallel-for-loops without any additional concurrency
-considerations (i.e., the algorithm is in the EREW PRAM model). As an
-immediate consequence, we also get a simple in-place quicksort
-algorithm with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
+We present an in-place algorithm for the parallel partition problem that has work $O(n)$ and span $O(\log n \cdot \log \log n)$. The algorithm uses only exclusive read/write shared variables, and can be implemented using parallel-for-loops without any additional concurrency considerations (i.e., the algorithm is EREW). As an immediate consequence, we also get an in-place quicksort algorithm with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
 
-Using our algorithmic techniques, we implement an (almost) in-place
-parallel partition. In addition to achieving much better memory
-utilization, the algorithm leverages its improved cache behavior to
-achieve a speedup over its out-of-place counterpart.
+Using our algorithmic techniques, we implement an (almost) in-place parallel partition. In addition to achieving much better memory utilization, the algorithm leverages its improved cache behavior to achieve a speedup over its out-of-place counterpart. Both algorithms remain bottlenecked by memory bandwidth, however, due to the fact that they require multiple passes over the input array.
 
-We also present an alternative in-place parallel-partition algorithm
-with a larger span of $O(\sqrt{n \log n})$, but which is designed to
-have very small overhead. We show that when the algorithm
-is tuned appropriately, and given a large enough input to achieve high
-parallelism, the algorithm can be made to outperform is lower-span
-peers.
-
-
+Our second contribution is an in-place EREW algorithm with polylogarithmic span and provably optimal cache behavior, up to small-order factors.  The resulting algorithm achieves near-ideal scaling in practice by avoiding the memory-bandwidth bottleneck. The algorithm's performance is comparable to that the Blocked Strided Algorithm of Francis, Pannan, Frias, and Petit, which is the previous state-of-the art for parallel EREW sorting algorithms, but which lacks theoretical guarantees on its span and cache behavior.
 \end{abstract}
 
 %
@@ -171,7 +155,6 @@ peers.
  
 
 \section{Introduction}
-\todo{Note that strided algorithm has been shown by past work to perform well in practice because of its cache behavior.}
 
 A \defn{parallel partition} operation rearranges the elements in an
 array so that the elements satisfying a particular \defn{pivot
@@ -214,42 +197,46 @@ that can be executed in memory. Many external memory algorithms (i.e.,
 algorithms for problems too large to fit in memory) perform large
 subproblems in memory; the size of these subproblems is again
 bottlenecked by the algorithm's memory-overhead \cite{Vitter08}. In
-multi-user systems, memory efficiency is also important on small
-inputs, since processes with larger memory-footprints can hog the
-cache, slowing down other processes. 
+multi-user systems, processes with larger memory-footprints can hog
+the cache and the memory bandwidth, slowing down other processes.
 
 For sorting algorithms, in particular, special attention to memory
 efficiency is often given. This is because (a) a user calling the sort
 function may already be using almost all of the memory in the system;
 and (b) sorting algorithms, and especially parallel sorting
-algorithms, are often bottlenecked by memory bandwidth.
+algorithms, are often bottlenecked by memory bandwidth. The latter
+property, in particular, means that any parallel sorting algorithm
+that wishes to achieve state-of-the art performance on a large
+multi-processor machine must be (at least close to) in place.
 
-In the context of parallel algorithms, however, the most practically
-efficient sorting algorithms fail to run in place, at least without
-the additional use of atomic-fetch-and-add variables
-\cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03}, or the loss of
-theoretical guarantees on parallelism \cite{FrancisPa92}. Parallel
-merge sort \cite{Hagerup89} was made in-place by Katajainen
-\cite{Katajainen93}, but has proven too sophisticated for practical
-applications. Bitonic sort \cite{BlellochLe98} is naturally in-place,
-and can be practical in certain applications on super computers, but
-suffers in general from requiring work $\Theta(n \log^2 n)$ rather
-than $O(n \log n)$. Parallel quicksort, on the other hand, despite the
-many efforts to optimize it \cite{HeidelbergerNo90, AxtmannWi17,
-  TsigasZh03, FrancisPa92, Frias08}, has eluded any in-place EREW (or
-even CREW) algorithms due to its reliance on parallel
-partition.\footnote{In a \defn{CREW} algorithm, reads may be
-  concurrent, but writes may not. CREW stands for
-  \emph{concurrent-read exclusive-write}.}
-
+Currently the only practical in-place parallel sorting algorithms
+either rely heavily on atomic operations or other concurrency
+mechanisms \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03}, or eschew
+theoretical guarantees \cite{FrancisPa92}. Parallel merge sort
+\cite{Hagerup89} was made in-place by Katajainen \cite{Katajainen93},
+but has proven too sophisticated for practical applications. Bitonic
+sort \cite{BlellochLe98} is naturally in-place, and can be practical
+in certain applications on super computers, but suffers in general
+from requiring work $\Theta(n \log^2 n)$ rather than $O(n \log
+n)$. Parallel quicksort, on the other hand, despite the many efforts
+to optimize it \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03,
+  FrancisPa92, Frias08}, has eluded any in-place EREW (or even CREW)
+algorithms due to its reliance on parallel partition.\footnote{In a
+  \defn{CREW} algorithm, reads may be concurrent, but writes may
+  not. CREW stands for \emph{concurrent-read exclusive-write}.}
 
 \paragraph{Results}
-We present a simple in-place algorithm for parallel partition that has
-work $O(n)$ and span $O(\log n \cdot \log \log n)$. The algorithm uses
-only exclusive read/write shared variables, and can be implemented
-using parallel-for-loops without any additional concurrency
-considerations. As an immediate consequence, we also get a simple
-in-place quicksort algorithm with work $O(n \log n)$ and span
+We show that parallel partition can be implemented in place, and
+without the use of concurrency mechanisms. All of the algorithms
+considered in this paper use only exclusive read/write shared
+variables, and can be implemented using parallel-for-loops without any
+additional concurrency considerations. 
+
+Our first result is a set of techniques that allows us to adapt the
+standard parallel partition algorithm to be fully in place. The new
+algorithm has work $O(n)$ and span $O(\log n \cdot \log \log
+n)$. As an immediate consequence, we also get a
+simple in-place quicksort algorithm with work $O(n \log n)$ and span
 $O(\log^2 n \log \log n)$.
 
 Using our algorithmic techniques, we implement and optimize a
@@ -257,17 +244,26 @@ space-efficient parallel partition. Because the in-place algorithm
 eliminates the use of large auxiliary arrays, the algorithm is able to
 achieve a significant reduction in cache misses over its out-of-place
 counterpart, resulting in performance improvements both in serial and
-in parallel.
+in parallel over the standard parallel partition algorithm.
 
-We also present an alternative in-place parallel-partition algorithm
-with a larger span of $O(\sqrt{n \log n})$, but which is designed to
-have very small engineering overhead. On a single core, the algorithm
-performs within 25\% of the serial GNU Libc quicksort partition
-algorithm. We show that when the algorithm is tuned appropriately, and
-given a large enough input to achieve high parallelism, the algorithm
-can be made to outperform is lower-span peers. The low-span
-algorithms, on the other hand, ensure good scaling with less
-sensitivity to the number of cores and the input size.
+The in-place algorithm remains bottlenecked by memory bandwidth,
+however, due to the fact that multiple passes over the input array are
+required. The memory-bandwidth bottleneck has led past researchers
+\cite{FrancisPa92, Frias08} to introduce the so-called \defn{Strided
+  Algorithm}, which has near optimal cache behavior in practice, but
+which exhibits theoretical guarantees only on certain random input
+arrays.
+
+Our second main result is an algorithm that we call the \defn{Smoothed
+  Striding Algorithm}. By randomly perturbing the internal structure
+of the Strided Algorithm, and adding a recursion step that was
+previously not possible, we arrive at a new algorithm with provably
+good span and cache behavior. The Smoothed Striding Algorithm is
+in-place, has polylogarithmic span, and exhibits provably optimal
+cache behavior up to small-order factors. In practice, the Smoothed
+Striding Algorithm performs within 15\% of the Strided Algorithm on a
+large number of threads.
+
 
 
 \section{Preliminaries}\label{secprelim}
@@ -366,10 +362,10 @@ array $A$ into $p$ parts and assigns one part to each thread. Reducing
 the space below $o(n)$ has remained open until now, even when the
 number of threads is fixed.
 
-\section{A Simple In-Place Algorithm}\label{secalg}
+\section{An In-Place Algorithm with Span $O(\log n \log \log n)$}\label{secalg}
 
-In this section, we present a simple in-place algorithm for parallel
-partition. 
+In this section, we present an in-place algorithm for parallel
+partition with span $O(\log n \log \log n)$.
 
 We assume without loss of generality that the total number of
 successors in $A$ exceeds the number of predecessors, since otherwise
@@ -553,9 +549,16 @@ blocks $X_i$ are no longer required to encode values, we can replace
 each overwritten $x_i$ with its correct value (given by the value of
 the preceding element).
 
-\section{A Cache Efficient Parallel Partition}\label{sec:smoothing}
+\section{A Cache Efficient In-Place Parallel Partition}\label{sec:smoothing}
 
-In Section \ref{secexp}, we will see that, although the techniques introduced in Section \ref{secalg} achieve speedups over the classic parallel-prefix-based partition algorithm, they nonetheless continue to be bottlenecked by cache misses. In this section, we introduce a simple alternative algorithm, which we call the \defn{Smoothed Striding Algorithm}, which exhibits provably optimal cache behavior (up to small-order factors). The Smoothed Striding Algorithm is fully in-place and has polylogarithmic span.
+In Section \ref{secexp}, we will see that, although the techniques
+introduced in Section \ref{secalg} achieve speedups over the classic
+parallel-prefix-based partition algorithm, they nonetheless continue
+to be bottlenecked by cache misses. In this section, we introduce a
+second algorithm, called the \defn{Smoothed Striding Algorithm}, which
+exhibits provably optimal cache behavior (up to small-order
+factors). The Smoothed Striding Algorithm is fully in-place and has
+polylogarithmic span.
 
 %% In this section, we follow the convention of 0-indexing arrays (i.e.,
 %% every array starts with element $0$), in order to allow for modular
@@ -1059,78 +1062,6 @@ A particularly natural parameter setting for the Recursive algorithm occurs at $
 
 \section{Performance Comparisons}\label{secexp}
 
-
-
-\begin{figure*}
-  \begin{center}
-    \CILKsorttable
-  \end{center}
-  \caption{We compare the performance of the low-space and high-span
-    sorting implementations running on varying numbers of threads and
-    input sizes. The $x$-axis is the number of worker threads and the
-    $y$-axis is the multiplicative speedup when compared to the Libc serial
-    baseline. Each time (including each serial baseline)
-    is averaged over five trials.}
-  \label{tablesort}
-\end{figure*}
-
-
-
-\begin{figure*}
-  \begin{center}
-    \CILKtable 
-  \end{center}
-    \caption{For a fixed table-size $n = 2^{30}$, we compare each
-      implementation's runtime to the Libc serial baseline, which takes 3.9
-      seconds to complete (averaged over five trials). The $x$-axis
-      plots the number of worker threads being used, and the $y$-axis
-      plots the multiplicative speedup over the serial baseline. Each
-      time (including the serial baseline) is averaged over five trials.}
-      \label{tablecilk}
-\end{figure*}
-
-%% \begin{figure*}
-%%   \begin{center}
-%%     \cilktwotabletwo
-%%   \end{center}
-%%   \caption{We compare the performance of the implementations running
-%%     on eighteen worker threads on varying input sizes. The $x$-axis is
-%%     the log-base-$2$ of the input size, and the $y$-axis is the
-%%     multiplicative speedup when compared to the serial baseline. Each
-%%     time (including each serial baseline) is averaged over five
-%%     trials.}
-%%   \label{tablecilk2}
-%% \end{figure*}
-
-
-\begin{figure*}
-  \begin{center}
-    \serialtable
-  \end{center}
-  \caption{We compare the performance of the implementations in
-    serial, with no scheduling overhead. The $x$-axis is the
-    log-base-$2$ of the input size, and the $y$-axis is the
-    multiplicative slowdown when compared to the Libc serial baseline. Each
-    time (including the baseline) is averaged over five
-    trials.}
-  \label{tableserial}
-\end{figure*}
-
-\begin{figure*}
-  \begin{center}
-    \partitionbandwidthboundtable
-  \end{center}
-  \caption{We compare the performances of the low-space and
-    Smoothed Striding parallel-partition algorithms to their ideal
-    performance determined by memory-bandwidth constraints on inputs
-    of size $2^{30}$. The $x$-axis is the number of worker threads,
-    and the $y$-axis is the multiplicative speedup when compared to
-    the Libc serial baseline (which is computed by an average over five
-    trials). Each data-point is averaged over five trials.}
-  \label{tablebandwidth}
-\end{figure*}
-
-
 In this section, we implement the techniques from Sections
 \ref{secalg} and \ref{sec:smoothing} to build space-efficient and
 in-place parallel-partition functions.
@@ -1574,7 +1505,7 @@ of auxiliary memory, while still using only exclusive read/write
 shared variables, and maintaining a polylogarithmic span. Although the
 superior cache performance of the low-space algorithm results in
 practical speedups over its out-of-place counterpart, both algorithms
-remain far from the state-of-the art due to memory bandwith bottlenecks. To close this gap, we also
+remain far from the state-of-the art due to memory bandwidth bottlenecks. To close this gap, we also
 presented a second in-place algorithm, the Smoothed Striding
 Algorithm, which achieves polylogarithmic span while guaranteeing
 provably optimal cache performance up to low-order factors. The
@@ -1612,6 +1543,75 @@ future work.
 This research was supported in part by NSF Grants 1314547 and 1533644. 
 
 
+\begin{figure*}
+  \begin{center}
+    \CILKtable 
+  \end{center}
+    \caption{For a fixed table-size $n = 2^{30}$, we compare each
+      implementation's runtime to the Libc serial baseline, which takes 3.9
+      seconds to complete (averaged over five trials). The $x$-axis
+      plots the number of worker threads being used, and the $y$-axis
+      plots the multiplicative speedup over the serial baseline. Each
+      time (including the serial baseline) is averaged over five trials.}
+      \label{tablecilk}
+\end{figure*}
+
+%% \begin{figure*}
+%%   \begin{center}
+%%     \cilktwotabletwo
+%%   \end{center}
+%%   \caption{We compare the performance of the implementations running
+%%     on eighteen worker threads on varying input sizes. The $x$-axis is
+%%     the log-base-$2$ of the input size, and the $y$-axis is the
+%%     multiplicative speedup when compared to the serial baseline. Each
+%%     time (including each serial baseline) is averaged over five
+%%     trials.}
+%%   \label{tablecilk2}
+%% \end{figure*}
+
+
+\begin{figure*}
+  \begin{center}
+    \serialtable
+  \end{center}
+  \caption{We compare the performance of the implementations in
+    serial, with no scheduling overhead. The $x$-axis is the
+    log-base-$2$ of the input size, and the $y$-axis is the
+    multiplicative slowdown when compared to the Libc serial baseline. Each
+    time (including the baseline) is averaged over five
+    trials.}
+  \label{tableserial}
+\end{figure*}
+
+\begin{figure*}
+  \begin{center}
+    \partitionbandwidthboundtable
+  \end{center}
+  \caption{We compare the performances of the low-space and
+    Smoothed Striding parallel-partition algorithms to their ideal
+    performance determined by memory-bandwidth constraints on inputs
+    of size $2^{30}$. The $x$-axis is the number of worker threads,
+    and the $y$-axis is the multiplicative speedup when compared to
+    the Libc serial baseline (which is computed by an average over five
+    trials). Each data-point is averaged over five trials.}
+  \label{tablebandwidth}
+\end{figure*}
+
+\begin{figure*}
+  \begin{center}
+    \CILKsorttable
+  \end{center}
+  \caption{We compare the performance of the low-space and high-span
+    sorting implementations running on varying numbers of threads and
+    input sizes. The $x$-axis is the number of worker threads and the
+    $y$-axis is the multiplicative speedup when compared to the Libc serial
+    baseline. Each time (including each serial baseline)
+    is averaged over five trials.}
+  \label{tablesort}
+\end{figure*}
+
+
+\newpage
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{paper}
 
