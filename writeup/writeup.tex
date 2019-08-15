@@ -1,5 +1,5 @@
-\documentclass[sigplan, 10pt]{acmart}
-
+\documentclass[sigplan, 10pt, nonacm]{acmart}
+\usepackage[moderate]{savetrees}
 
 \newcommand{\alek}[1]{\textcolor{red}{#1}}
 
@@ -24,9 +24,9 @@
 \acmISBN{123-4567-24-567/08/06}
 
 %Conference
-\acmConference[APOCS '20]{}{January 2020}{Salt Lake City, UT, USA}
-\acmYear{2019}
-\copyrightyear{2019}
+%% \acmConference[APOCS '20]{}{January 2020}{Salt Lake City, UT, USA}
+%% \acmYear{2019}
+%% \copyrightyear{2019}
 
 
 \acmArticle{4}
@@ -133,19 +133,19 @@ Our second contribution is an in-place EREW algorithm with polylogarithmic span 
 % http://dl.acm.org/ccs.cfm
 % Please copy and paste the code instead of the example below.
 %
-\begin{CCSXML}
-<ccs2012>
-<concept>
-<concept_id>10003752.10003809.10010170.10010171</concept_id>
-<concept_desc>Theory of computation~Shared memory algorithms</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-</ccs2012>
-\end{CCSXML}
+%% \begin{CCSXML}
+%% <ccs2012>
+%% <concept>
+%% <concept_id>10003752.10003809.10010170.10010171</concept_id>
+%% <concept_desc>Theory of computation~Shared memory algorithms</concept_desc>
+%% <concept_significance>500</concept_significance>
+%% </concept>
+%% </ccs2012>
+%% \end{CCSXML}
 
-\ccsdesc[500]{Theory of computation~Shared memory algorithms}
+%% \ccsdesc[500]{Theory of computation~Shared memory algorithms}
 
-\keywords{Parallel Partition, EREW PRAM, in-place algorithms}
+%% \keywords{Parallel Partition, EREW PRAM, in-place algorithms}
 
 
 \maketitle
@@ -222,8 +222,8 @@ in certain applications on super computers, but suffers in general
 from requiring work $\Theta(n \log^2 n)$ rather than $O(n \log
 n)$. Parallel quicksort, on the other hand, despite the many efforts
 to optimize it \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03,
-  FrancisPa92, Frias08}, has eluded any in-place EREW (or even CREW)
-algorithms due to its reliance on parallel partition.\footnote{In a
+  FrancisPa92, Frias08}, has eluded any in-place EREW (or CREW)
+algorithms due to its reliance on parallel partition.\footnote{In aCRCW
   \defn{CREW} algorithm, reads may be concurrent, but writes may
   not. CREW stands for \emph{concurrent-read exclusive-write}.}
 
@@ -316,9 +316,9 @@ Note that threads are not in lockstep (i.e., they may progress at arbitrary diff
 In an \defn{in-place} algorithm, each thread is given $O(\polylog n)$
 memory upon creation that is deallocated when the thread dies. This
 memory can be shared with the thread's children. However, the depth of
-the parent-child tree is not permitted to exceed $O(polylog n)$.
+the parent-child tree is not permitted to exceed $O(\polylog n)$.
 
-Whereas the EREW memory model prohibits concurrent accesses to memory, on the other side of the spectrum are CRCW (concurrent-read-concurrent-write) models, which allow for both reads and writes to be performed concurrently (and in some variants even allow for atomic operations) \cite{Blelloch96,AcarBl16,MatiasVi95}. One approach to designing efficient EREW algorithms is to simulate efficient CRCW algorithms in the EREW model \cite{MatiasVi95}. The known simulation techniques substantial space overhead, however, preventing the design of in-place algorithms \cite{MatiasVi95}.\footnote{The known simulation techniques also increase the total work in the original algorithm, although this can be acceptable if only a small number of atomic operations need to be simulated.}
+Whereas the EREW memory model prohibits concurrent accesses to memory, on the other side of the spectrum are CRCW (concurrent-read-concurrent-write) models, which allow for both reads and writes to be performed concurrently (and in some variants even allow for atomic operations) \cite{Blelloch96,AcarBl16,MatiasVi95}. One approach to designing efficient EREW algorithms is to simulate efficient CRCW algorithms in the EREW model \cite{MatiasVi95}. The known simulation techniques require substantial space overhead, however, preventing the design of in-place algorithms \cite{MatiasVi95}.\footnote{The known simulation techniques also increase the total work in the original algorithm, although this can be acceptable if only a small number of atomic operations need to be simulated.}
 
 %% HERE: Is where we can talk about the more powerful alternative to EREW, and there relationship, and why we can't just simulate CRCW (or, more importantly, ERCW). Make it clear that the Exclusive Read part is not actually very important -- it's the exclusive write part that's hard.
 
@@ -330,7 +330,7 @@ Whereas the EREW memory model prohibits concurrent accesses to memory, on the ot
 \paragraph{The Parallel Partition Problem}
 The parallel partition problem takes an input array $A$ of size $n$,
 and a \defn{decider function} $\dec$ that determines for each element
-$a[i] \in A$ whether or not $A[i]$ is a \defn{predecessor} or a
+$A[i] \in A$ whether or not $A[i]$ is a \defn{predecessor} or a
 \defn{successor}. That is, $\dec(A[i]) = 1$ if $A[i]$ is a
 predecessor, and $\dec(A[i]) = 0$ if $A[i]$ is a successor. The
 behavior of the parallel partition is to reorder the elements in the
@@ -398,20 +398,21 @@ swaps.
 
 To combat this, we begin the algorithm with a Preprocessing Phase in
 which $A$ is rearranged so that every prefix is
-\defn{successor-heavy}, meaning that for all $t$, the first $t$ elements contain at
-least $\frac{t}{4}$ successors. Then we compute the
-prefix-sum array $B$, and begin the Reordering Phase. Using the
+\defn{successor-heavy}, meaning that for all $t$, the first $t$
+elements contain at least $\frac{t}{4}$ successors. Then we compute
+the prefix-sum array $B$, and begin the Reordering Phase. Using the
 fact that the prefixes of $A$ are successor-heavy, the reordering can
 now be performed in place as follows: (1) We begin by recursively
 reordering the prefix $P$ of $A$ consisting of the first $4/5 \cdot n$
 elements, so that the predecessors appear before the successors; (2)
-Then we simply swap each predecessor $A[i]$ with the corresponding
-element $B[A[i]]$. The fact that the prefix $P$ is successor-heavy
-ensures that the final $\frac{1}{5} \cdot n$ elements of the reordered
-$P$ will consist of successors. This implies that for each of the
-swaps between predecessors $A[i]$ and earlier positions $B[A[i]]$, the
-latter element will be a successor. In other words, the swaps are now
-conflict free.
+Then we simply swap each predecessor $A[i]$ in the final $1/5 \cdot n$
+elements with the corresponding element $B[A[i]]$. The fact that the
+prefix $P$ is successor-heavy ensures that the final $\frac{1}{5}
+\cdot n$ elements of the reordered $P$ will consist of
+successors. This implies that for each of the swaps between
+predecessors $A[i]$ in the final $1/5 \cdots n$ elements and earlier
+positions $B[A[i]]$, the latter element will be a successor. In other
+words, the swaps are now conflict free.
 
 Next consider how to remove the array $B$ from the Parallel-Prefix
 Phase. At face value, this would seem quite difficult since the
@@ -422,8 +423,7 @@ blocks of size $O(\log n)$, and use the order of the elements in each
 block to encode an entry of $B$. (If the elements are not all
   distinct, then a slightly more sophisticated encoding is necessary.)
 Moreover, we modify the algorithm for building $B$ to only construct
-every $O(\log n)$-th element and to perform the construction also
-using implicitly storing values. The new parallel-prefix sum performs
+every $O(\log n)$-th element. The new parallel-prefix sum performs
 $O(n / \log n)$ arithmetic operations on values that are implicitly
 encoded in blocks; since each such operation requires $O(\log n)$
 work, the total work remains linear.
@@ -431,44 +431,109 @@ work, the total work remains linear.
 In the remainder of the section, we present the algorithm in detail.
 It proceeds in three phases.
 
-\paragraph{A Preprocessing Phase} Recall that for each $t \in 1, \ldots, n$, we call the $t$-prefix $A[1], \ldots, A[t]$ of $A$ successor-heavy if it contains at least $\frac{t}{4}$ successors. The goal of the preprocessing phase is to rearrange $A$ so that every prefix is successor heavy.
+\paragraph{A Preprocessing Phase}
+The goal of the Preprocessing phase is to make every prefix of $A$
+successor-heavy. To perform the Preprocessing phase on $A$, we begin
+with a parallel-for-loop: For each $i = 1, \ldots, \lfloor n /
+2\rfloor$, if $A[i]$ is a predecessor and $A[n - i + 1]$ is a
+successor, then we swap their positions in $A$. To complete the
+Preprocessing phase on $A$, we then recursively perform a
+Preprocessing phase on $A[1], \ldots, A[\lceil n / 2 \rceil]$.
 
-We begin with a parallel-for-loop: For each $i = 1, \ldots, \lfloor n
-/ 2\rfloor$, if $A[i]$ is a predecessor and $A[n - i + 1]$ is a
-successor, then we swap their positions in $A$.
+\begin{lemma}
+ The Preprocessing Phase has work $O(n)$ and span $O(\log n)$. At the
+ end of the Preprocessing Phase, every prefix of $A$ is
+ successor-heavy.
+  \label{lem:preprocessingphase}
+\end{lemma}
+\begin{proof}
+Recall that for each $t \in 1, \ldots, n$, we call the $t$-prefix
+$A[1], \ldots, A[t]$ of $A$ successor-heavy if it contains at least
+$\frac{t}{4}$ successors.
 
-This ensures that at least half the successors in $A$ reside in the
-first $\lceil n / 2 \rceil$ positions. Thus the first $\lceil n / 2
-\rceil$ positions contain at least $\lceil n / 4\rceil$ successors,
+The first parallel-for-loop ensures that at least half the successors
+in $A$ reside in the first $\lceil n / 2 \rceil$ positions, since for
+$i = 1, \ldots, \lfloor n / 2 \rfloor$, $A[n - i + 1]$ will only be a
+successor if $A[i]$ is also a successor. Because at least half the
+elements in $A$ are successors, it follows that the first $\lceil n /
+2 \rceil$ positions contain at least $\lceil n / 4\rceil$ successors,
 making every $t$-prefix with $t \ge \lceil n / 2 \rceil$
 successor-heavy.
 
-Since $\lceil n / 4 \rceil \ge \frac{\lceil n / 2 \rceil}{2}$, the
-first $\lceil n / 2 \rceil$ positions of $A$ now contain at least as
-many successors as predecessors. Thus we can recursively repeat the
-same process on the subarray $A[1], \ldots, A[\lceil n / 2 \rceil]$
-in order to make each of its prefixes successor-heavy.
+After the parallel-for-loop, the first $\lceil n / 2 \rceil$ positions
+of $A$ contain at least as many successors as predecessors (since
+$\lceil n / 4 \rceil \ge \frac{\lceil n / 2 \rceil}{2}$). Thus we can
+recursively apply the argument above in order to conclude that the
+recursion on $A[1], \ldots, A[\lceil n / 2 \rceil]$ makes every
+$t$-prefix with $t \le \lceil n / 2 \rceil$ successor-heavy. It
+follows that, after the recursion, every $t$-prefix of $A$ is
+successor-heavy.
 
-Each recursive step has constant span and performs work proportional
-to the size of the subarray being considered. The preprocessing phase
+Each recursive level has constant span and performs work proportional
+to the size of the subarray being considered. The Preprocessing phase
 therefore has total work $O(n)$ and span $O(\log n)$.
+\end{proof}
 
-\paragraph{An Implicit Parallel Prefix Sum} Pick a \defn{block-size} $b \in \Theta(\log n)$ satisfying $b \ge 2 \lceil \log (n + 1) \rceil$. Consider $A$ as a series of $\lfloor n / b \rfloor$ blocks of size $b$, with the final block of size between $b$ and $2b - 1$. Denote the blocks by $X_1, \ldots, X_{\lfloor n / b \rfloor}$.
+
+%% Recall that for each $t \in 1, \ldots, n$, we call the $t$-prefix
+%% $A[1], \ldots, A[t]$ of $A$ successor-heavy if it contains at least
+%% $\frac{t}{4}$ successors. The goal of the preprocessing phase is to
+%% rearrange $A$ so that every prefix is successor heavy.
+
+%% We begin with a parallel-for-loop: For each $i = 1, \ldots, \lfloor n
+%% / 2\rfloor$, if $A[i]$ is a predecessor and $A[n - i + 1]$ is a
+%% successor, then we swap their positions in $A$.
+
+%% This ensures that at least half the successors in $A$ reside in the
+%% first $\lceil n / 2 \rceil$ positions. Thus the first $\lceil n / 2
+%% \rceil$ positions contain at least $\lceil n / 4\rceil$ successors,
+%% making every $t$-prefix with $t \ge \lceil n / 2 \rceil$
+%% successor-heavy.
+
+%% Since $\lceil n / 4 \rceil \ge \frac{\lceil n / 2 \rceil}{2}$, the
+%% first $\lceil n / 2 \rceil$ positions of $A$ now contain at least as
+%% many successors as predecessors. Thus we can recursively repeat the
+%% same process on the subarray $A[1], \ldots, A[\lceil n / 2 \rceil]$
+%% in order to make each of its prefixes successor-heavy.
+
+%% Each recursive step has constant span and performs work proportional
+%% to the size of the subarray being considered. The preprocessing phase
+%% therefore has total work $O(n)$ and span $O(\log n)$.
+
+\paragraph{An Implicit Parallel Prefix Sum}
+Pick a \defn{block-size} $b \in \Theta(\log n)$ satisfying $b \ge 2
+\lceil \log (n + 1) \rceil$. Consider $A$ as a series of $\lfloor n /
+b \rfloor$ blocks of size $b$, with the final block of size between
+$b$ and $2b - 1$. Denote the blocks by $X_1, \ldots, X_{\lfloor n / b
+  \rfloor}$.
 
 Within each block $X_i$, we can implicitly store a value in the range
-$0, \ldots, n$ through the ordering of the elements. In particular,
-$X_i$ can be broken into (at least) $\lceil \log (n + 1) \rceil$
-disjoint pairs of adjacent elements, and by rearranging the order in
-which a given pair $(x_j, x_{j + 1})$ occurs, the lexicographic
-comparison of whether $x_j < x_{j + 1}$ can be used to encode one bit
-of information. Values $v \in [0,n]$ can therefore be read and written to $X_i$ with
-work $O(b) = O(\log n)$ and span $O(\log b) = O(\log \log n)$ using a
-simple divide-and-conquer recursive approach.
+$0, \ldots, n$ through the ordering of the elements:
+\begin{lemma}
+Given an array $X$ of $2 \lceil \log (n + 1) \rceil$ distinct
+elements, and a value $v \in \{0, \ldots, n\}$, one can rearrange the
+elements of $X$ to encode the bits of $v$ using work $O(\log n)$ and
+span $O(\log \log n)$; and one can then later decode $v$ from $X$
+using work $O(\log n)$ and span $O(\log \log n)$.
+\label{lem:bitstore}
+\end{lemma}
+\begin{proof}
+Observe that $X$ can be broken into (at least) $\lceil \log (n + 1)
+\rceil$ disjoint pairs of adjacent elements $(x_1, x_2), (x_3, x_4),
+\ldots$, and by rearranging the order in which a given pair $(x_j,
+x_{j + 1})$ occurs, the lexicographic comparison of whether $x_j <
+x_{j + 1}$ can be used to encode one bit of information. Values $v \in
+[0,n]$ can therefore be read and written to $X$ with work $O(b) =
+O(\log n)$ and span $O(\log b) = O(\log \log n)$ using a simple
+divide-and-conquer recursive approach to encode and decode the bits of
+$v$.
+\end{proof}
 
-After the preprocessing phase, our algorithm performs a parallel-for
-loop through the blocks, and stores in each block $X_i$ a value $v_i$
-equal to the number of predecessors in the block. This can be done
-in place with work $O(n)$ and span $O(\log \log n)$.
+To perform the Parallel Prefix Sum phase, our algorithm beings by
+performing a parallel-for loop through the blocks, and storing in each
+block $X_i$ a value $v_i$ equal to the number of predecessors in the
+block. (This can be done in place with work $O(n)$ and span $O(\log
+\log n)$ by Lemma \ref{lem:bitstore}.)
 
 The algorithm then performs an in-place parallel-prefix operation on
 the values $v_1, \ldots, v_{\lfloor n / b \rfloor}$ stored in the
@@ -476,54 +541,89 @@ blocks. This is done by first resetting each even-indexed value
 $v_{2i}$ to $v_{2i} + v_{2i - 1}$; then recursively performing a
 parallel-prefix sum on the even-indexed values; and then replacing
 each odd-indexed $v_{2i + 1}$ with $v_{2i + 1} + v_{2i}$, where $v_0$
-is defined to be zero. If the $v_i$'s could be read and written in
-constant time, then the prefix sum would take work $O(n)$
-and span $O(\log n)$. Since each $v_i$ actually requires work $O(\log
-n)$ and span $O(\log \log n)$ to read/write, the prefix sum takes work
-$O(n)$ and span $O(\log n \cdot \log \log n)$.
+is defined to be zero.
 
-At the end of this phase of the algorithm, the array $A$ satisfies two
-important properties: (1) Every block $X_i$ encodes a value $v_i$
+Lemma \ref{lem:parallelprefix} analyzes the phase:
+\begin{lemma}
+The Parallel Prefix Sum phase uses work $O(n)$ and span $O(\log n \log
+\log n)$. At the end of the phase, each $X_i$ encodes a value $v_i$
 counting the number of predecessors in the prefix $X_1 \circ X_2 \circ
-\cdots \circ X_i$; and (2) Each prefix $X_1 \circ X_2 \circ \cdots
-\circ X_i$ is successor-heavy.
+\cdots \circ X_i$; and each prefix $X_1 \circ X_2 \circ \cdots \circ
+X_i$ is successor-heavy.
+\label{lem:parallelprefix}
+\end{lemma}
+\begin{proof}
+If the $v_i$'s could be read and written in constant time, then the
+prefix sum would take work $O(n / \log n)$ and span $O(\log n)$, since
+there are $O(n / \log n)$ $v_i$'s. Because each $v_i$ actually
+requires work $O(\log n)$ and span $O(\log \log n)$ to read/write (by
+Lemma \ref{lem:bitstore}), the prefix sum takes work $O(n)$ and span
+$O(\log n \cdot \log \log n)$.
 
-\paragraph{In-Place Reordering} In the final phase of the algorithm, we reorder $A$ so that the predecessors appear before the successors. Let $P = X_1 \circ X_2 \circ \cdots \circ X_t$ be the smallest prefix of blocks that contain at least $4/5$ of the elements in $A$. We begin by recursively reordering the elements in $P$ so that the predecessors appear before the successors; as a base case, when $|P| \le 5b = O(\log n)$, we simply perform the reordering in serial.
+Once of the prefix-sum that has been performed, every block $X_i$
+encodes a value $v_i$ counting the number of predecessors in the
+prefix $X_1 \circ X_2 \circ \cdots \circ X_i$. Moreover, because the
+Parallel Prefix Sum phase only rearranges elements within each $X_i$,
+Lemma \ref{lem:preprocessingphase} ensures that each prefix of the
+form $X_1 \circ X_2 \circ \cdots \circ X_i$ remains successor-heavy.
+\end{proof}
 
-After $P$ has been reordered, it will be of the form $P_1
-\circ P_2$ where $P_1$ contains only predecessors and $P_2$ contains
-only successors. Because $P$ is successor-heavy, we have that $|P_2|
-\ge |P| / 4$, and thus that $|P_2| \ge |X_{t + 1} \circ \cdots \circ
-X_n|$.
+\paragraph{In-Place Reordering}
+In the final phase of the algorithm, we reorder $A$ so that the
+predecessors appear before the successors. Let $P = X_1 \circ X_2
+\circ \cdots \circ X_t$ be the smallest prefix of blocks that contains
+at least $4/5$ of the elements in $A$. We begin by recursively
+reordering the elements in $P$ so that the predecessors appear before
+the successors; as a base case, when $|P| \le 5b = O(\log n)$, we
+simply perform the reordering in serial.
 
 To complete the reordering of $A$, we perform a parallel-for-loop
-through each of the blocks $X_{t + 1}, \ldots, X_n$. For each block
+through each of the blocks $X_{t + 1}, \ldots, X_{\lfloor n / b \rfloor}$. For each block
 $X_i$, we first extract $v_i$ (with work $O(\log n)$ and span $O(\log
-\log n)$). We then create an auxiliary array $Y_i$ of size $|X_i|$,
-using $O(\log n)$ memory from the thread in charge of $Y_i$ in the
-parallel-for-loop. Using a parallel-prefix sum (with work $O(\log n)$
-and span $O(\log \log n)$), we set each $Y_i[j]$ equal to $v_i$ plus
-the number of predecessors in $X_i[1], \ldots, X_i[j]$. In other
-words, $Y_i[j]$ equals the number of predecessors in $A$ appearing at
-or before $X_i[j]$.
+\log n)$ using Lemma \ref{lem:bitstore}). We then create an auxiliary
+array $Y_i$ of size $|X_i|$, using $O(\log n)$ thread-local
+memory. Using a parallel-prefix sum (with work $O(\log n)$ and span
+$O(\log \log n)$), we set each $Y_i[j]$ equal to $v_i$ plus the number
+of predecessors in $X_i[1], \ldots, X_i[j]$. In other words, $Y_i[j]$
+equals the number of predecessors in $A$ appearing at or before
+$X_i[j]$.
 
 After creating $Y_i$, we then perform a parallel-for-loop through the
 elements $X_i[j]$ of $X_i$ (note we are still within another parallel
 loop through the $X_i$'s), and for each predecessor $X_i[j]$, we swap
-it with the element in position $Y_i[j]$ of the array $A$. Critically,
-because $|P_2| \ge |X_{t + 1} \circ \cdots \circ X_n|$, we are
-guaranteed that the element with which $X_i[j]$ is being swapped is a
-successor in $P_2$. After the swaps have been performed, all of the
-elements of $X_i$ are now successors.
+it with the element in position $Y_i[j]$ of the array $A$. This
+completes the algorithm.
 
-Once the outer for-loop through the $X_i$'s is complete, so will be
-the parallel partition of $A$. The total work in the reordering phase
-is $O(n)$ since each $X_i$ appears in a parallel-for-loop at exactly
-one level of the recursion, and incurs $O(\log n)$ work. The total
-span of the reordering phase is $O(\log n \cdot \log \log n)$, since
-there are $O(\log n)$ levels of recursion, and within each level of
-recursion each $X_i$ in the parallel-for-loop incurs span $O(\log \log
-n)$.
+\begin{lemma}
+ The Reordering phase takes work $O(n)$ and span $O(\log n \log \log
+ n)$. At the end of the phase, the array $A$ is fully partitioned.
+\end{lemma}
+\begin{proof}
+After $P$ has been recursively partitioned, it will be of the form
+$P_1 \circ P_2$ where $P_1$ contains only predecessors and $P_2$
+contains only successors. Because $P$ is successor-heavy (by Lemma
+\ref{lem:parallelprefix}), we have that $|P_2| \ge |P| / 4$, and thus
+that $|P_2| \ge |X_{t + 1} \circ \cdots \circ X_{\lfloor n / b
+  \rfloor}|$.
+
+After the recursion, the swaps performed by the algorithm will swap
+the $i$-th predecessor in $X_{t + 1} \circ \cdots \circ X_{\lfloor n /
+  b \rfloor}$ with the $i$-th element in $P_2$, for $i$ from $1$ to
+the number of predecessors in $X_{t + 1} \circ \cdots \circ X_{\lfloor
+  n / b \rfloor}$. Because $|P_2| \ge |X_{t + 1} \circ \cdots \circ
+X_{\lfloor n / b \rfloor}|$ these swaps are guaranteed not to conflict
+with one-another; and since $P_2$ consists of successors, the final
+state of array $A$ will be fully partitioned.
+
+The total work in the reordering phase is $O(n)$ since each $X_i$
+appears in a parallel-for-loop at exactly one level of the recursion,
+and incurs $O(\log n)$ work. The total span of the reordering phase is
+$O(\log n \cdot \log \log n)$, since there are $O(\log n)$ levels of
+recursion, and within each level of recursion each $X_i$ in the
+parallel-for-loop incurs span $O(\log \log n)$. 
+\end{proof}
+
+
 
 Combining the phases, the full algorithm has work $O(n)$ and span
 $O(\log \log n)$. Thus we have:
@@ -534,30 +634,74 @@ $O(\log \log n)$. Thus we have:
   \label{thminplace}
 \end{theorem}
 
-\paragraph{Allowing for Repeated Elements} In proving Theorem \ref{thminplace} we assumed for simplicity that the elements of $A$ are distinct. This plays an important role in how we store the values $v_i$ in the blocks $X_i$. To eliminate this requirement without changing the work and span of the algorithm, we can require that $b \ge 4 \lceil \log (n + 1) \rceil + 2$, and use the following slightly more complex encoding of the $v_i$'s.
+\paragraph{Allowing for Repeated Elements}
+In proving Theorem \ref{thminplace} we assumed for simplicity that the
+elements of $A$ are distinct. To remove this assumption, we conclude
+the section by proving a slightly more complex variant of Lemma
+\ref{lem:bitstore}, eliminating the requirement that the elements of
+the array $X$ be distinct:
 
-Consider the first $b$ letters of $X_i$ as a sequence of pairs, given
-by $(x_1, x_2), \ldots, (x_{b - 1}, x_b)$. If at least half of the
-pairs consist of distinct elements, then we can reorder those pairs to
-appear at the front of $X_i$, and use them to encode values
-$v_i$. (For each $X_i$ this reordering can be done once before the
-Implicit-Parallel-Prefix-Sum phase, adding only linear work and
-logarithmic span to the full algorithm.) If, on the other hand, at
-least half the pairs consist of equal-value elements, then we can
-reorder the pairs so that the first $\lceil \log (n + 1) \rceil + 1$
-of them satisfy this property. That is, if we reindex the reordered
-elements as $x_0,x_1,\ldots$, then $x_{2j + 1} = x_{2j + 2}$ for each
-$j = 0, 1, \ldots, \lceil \log (n + 1) \rceil$. To encode a value
-$v_i$, we explicitly overwrite the second element in each of the pairs
-$(x_3, x_4), (x_5, x_6), \ldots$ with the bits of $v_i$, overwriting
-each element with one bit.
+\begin{lemma}
+Let $X$ be an array of $b = 4 \lceil \log (n + 1) \rceil + 2$
+elements. The there is an \emph{encode} function, and a \emph{decode}
+function such that:
+\begin{itemize}
+\item The encode function modifies the array $X$ (possibly overwriting
+  elements in addition to rearranging them) to store a value $v \in
+  \{0, \ldots, n\}$. The first time the encode function is called on
+  $X$ it has work and span $O(\log n)$. Any later times the encode
+  function is called on $X$, it has work $O(\log n)$ and span $O(\log
+  \log n)$. In addition to being given an argument $v$, the encode
+  function is given a boolean argument indicating whether the function
+  has been invoked on $X$ before.
+\item The decode function recovers the value of $v$ from the modified
+  array $X$, and restores $X$ to again be an array consisting of the
+  same multiset of elements that it began with. The decode function
+  has work $O(\log n)$ and span $O(\log \log n)$.
+\end{itemize}
+  \label{lem:bitstore2}
+\end{lemma}
+\begin{proof}
+Consider the first $b$ letters of $X$ as a sequence of pairs, given by
+$(x_1, x_2), \ldots, (x_{b - 1}, x_b)$. If at least half of the pairs
+$(x_i, x_{i + 1}$ satisfy $x_i \neq x_{i + 1}$, then the encode
+function can reorder those pairs to appear at the front of $X$, and
+then use them to encode $v$ as in Lemma \ref{lem:bitstore}. Note that
+the reordering of the pairs will only be performed the first time that
+the encode function is invoked on $X$. Later calls to the encode
+function will have work $O(\log n)$ and span $O(\log \log n)$, as in
+Lemma \ref{lem:bitstore}.
 
-To read the value $v_i$, we check whether $x_1 = x_2$ in order to
-determine which encoding is being used and then unencode the bits
-appropriately. In the Reordering phase of the algorithm, once the
-blocks $X_i$ are no longer required to encode values, we can replace
-each overwritten $x_i$ with its correct value (given by the value of
-the preceding element).
+If, on the other hand, at least half the pairs consist of equal-value
+elements $x_i = x_{i + 1}$, then we can reorder the pairs so that the
+first $\lceil \log (n + 1) \rceil + 1$ of them satisfy this
+property. (This is only done on the first call to encode.) To encode a
+value $v$, we simply explicitly overwrite the second element in each
+of the pairs $(x_3, x_4), (x_5, x_6), \ldots$ with the bits of $v$,
+overwriting each element with one bit. The reordering performed by the
+first call to encode has work and span $O(\log n)$; the writing of
+$v$'s bits can then be performed in work $O(\log n)$ and span $O(\log
+\log n)$ using a simple divide-and-conquer approach.
+
+To perform a decode and read the value $v$, we check whether $x_1 =
+x_2$ in order to determine which type of encoding is being used, and
+then we can unencode the bits of $v$ using work $O(\log n)$ and span
+$O(\log \log n)$; if the encoding is the second type (i.e., $x_1 =
+x_2$), then the decode function also restores the elements $x_2, x_4,
+x_6, \ldots$ of the array $X$ as it extracts the bits of $v$. Note
+that checking whether $x_1 = x_2$ is also used by the encode function
+each time after the first time it is called, in order determine which
+type of encoding is being used.
+\end{proof}
+
+The fact that the first call to the encode function on each $X_i$ has
+span $O(\log n)$ (rather than $O(\log \log n)$) does not affect the
+total span of our parallel-partition algorithm, since this simply adds
+a step with $O(\log n)$-span to the beginning of the Parallel Prefix
+phase. Lemma \ref{lem:bitstore2} can therefore used in place of Lemma
+\ref{lem:bitstore} in order to complete the proof of Theorem
+\ref{thminplace} for arrays $A$ that contain duplicate elements.
+
 
 \section{A Cache Efficient In-Place Parallel Partition}\label{sec:smoothing}
 
@@ -724,7 +868,7 @@ incurs $n (1 + o(1))$ cache misses.
 The recursive structure of the Smoothed Striding Algorithm allows for
 the algorithm to achieve polylogarithmic span. As an alternative to
 recursing, one can also use the in-place algorithm from Section
-\ref{secalg} in order to partition $A[v_{\text{min}}], \ldots,
+\ref{secalg} in order to partition \\ $A[v_{\text{min}}], \ldots,
   A[v_{\text{max}} - 1]$. This results in an improved span (since the
 algorithm from Section \ref{secalg} has span only $O(\log n \log \log
 n)$), while still incurring only $n (1 + o(1))$ cache misses (since
@@ -1116,9 +1260,9 @@ algorithm. We compare the performance of three parallel-partition
 implementations: (1) The \defn{high-space} implementation which
 follows the standard parallel-partition algorithm exactly; (2) a
 \defn{medium-space} implementation which reduces the space used for
-the Parallel-Prefix Phase; and (3) a \defn{low-space} implementation
+the Parallel-Prefix phase; and (3) a \defn{low-space} implementation
 which further eliminates the auxiliary space used in the Reordering
-Phase of the algorithm. The low-space implementation still uses a
+phase of the algorithm. The low-space implementation still uses a
 small amount of auxiliary memory for the parallel-prefix, storing
 every $O(\log n)$-th element of the parallel-prefix array explicitly
 rather than using the implicit-storage approach in Section
@@ -1198,7 +1342,7 @@ achieve space efficiency:
   $2n$ eight-byte words.
 \item \emph{The Medium-Space Parallel Implementation:} Starting with
   the high-space implementation, we reduce the space used by the
-  Parallel-Prefix Phase by only constructing every $O(\log n)$-th
+  Parallel-Prefix phase by only constructing every $O(\log n)$-th
   element of the prefix-sum array $B$, as in Section
   \ref{secalg}. (Here $O(\log n)$ is hard-coded as 64.) The array $B$
   is initialized to be of size $n / 64$, with each component equal to
@@ -1300,11 +1444,11 @@ reduction in the number of such scans. Additionally, the low-space
 algorithm allows for steps from adjacent phases of the algorithm to
 sometimes be performed in the same pass. For example, the enumeration
 of the number of predecessors and the top level of the Preprocessing
-Phase can be performed together in a single pass on the input
-array. Similarly, the later levels of the Preprocessing Phase (which
+phase can be performed together in a single pass on the input
+array. Similarly, the later levels of the Preprocessing phase (which
 focus on only one half of the input array) can be combined with the
 construction of (one half of) the auxiliary array used in the Parallel
-Prefix Sum Phase, saving another half of a pass.
+Prefix Sum phase, saving another half of a pass.
 
 
 %% There are additional slightly more tricky potential optimizations
