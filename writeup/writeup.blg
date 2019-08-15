@@ -1,4 +1,4 @@
-This is BibTeX, Version 0.99d (TeX Live 2019)
+This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
 Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: writeup.aux
 The style file: ACM-Reference-Format.bst
@@ -17,6 +17,7 @@ Warning--page numbers missing in both pages and numpages fields in AxtmannWi17
 Warning--can't use both volume and number fields in BlellochFi12
 Warning--empty publisher in BlellochFi12
 Warning--empty address in BlellochFi12
+Warning--empty address in CLRS
 Warning--empty publisher in Frias08
 Warning--empty address in Frias08
 Warning--empty publisher in FrigoLe09
@@ -28,49 +29,51 @@ Warning--no number and no volume in Kleen05
 Warning--page numbers missing in both pages and numpages fields in Kleen05
 Warning--empty publisher in LiuKn05
 Warning--empty address in LiuKn05
+Warning--empty publisher in MatiasVi95
+Warning--empty address in MatiasVi95
 Warning--empty publisher in ShunGu15
 Warning--empty address in ShunGu15
 Warning--empty publisher in TsigasZh03
 Warning--empty address in TsigasZh03
-You've used 27 entries,
-            5719 wiz_defined-function locations,
-            1484 strings with 19012 characters,
-and the built_in function-call counts, 32958 in all, are:
-= -- 4418
-> -- 1066
+You've used 29 entries,
+            5733 wiz_defined-function locations,
+            1498 strings with 19379 characters,
+and the built_in function-call counts, 35328 in all, are:
+= -- 4644
+> -- 1156
 < -- 0
-+ -- 361
-- -- 392
-* -- 2203
-:= -- 3261
-add.period$ -- 136
-call.type$ -- 27
-change.case$ -- 176
-chr.to.int$ -- 27
-cite$ -- 49
-duplicate$ -- 2906
-empty$ -- 2038
-format.name$ -- 476
-if$ -- 8107
++ -- 393
+- -- 424
+* -- 2372
+:= -- 3505
+add.period$ -- 147
+call.type$ -- 29
+change.case$ -- 190
+chr.to.int$ -- 29
+cite$ -- 54
+duplicate$ -- 3141
+empty$ -- 2210
+format.name$ -- 516
+if$ -- 8665
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 109
-newline$ -- 248
-num.names$ -- 216
-pop$ -- 1033
+missing$ -- 116
+newline$ -- 263
+num.names$ -- 232
+pop$ -- 1145
 preamble$ -- 1
-purify$ -- 419
+purify$ -- 451
 quote$ -- 0
-skip$ -- 1028
+skip$ -- 1105
 stack$ -- 0
-substring$ -- 2597
-swap$ -- 320
+substring$ -- 2757
+swap$ -- 341
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 572
-warning$ -- 22
-while$ -- 250
+type$ -- 617
+warning$ -- 25
+while$ -- 265
 width$ -- 0
-write$ -- 497
-(There were 22 warnings)
+write$ -- 532
+(There were 25 warnings)

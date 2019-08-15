@@ -273,18 +273,15 @@ large number of threads.
 We begin by describing the the parallelism and memory model used in
 the paper, and by presenting background on parallel partition.
 
-\paragraph{Workflow Model} We consider a language-based model of parallelism in which algorithms may achieve parallelism
-through the use of \defn{parallel-for-loops}, though our algorithm
-also works in the less restrictive PRAM model
-\cite{Blelloch96,AcarBl16}.  A parallel-for-loop is given a range $R
-\in \mathbb{N}$, a constant number of arguments $\arg_1, \arg_2,
-\ldots, \arg_c$, and a body of code. For each $i \in \{1, \ldots,
-R\}$, the loop launches a thread that is given loop-counter $i$ and
-local copies of the arguments $\arg_1, \arg_2, \ldots, \arg_c$. The
-threads then perform the body of the loop.\footnote{Note that
-  parallel-for-loops also implicitly allow for the implementation of
-  parallel recursion by placing recursive function calls in the body
-  of the parallel-for-loop.}
+\paragraph{Workflow Model} We consider a simple language-based model of parallelism in which algorithms achieve parallelism through the use of \defn{parallel-for-loops} (see, e.g.,
+\cite{Blelloch96,AcarBl16,CLRS}); function calls within the inner loop
+then allow for more complicated parallel structures (e.g., recursion). Our algorithms can also be implemented in the less restrictive PRAM model \cite{Blelloch96, AcarBl16}.
+
+Formally, a parallel-for-loop is given a range $R \in \mathbb{N}$, a
+constant number of arguments $\arg_1, \arg_2, \ldots, \arg_c$, and a
+body of code. For each $i \in \{1, \ldots, R\}$, the loop launches a
+thread that is given loop-counter $i$ and local copies of the
+arguments $\arg_1, \arg_2, \ldots, \arg_c$. The threads are then taken up by processors and the iterations of the loop are performed in parallel. Only after every iteration of the loop is complete can control flow continue past the loop.
 
 A parallel algorithm may be run on an arbitrary number $p$ of
 processors. The algorithm itself is oblivious to $p$, however, leaving
@@ -294,7 +291,7 @@ The \defn{work} $T_1$ of an algorithm is the time that the algorithm
 would require to execute on a single processor. The \defn{span}
 $T_\infty$ of an algorithm is the time to execute on infinitely many
 processors. The scheduler is assumed to contribute no overhead to the
-span. In particular, if the body of a
+span. In particular, if each iteration of a
 parallel-for-loop has span $s$, then the full parallel loop has span
 $s + O(1)$ \cite{Blelloch96,AcarBl16}.
 
@@ -308,17 +305,27 @@ $$T_1 / p \le T_p \le T_1 / p + T_\infty.$$
 The work-stealing algorithms used in the Cilk extension of C/C++ realize
 the guarantee offered by Brent's Theorem within a constant factor
 \cite{BlumofeJo96,BlumofeLe99}, with the added caveat that parallel-for-loops typically induce an additional additive overhead of $O(\log
-R)$.
+R)$. 
 
-\paragraph{Memory Model} Memory is \defn{exclusive-read} and \defn{exclusive-write}. That is, no two threads are ever permitted to attempt to read or write to the same variable concurrently. The exclusive-read exclusive-write memory model is sometime referred to as the \defn{EREW model} (see, e.g., \cite{Hagerup89}).
+\paragraph{Memory Model} Memory is \defn{exclusive-read} and \defn{exclusive-write}. That is, no two threads are ever permitted to attempt to read or write to the same variable concurrently. 
+The exclusive-read exclusive-write memory model is sometime referred
+to as the \defn{EREW model} (see, e.g., \cite{Hagerup89}).
 
-In an \defn{in-place} algorithm, each thread is given $O(\log n)$
+Note that threads are not in lockstep (i.e., they may progress at arbitrary different speeds), and thus the EREW model requires algorithms to be data-race free in order to avoid the possibility of non-exclusive data accesses.
+
+In an \defn{in-place} algorithm, each thread is given $O(\polylog n)$
 memory upon creation that is deallocated when the thread dies. This
-memory can be shared with the thread's children. The depth of the
-parent-child tree is not permitted to exceed $O(\log n)$.\footnote{The
-  algorithm in this paper satisfies a slightly stronger property that
-  the total memory being used is never more than $O(\log n) \cdot p$,
-  where $p$ is an upper-bound on the number of worker threads.}
+memory can be shared with the thread's children. However, the depth of
+the parent-child tree is not permitted to exceed $O(polylog n)$.
+
+Whereas the EREW memory model prohibits concurrent accesses to memory, on the other side of the spectrum are CRCW (concurrent-read-concurrent-write) models, which allow for both reads and writes to be performed concurrently (and in some variants even allow for atomic operations) \cite{Blelloch96,AcarBl16,MatiasVi95}. One approach to designing efficient EREW algorithms is to simulate efficient CRCW algorithms in the EREW model \cite{MatiasVi95}. The known simulation techniques substantial space overhead, however, preventing the design of in-place algorithms \cite{MatiasVi95}.\footnote{The known simulation techniques also increase the total work in the original algorithm, although this can be acceptable if only a small number of atomic operations need to be simulated.}
+
+%% HERE: Is where we can talk about the more powerful alternative to EREW, and there relationship, and why we can't just simulate CRCW (or, more importantly, ERCW). Make it clear that the Exclusive Read part is not actually very important -- it's the exclusive write part that's hard.
+
+%% \footnote{The
+  %% algorithm in this paper satisfies a slightly stronger property that
+  %% the total memory being used is never more than $O(\log n) \cdot p$,
+  %% where $p$ is an upper-bound on the number of worker threads.}
 
 \paragraph{The Parallel Partition Problem}
 The parallel partition problem takes an input array $A$ of size $n$,
@@ -367,7 +374,8 @@ number of threads is fixed.
 \section{An In-Place Algorithm with Span $O(\log n \log \log n)$}\label{secalg}
 
 In this section, we present an in-place algorithm for parallel
-partition with span $O(\log n \log \log n)$.
+partition with span $O(\log n \log \log n)$. Each thread in the
+algorithm requires memory at most $O(\log n)$.
 
 We assume without loss of generality that the total number of
 successors in $A$ exceeds the number of predecessors, since otherwise
@@ -1402,8 +1410,8 @@ necessary to prevent the Smoothed Striding Algorithm and the Strided
 Algorithm from being bandwidth limited. For example, if we replicate
 the 18-thread column of Figure \ref{tablebandwidth} without using
 \emph{numactl}, then the speedup of the Smoothed Striding Algorithm is
-8.4, whereas the memory-bandwidth bound for maximum possible speedup
-is only slightly larger at $10.0$.
+8.2, whereas the memory-bandwidth bound for maximum possible speedup
+is only slightly larger at $10.2$.
 
 
 \paragraph{Implementation Details} Both algorithms use $b = 512$. The Smoothed Striding Algorithm uses

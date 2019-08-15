@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{27}
+\begin{thebibliography}{29}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -42,7 +42,7 @@
 \bibfield{author}{\bibinfo{person}{Umut~A Acar} {and} \bibinfo{person}{Guy
   Blelloch}.} \bibinfo{year}{2016}\natexlab{}.
 \newblock \bibinfo{title}{Algorithm design: Parallel and sequential}.
-\newblock
+\newblock   (\bibinfo{year}{2016}).
 \newblock
 
 
@@ -170,6 +170,17 @@
 \newblock
 
 
+\bibitem[\protect\citeauthoryear{Cormen, Leiserson, Rivest, and Stein}{Cormen
+  et~al\mbox{.}}{2009}]%
+        {CLRS}
+\bibfield{author}{\bibinfo{person}{Thomas~H Cormen}, \bibinfo{person}{Charles~E
+  Leiserson}, \bibinfo{person}{Ronald~L Rivest}, {and}
+  \bibinfo{person}{Clifford Stein}.} \bibinfo{year}{2009}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Introduction to algorithms}}.
+\newblock \bibinfo{publisher}{MIT press}.
+\newblock
+
+
 \bibitem[\protect\citeauthoryear{Francis and Pannan}{Francis and
   Pannan}{1992}]%
         {FrancisPa92}
@@ -294,6 +305,17 @@
   implementation on a shared memory parallel computer}. In
   \bibinfo{booktitle}{\emph{International Symposium on Parallel and Distributed
   Processing and Applications}}. Springer, \bibinfo{pages}{491--502}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Matias and Vishkin}{Matias and
+  Vishkin}{1995}]%
+        {MatiasVi95}
+\bibfield{author}{\bibinfo{person}{E Matias} {and} \bibinfo{person}{Uzi
+  Vishkin}.} \bibinfo{year}{1995}\natexlab{}.
+\newblock \showarticletitle{A note on reducing parallel model simulations to
+  integer sorting}. In \bibinfo{booktitle}{\emph{Parallel Processing Symposium,
+  1995. Proceedings., 9th International}}. IEEE, \bibinfo{pages}{208--212}.
 \newblock
 
 
