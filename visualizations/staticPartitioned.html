@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Staticpartitioned</title>
+		<script src="pkgs/p5/p5.min.js" charset="utf-8"></script>
+	</head>
+	<body>
+		<script charset="utf-8">
+let pivotVal = Math.random();
+let n = 100;
+let numPreds = 40;
+let A = [];
+for(let i = 0; i < n; i++){
+	if(i < numPreds){
+		A.push(Math.random()*pivotVal);
+	}
+	else {
+		A.push(Math.random()*(1-pivotVal)+pivotVal);
+	}
+}
+function setup(){
+	createCanvas(500,500);
+}
+function draw(){
+	for(let i = 0; i < n; i++){
+		if (A[i] < pivotVal) {
+			fill(0,0,0); // black
+		}
+		else {
+			fill(255,255,255); // white
+		}
+		rect(i*width/n, 0.25*height*(1-A[i]), width/n, 0.25*height*A[i]);
+	}
+	// pivot value
+	fill(0,255,0, 250);// green
+	rect(0,(1-pivotVal)*height*0.25,width,10*0.25);
+}
+console.log("Note: running 'save(fileName)' will save the canvas as an image");
+
+</script>
+	</body>
+</html>
