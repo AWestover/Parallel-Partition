@@ -151,24 +151,9 @@ Thus reducing the number of cache misses is a promising place to look in order t
 We now present an algorithm for parallel partiition developed by Francis and Pannan, which we call the \defn{Strided Algorithm}.
 The Strided Algorithm is thought to use very few passes over the array, although we could not find any accurate theoretical analysis of the algorithm.
 Having a low number of cache misses is desirable because it makes the algorithm run much faster, overcoming the problem of memory bandwidth bound.
-The Strided Algorithm does not achieve a small number of cache misses for all inputs, but it does achieve this when used on random inputs.
+The Strided Algorithm does not achieve a small number of cache misses for all inputs, but it does achieve this when used on some inputs, for example random inputs.
 We introduce our model of cache misses and then prove that the Strided Algorithm incurs very few cache misses for random inputs.
 
-\paragraph{Modelling Cache Misses}
-We treat memory as being accessed in some fixed cache-line size $b$. 
-In our model each processor's cache is composed of a set of $\operatorname{polylog}{n}$ cache lines.
-A cache miss occurs when the line being accessed is not currently in cache, in which case some other line is evicted from cache to make room for the new entry.
-Each cache is managed with a LRU (Least Recently Used) eviction policy and we assume that child threads inherit their cache contents from their parent.
-
-In the analysis of our algorithm it will be useful to assume that certain small arrays are pinned in cache (i.e. their entries are never evicted from cache).
-This assumption is without loss of generality in the sense that LRU eviction is competitive (up to resource augmentation) with the optimal off-line eviction strategy OPT (i.e. Furthest in the Future).
-Formally this is due to the following theorem by Sleator and Tarjan:
-\begin{theorem}{Resource Augmentation Theorem \cite{SleatorTa85}}
-	LRU operating on a cache of size $K\cdot M$ for some $K>1$ will incur at most $1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on a cache of size $M$, for the same series of memory accesses.
-\end{theorem}
-
-We assume caches of size $\log^c n$ for $c$ a constant of our choice. 
-Up to changes in $c$ LRU incurs no more than a $1+\frac{1}{\operatorname{polylog}{n}}$ factor more cache misses than OPT incurs.
 
 \paragraph{Strided Algorithm Description}
 Now we describe the algorithm.

@@ -1,0 +1,383 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{29}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[\protect\citeauthoryear{Acar and Blelloch}{Acar and Blelloch}{2016}]%
+        {AcarBl16}
+\bibfield{author}{\bibinfo{person}{Umut~A Acar} {and} \bibinfo{person}{Guy
+  Blelloch}.} \bibinfo{year}{2016}\natexlab{}.
+\newblock \bibinfo{title}{Algorithm design: Parallel and sequential}.
+\newblock
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Albers and Hagerup}{Albers and
+  Hagerup}{1997}]%
+        {AlbersHa97}
+\bibfield{author}{\bibinfo{person}{Susanne Albers} {and}
+  \bibinfo{person}{Torben Hagerup}.} \bibinfo{year}{1997}\natexlab{}.
+\newblock \showarticletitle{Improved parallel integer sorting without
+  concurrent writing}.
+\newblock \bibinfo{journal}{\emph{Information and Computation}}
+  \bibinfo{volume}{136}, \bibinfo{number}{1} (\bibinfo{year}{1997}),
+  \bibinfo{pages}{25--51}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Alonso and Schott}{Alonso and Schott}{1996}]%
+        {AlonsoSc96}
+\bibfield{author}{\bibinfo{person}{Laurent Alonso} {and}
+  \bibinfo{person}{Ren{\'e} Schott}.} \bibinfo{year}{1996}\natexlab{}.
+\newblock \showarticletitle{A parallel algorithm for the generation of a
+  permutation and applications}.
+\newblock \bibinfo{journal}{\emph{Theoretical Computer Science}}
+  \bibinfo{volume}{159}, \bibinfo{number}{1} (\bibinfo{year}{1996}),
+  \bibinfo{pages}{15--28}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Anderson}{Anderson}{1990}]%
+        {Anderson90}
+\bibfield{author}{\bibinfo{person}{R\_ Anderson}.}
+  \bibinfo{year}{1990}\natexlab{}.
+\newblock \showarticletitle{Parallel algorithms for generating random
+  permutations on a shared memory machine}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the second annual ACM Symposium on
+  Parallel Algorithms and Architectures}}. ACM, \bibinfo{pages}{95--102}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Axtmann, Witt, Ferizovic, and Sanders}{Axtmann
+  et~al\mbox{.}}{2017}]%
+        {AxtmannWi17}
+\bibfield{author}{\bibinfo{person}{Michael Axtmann}, \bibinfo{person}{Sascha
+  Witt}, \bibinfo{person}{Daniel Ferizovic}, {and} \bibinfo{person}{Peter
+  Sanders}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{In-place Parallel Super Scalar Samplesort}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:1705.02257}}
+  (\bibinfo{year}{2017}).
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Blelloch}{Blelloch}{1996}]%
+        {Blelloch96}
+\bibfield{author}{\bibinfo{person}{Guy~E Blelloch}.}
+  \bibinfo{year}{1996}\natexlab{}.
+\newblock \showarticletitle{Programming parallel algorithms}.
+\newblock \bibinfo{journal}{\emph{Commun. ACM}} \bibinfo{volume}{39},
+  \bibinfo{number}{3} (\bibinfo{year}{1996}), \bibinfo{pages}{85--97}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Blelloch, Fineman, Gibbons, and Shun}{Blelloch
+  et~al\mbox{.}}{2012}]%
+        {BlellochFi12}
+\bibfield{author}{\bibinfo{person}{Guy~E Blelloch}, \bibinfo{person}{Jeremy~T
+  Fineman}, \bibinfo{person}{Phillip~B Gibbons}, {and} \bibinfo{person}{Julian
+  Shun}.} \bibinfo{year}{2012}\natexlab{}.
+\newblock \showarticletitle{Internally deterministic parallel algorithms can be
+  fast}. In \bibinfo{booktitle}{\emph{ACM SIGPLAN Notices}},
+  Vol.~\bibinfo{volume}{47}. ACM, \bibinfo{pages}{181--192}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Blelloch, Leiserson, Maggs, Plaxton, Smith,
+  and Zagha}{Blelloch et~al\mbox{.}}{1998}]%
+        {BlellochLe98}
+\bibfield{author}{\bibinfo{person}{Guy~E. Blelloch},
+  \bibinfo{person}{Charles~E. Leiserson}, \bibinfo{person}{Bruce~M Maggs},
+  \bibinfo{person}{C~Greg Plaxton}, \bibinfo{person}{Stephen~J Smith}, {and}
+  \bibinfo{person}{Marco Zagha}.} \bibinfo{year}{1998}\natexlab{}.
+\newblock \showarticletitle{An experimental analysis of parallel sorting
+  algorithms}.
+\newblock \bibinfo{journal}{\emph{Theory of Computing Systems}}
+  \bibinfo{volume}{31}, \bibinfo{number}{2} (\bibinfo{year}{1998}),
+  \bibinfo{pages}{135--167}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Blumofe, Joerg, Kuszmaul, Leiserson, Randall,
+  and Zhou}{Blumofe et~al\mbox{.}}{1996}]%
+        {BlumofeJo96}
+\bibfield{author}{\bibinfo{person}{Robert~D Blumofe},
+  \bibinfo{person}{Christopher~F Joerg}, \bibinfo{person}{Bradley~C Kuszmaul},
+  \bibinfo{person}{Charles~E Leiserson}, \bibinfo{person}{Keith~H Randall},
+  {and} \bibinfo{person}{Yuli Zhou}.} \bibinfo{year}{1996}\natexlab{}.
+\newblock \showarticletitle{Cilk: An efficient multithreaded runtime system}.
+\newblock \bibinfo{journal}{\emph{Journal of parallel and distributed
+  computing}} \bibinfo{volume}{37}, \bibinfo{number}{1} (\bibinfo{year}{1996}),
+  \bibinfo{pages}{55--69}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Blumofe and Leiserson}{Blumofe and
+  Leiserson}{1999}]%
+        {BlumofeLe99}
+\bibfield{author}{\bibinfo{person}{Robert~D Blumofe} {and}
+  \bibinfo{person}{Charles~E Leiserson}.} \bibinfo{year}{1999}\natexlab{}.
+\newblock \showarticletitle{Scheduling multithreaded computations by work
+  stealing}.
+\newblock \bibinfo{journal}{\emph{Journal of the ACM (JACM)}}
+  \bibinfo{volume}{46}, \bibinfo{number}{5} (\bibinfo{year}{1999}),
+  \bibinfo{pages}{720--748}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Brent}{Brent}{1974}]%
+        {Brent74}
+\bibfield{author}{\bibinfo{person}{Richard~P Brent}.}
+  \bibinfo{year}{1974}\natexlab{}.
+\newblock \showarticletitle{The parallel evaluation of general arithmetic
+  expressions}.
+\newblock \bibinfo{journal}{\emph{Journal of the ACM (JACM)}}
+  \bibinfo{volume}{21}, \bibinfo{number}{2} (\bibinfo{year}{1974}),
+  \bibinfo{pages}{201--206}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Cormen, Leiserson, Rivest, and Stein}{Cormen
+  et~al\mbox{.}}{2009}]%
+        {CLRS}
+\bibfield{author}{\bibinfo{person}{Thomas~H Cormen}, \bibinfo{person}{Charles~E
+  Leiserson}, \bibinfo{person}{Ronald~L Rivest}, {and}
+  \bibinfo{person}{Clifford Stein}.} \bibinfo{year}{2009}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Introduction to algorithms}}.
+\newblock \bibinfo{publisher}{MIT press}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Francis and Pannan}{Francis and
+  Pannan}{1992}]%
+        {FrancisPa92}
+\bibfield{author}{\bibinfo{person}{Rhys~S. Francis} {and} \bibinfo{person}{LJH
+  Pannan}.} \bibinfo{year}{1992}\natexlab{}.
+\newblock \showarticletitle{A parallel partition for enhanced parallel
+  quicksort}.
+\newblock \bibinfo{journal}{\emph{Parallel Comput.}} \bibinfo{volume}{18},
+  \bibinfo{number}{5} (\bibinfo{year}{1992}), \bibinfo{pages}{543--550}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Frias and Petit}{Frias and Petit}{2008}]%
+        {Frias08}
+\bibfield{author}{\bibinfo{person}{Leonor Frias} {and} \bibinfo{person}{Jordi
+  Petit}.} \bibinfo{year}{2008}\natexlab{}.
+\newblock \showarticletitle{Parallel partition revisited}. In
+  \bibinfo{booktitle}{\emph{International Workshop on Experimental and
+  Efficient Algorithms}}. Springer, \bibinfo{pages}{142--153}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Frigo, Halpern, Leiserson, and
+  Lewin-Berlin}{Frigo et~al\mbox{.}}{2009}]%
+        {FrigoLe09}
+\bibfield{author}{\bibinfo{person}{Matteo Frigo}, \bibinfo{person}{Pablo
+  Halpern}, \bibinfo{person}{Charles~E Leiserson}, {and}
+  \bibinfo{person}{Stephen Lewin-Berlin}.} \bibinfo{year}{2009}\natexlab{}.
+\newblock \showarticletitle{Reducers and other Cilk++ hyperobjects}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the twenty-first annual symposium on
+  Parallelism in algorithms and architectures}}. ACM, \bibinfo{pages}{79--90}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Gerbessiotis and Siniolakis}{Gerbessiotis and
+  Siniolakis}{2004}]%
+        {GerbessiotisSi04}
+\bibfield{author}{\bibinfo{person}{Alexandros~V Gerbessiotis} {and}
+  \bibinfo{person}{Constantinos~J Siniolakis}.}
+  \bibinfo{year}{2004}\natexlab{}.
+\newblock \showarticletitle{Probabilistic integer sorting}.
+\newblock \bibinfo{journal}{\emph{Information processing letters}}
+  \bibinfo{volume}{90}, \bibinfo{number}{4} (\bibinfo{year}{2004}),
+  \bibinfo{pages}{187--193}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Hagerup and R{\"u}b}{Hagerup and
+  R{\"u}b}{1989}]%
+        {Hagerup89}
+\bibfield{author}{\bibinfo{person}{Torben Hagerup} {and}
+  \bibinfo{person}{Christine R{\"u}b}.} \bibinfo{year}{1989}\natexlab{}.
+\newblock \showarticletitle{Optimal merging and sorting on the EREW PRAM}.
+\newblock \bibinfo{journal}{\emph{Inform. Process. Lett.}}
+  \bibinfo{volume}{33}, \bibinfo{number}{4} (\bibinfo{year}{1989}),
+  \bibinfo{pages}{181--185}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Han}{Han}{2001}]%
+        {Han01}
+\bibfield{author}{\bibinfo{person}{Yijie Han}.}
+  \bibinfo{year}{2001}\natexlab{}.
+\newblock \showarticletitle{Improved fast integer sorting in linear space}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the twelfth annual ACM-SIAM
+  symposium on Discrete algorithms}}. Society for Industrial and Applied
+  Mathematics, \bibinfo{pages}{793--796}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Han and He}{Han and He}{2012}]%
+        {HanHe12}
+\bibfield{author}{\bibinfo{person}{Yijie Han} {and} \bibinfo{person}{Xin He}.}
+  \bibinfo{year}{2012}\natexlab{}.
+\newblock \showarticletitle{More efficient parallel integer sorting}.
+\newblock In \bibinfo{booktitle}{\emph{Frontiers in Algorithmics and
+  Algorithmic Aspects in Information and Management}}.
+  \bibinfo{publisher}{Springer}, \bibinfo{pages}{279--290}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Heidelberger, Norton, and
+  Robinson}{Heidelberger et~al\mbox{.}}{1990}]%
+        {HeidelbergerNo90}
+\bibfield{author}{\bibinfo{person}{Philip Heidelberger}, \bibinfo{person}{Alan
+  Norton}, {and} \bibinfo{person}{John~T. Robinson}.}
+  \bibinfo{year}{1990}\natexlab{}.
+\newblock \showarticletitle{Parallel quicksort using fetch-and-add}.
+\newblock \bibinfo{journal}{\emph{IEEE Trans. Comput.}} \bibinfo{volume}{39},
+  \bibinfo{number}{1} (\bibinfo{year}{1990}), \bibinfo{pages}{133--138}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Katajainen, Levcopoulos, and
+  Petersson}{Katajainen et~al\mbox{.}}{1993}]%
+        {Katajainen93}
+\bibfield{author}{\bibinfo{person}{Jyrki Katajainen}, \bibinfo{person}{Christos
+  Levcopoulos}, {and} \bibinfo{person}{Ola Petersson}.}
+  \bibinfo{year}{1993}\natexlab{}.
+\newblock \showarticletitle{Space-efficient parallel merging}.
+\newblock \bibinfo{journal}{\emph{RAIRO-Theoretical Informatics and
+  Applications}} \bibinfo{volume}{27}, \bibinfo{number}{4}
+  (\bibinfo{year}{1993}), \bibinfo{pages}{295--310}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Kleen}{Kleen}{2005}]%
+        {Kleen05}
+\bibfield{author}{\bibinfo{person}{Andi Kleen}.}
+  \bibinfo{year}{2005}\natexlab{}.
+\newblock \showarticletitle{A numa api for linux}.
+\newblock \bibinfo{journal}{\emph{Novel Inc}} (\bibinfo{year}{2005}).
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Liu, Knowles, and Davis}{Liu
+  et~al\mbox{.}}{2005}]%
+        {LiuKn05}
+\bibfield{author}{\bibinfo{person}{Jie Liu}, \bibinfo{person}{Clinton Knowles},
+  {and} \bibinfo{person}{Adam~Brian Davis}.} \bibinfo{year}{2005}\natexlab{}.
+\newblock \showarticletitle{A cost optimal parallel quicksorting and its
+  implementation on a shared memory parallel computer}. In
+  \bibinfo{booktitle}{\emph{International Symposium on Parallel and Distributed
+  Processing and Applications}}. Springer, \bibinfo{pages}{491--502}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Matias and Vishkin}{Matias and
+  Vishkin}{1995}]%
+        {MatiasVi95}
+\bibfield{author}{\bibinfo{person}{E Matias} {and} \bibinfo{person}{Uzi
+  Vishkin}.} \bibinfo{year}{1995}\natexlab{}.
+\newblock \showarticletitle{A note on reducing parallel model simulations to
+  integer sorting}. In \bibinfo{booktitle}{\emph{Parallel Processing Symposium,
+  1995. Proceedings., 9th International}}. IEEE, \bibinfo{pages}{208--212}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Rajasekaran and Sen}{Rajasekaran and
+  Sen}{1992}]%
+        {Rajasekaran92}
+\bibfield{author}{\bibinfo{person}{Sanguthevar Rajasekaran} {and}
+  \bibinfo{person}{Sandeep Sen}.} \bibinfo{year}{1992}\natexlab{}.
+\newblock \showarticletitle{On parallel integer sorting}.
+\newblock \bibinfo{journal}{\emph{Acta Informatica}} \bibinfo{volume}{29},
+  \bibinfo{number}{1} (\bibinfo{year}{1992}), \bibinfo{pages}{1--15}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Shun, Gu, Blelloch, Fineman, and Gibbons}{Shun
+  et~al\mbox{.}}{2015}]%
+        {ShunGu15}
+\bibfield{author}{\bibinfo{person}{Julian Shun}, \bibinfo{person}{Yan Gu},
+  \bibinfo{person}{Guy~E Blelloch}, \bibinfo{person}{Jeremy~T Fineman}, {and}
+  \bibinfo{person}{Phillip~B Gibbons}.} \bibinfo{year}{2015}\natexlab{}.
+\newblock \showarticletitle{Sequential random permutation, list contraction and
+  tree contraction are highly parallel}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the twenty-sixth annual ACM-SIAM
+  symposium on Discrete algorithms}}. Society for Industrial and Applied
+  Mathematics, \bibinfo{pages}{431--448}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Sleator and Tarjan}{Sleator and
+  Tarjan}{1985}]%
+        {SleatorTa85}
+\bibfield{author}{\bibinfo{person}{Daniel~D Sleator} {and}
+  \bibinfo{person}{Robert~E Tarjan}.} \bibinfo{year}{1985}\natexlab{}.
+\newblock \showarticletitle{Amortized efficiency of list update and paging
+  rules}.
+\newblock \bibinfo{journal}{\emph{Commun. ACM}} \bibinfo{volume}{28},
+  \bibinfo{number}{2} (\bibinfo{year}{1985}), \bibinfo{pages}{202--208}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Tsigas and Zhang}{Tsigas and Zhang}{2003}]%
+        {TsigasZh03}
+\bibfield{author}{\bibinfo{person}{Philippas Tsigas} {and} \bibinfo{person}{Yi
+  Zhang}.} \bibinfo{year}{2003}\natexlab{}.
+\newblock \showarticletitle{A simple, fast parallel implementation of quicksort
+  and its performance evaluation on SUN enterprise 10000}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the Eleventh Euromicro Conference on
+  Parallel, Distributed and Network-Based Processing}}. IEEE,
+  \bibinfo{pages}{372}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Vitter}{Vitter}{2008}]%
+        {Vitter08}
+\bibfield{author}{\bibinfo{person}{Jeffrey~Scott Vitter}.}
+  \bibinfo{year}{2008}\natexlab{}.
+\newblock \showarticletitle{Algorithms and data structures for external
+  memory}.
+\newblock \bibinfo{journal}{\emph{Foundations and Trends{\textregistered} in
+  Theoretical Computer Science}} \bibinfo{volume}{2}, \bibinfo{number}{4}
+  (\bibinfo{year}{2008}), \bibinfo{pages}{305--474}.
+\newblock
+
+
+\end{thebibliography}
