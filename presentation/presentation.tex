@@ -1,6 +1,13 @@
-%%%%%%%%%%%% \todo{add preliminaries, and add pictures}
+\documentclass[x11names, svgnames, rgb]{beamer}
 
-\documentclass{beamer}
+\usetheme{Madrid}
+% \usecolortheme{beaver}
+
+% you can only do these with very special types of pdf viewers
+% \usepackage{animate}
+% \animategraphics[loop,controls,width=\linewidth]{10}{imgs/serialPartition-}{0}{129}
+% \usepackage{xmpmulti}
+\usepackage{algpseudocode}
 
 \usepackage{mathtools}
 \newcommand{\defeq}{\vcentcolon=}
@@ -17,237 +24,138 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 
-\newtheorem{prop}{Proposition}
-\newtheorem{cor}{Corollary}
-\newtheorem{thm}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{defin}{Definition}
 
 \usepackage{hyperref}
-
-
 
 
 \title{Cache-Efficient Parallel Partition Algorithms}
 \author{Alek Westover}
 \institute{MIT PRIMES}
-\date{2019}
+\date{October 20, 2019}
 
 \begin{document}
  
 \frame{\titlepage}
 
-\begin{frame}[t]{Introduction}
-	\begin{itemize}
-		\item What is the partition problem?
-		\item Why is it interesting to solve?
-	\end{itemize}
+\begin{frame}[t]{Partition}
+	\begin{defin}[Partitioned Array]
+		$A[i]$ predecessor, $A[j]$ successor $\implies i < j$
+	\end{defin}	
+	\begin{defin}[Array partitioned relative to pivot value $p$]
+		$A[i] \le p, A[j] > p \implies i < j$
+	\end{defin}	
 	\begin{figure}
-		\includegraphics[width=\linewidth]{partitionedArray.png}
-		\caption{A depiction of a partitioned array where rectangle heights represent values in the array, and the green bar represents the value the elements are partitioned relative to. Note that the elements colored black are called predecessors and the elements colored white are called successors.}
-		\label{fig:partitionedArray}
+		\includegraphics[width=\linewidth]{imgs/partitionedArray.png}
+		\caption{Black: Predecessor, White: Successor, Green: Pivot Value}
 	\end{figure}
 \end{frame}
 
-\begin{frame}[t]{The Partition Problem}
-	\begin{itemize}
-		\item Given an array $A$ of size $n$ and a decider function that labels each $A[i]$ as either a predecessor or a successor, a partition algorithm must reorder the array such that for all $i$ such that $A[i]$ is a predecessor and for all $j$ such that $A[j]$ is a successor $i < j$.
-		\item We will use a decider funciton that partitions the array relative to some "pivot value". That is, we use a decider function that, given some pivot value, labels $A[i]$ a predecessor if and only if $A[i] \le \text{pivot value}$.
-\end{itemize}
+\begin{frame}[t]{Parallel Algorithm}
+	\begin{figure}
+		\includegraphics[width=0.5\linewidth]{imgs/DAG.png}
+	\end{figure}
 \end{frame}
 
-\begin{frame}[t]{Parallel Partition Motivation}
-	\begin{itemize}
-		\item Parrallel partition plays a central role in Parallel Quicksort
-		\item Parallel partition is interesting in its own right
-		\item Parallel partitions are used in performing filter opperations
-\end{itemize}	
+\begin{frame}[t]{Work and Span}
+
+\begin{defin}[$T_p$]
+	Running time on $p$ processors. Note: $T_p \ge T_\infty, T_p \ge \frac{T_1}{p}$.
+\end{defin}	
+\begin{defin}[Work]
+	Running time on a single processor. $T_1 = \sum_i W_i$.
+\end{defin}	
+\begin{defin}[Span]
+	Running time on infinitely many processors. $T_\infty = \sum_i 1$.
+\end{defin}	
+\begin{theorem}[Brent's Theorem]
+	$$T_p = \sum_i \Big\lceil \frac{W_i}{p} \Big\rceil \le \sum_i \Big( \frac{W_i}{p}+1 \Big) = \frac{T_1}{p}+T_\infty.$$	
+\end{theorem}
 \end{frame}
 
-\begin{frame}[t]{Preliminaries}
+\begin{frame}[t]{Serial Partition}  %% See if you can get a decent picture replacement for this...
+  % \transduration<0-10>{0}
+	% \multiinclude[<+->][format=png, graphics={width=\textwidth}]{imgs/serialPartition-}
+	\begin{algorithmic}
+		\While{$\text{low} < \text{high}$} 
+	\While{$A[\text{low}] \leq \text{pivotValue}$}
+			\State $\text{low} \gets \text{low}+1$
+		\EndWhile
+		\While{$A[\text{high}] > \text{pivotValue}$}
+		\State $\text{high} \gets \text{high}-1$
+		\EndWhile
+		\State Swap $A[\text{low}]$ with $A[\text{high}]$
+	\EndWhile
+	\If{$A[\text{low}] \leq \text{pivotValue}$}
+	\State $\text{low} \gets \text{low}+1$
+	\EndIf
+\end{algorithmic}
+
+\end{frame}
+
+\begin{frame}[t]{Randomized Algorithms}
+	\begin{defin}[With high probability in $n$]
+		Probability of success is 
+		$$1-\frac{1}{n^c}$$
+		for $c$ of our choice. i.e. the probability can be made arbitrarily close to $1$.
+	\end{defin}
+\end{frame}
+
+\begin{frame}[t]{Memory Bandwidth Bound}
+	\begin{defin}[Cache miss]
+		A cache miss occurs when the algorithm must load a cache-line not stored in cache into cache.
+	\end{defin}	
 	\begin{itemize}
-		\item Serial Partition
-		\item What is parallel processing?
-		\item Standard Parallel Partition (not in-place)
-		\item Work, Span, and Brent's theorem
-		\item With High Probability
-		\item Bill's alg and bandwidth bound
-		\item Cache Misses
+		\item Being in-place is desirable 
+		\item Kuszmaul developed an in-place version of parallel partition.
+		\item His in-place version outperformed the out-of-place standard algorithm.
+		\item But was outperformed in practice by a lower span algorithm
+		\item Experiments show the source of the problem: Memory bandwidth bound, i.e. incurring too many cache misses
+		\item Note that both temporal and spatial cache efficiency are important.
 	\end{itemize}
 \end{frame}
 
-\begin{frame}[t]{Serial Partition}
-\begin{enumerate}
-	\item{Initialize \defn{low} to point at the beginning of the array, and initialize \defn{high} to point at the end of the array}
-	\item{Increment low until $A[\text{low}]$ is a successor}
-	\item{Decrement high until $A[\text{high}]$ is a predecessor}
-	\item{Swap values $A[\text{low}]$ and $A[\text{high}]$ in the array}
-	\item{Repeat steps 3-5 until $\text{high} \geq \text{low}$ which means that all elements in the array have been processed}
-	\item{If $A[\text{low}]$ is a predecessor increment $A[\text{low}]$ by $1$ so that $A[\text{low}]$ is the first successor in $A$, which is now partitioned}
-\end{enumerate}
-This has work $O(n)$, is in-place, and incurs $n+O(1)$ cache misses.	
-\end{frame}
-
-\begin{frame}[t]{Standard Parallel Partition (not in-place)}
+\begin{frame}[t]{Strided Algorithm cite{FrancisPa92, Frias08} Description}
+	Partition $A$ into chunks $C_1,C_2,\ldots C_n/gb$ each consisting of $g$ cache lines of size $b$. Let $P_i$ be the union of the $i$-th cache-line from each chunk $C_j$.
+	\begin{figure}
+		\includegraphics[width=\linewidth]{imgs/stridedAlgHighlighted.png}
+	\end{figure}
+	\begin{defin}[Partially Partitioned Array]
+		$\exists u, l $ such that $$i < u \implies A[i] \text{ is predecessor }, i \ge l \implies A[i] \text{ is successor }$$
+	\end{defin}
 	\begin{itemize}
-		\item Parallel prefix sum
+		\item Perform serial partitions on all $P_i$ in parallel.
+		\item Let $v_i$ be the position in $A$ of the first successor in $P_i$. Perform a serial partition on $A[\min_i v_i], \ldots, A[\max_i v_i -1]$.
 	\end{itemize}
 \end{frame}
 
-\begin{frame}[t]{Work, Span, Brent's Theorem}
+\begin{frame}[t]{Strided Algorithm Analysis}
 	\begin{itemize}
-		\item The \defn{work} of an algorithm, denoted $T_1$	is its running time with a single processor.
-		\item The \defn{span} of an algorithm, denoted $T_\infty$ is its running time with an infinite number of processors.
-		\item Clearly $T_p \ge \frac{T_1}{p}$ and $T_p \ge T_\infty$.
-		\item Brent's theorem gives an upper bound for an algorithm's running time on $p$ processors, denoted $T_p$, from the alghrithms work and span. 
+		\item Partial partiton step: work $O(n)$, span $\Theta(n/g)$.
+		\item Serial cleanup step: span $\Theta(v_\text{max}-v_\text{min})$, which is $O(n)$ in general.
+		\item If the number of predecessors in each $P_i$ is similar, $v_\text{max}-v_\text{min}$ can be small.
+		\item In particular, if $b\in \polylog(n)$, and the array values are selected independently at random from some distribution, and $g$ is chosen to optimize span ($g=n^{1/3}$), then with high probability in $n$, $$v_\text{max}-v_\text{min} < \tilde{O}(n^{2/3}),$$ the span is $$\tilde{O}(n^{2/3}),$$ and the number of cache misses is fewer than $$\frac{n}{b}+\frac{\tilde{O}(n^{2/3})}{b}.$$
 	\end{itemize}
-	\begin{thm}[Brent's theorem]
-		$$ T_p \le \frac{T_1}{p} +  T_\infty.$$
-	\end{thm}
 \end{frame}
 
-\begin{frame}[t]{With High Probability}
-	whp means $$1-n^{-c}$$
-	for $c$ of our choice.
-\end{frame}
 
-\begin{frame}[t]{Bill's alg and Memory Bandwidth Bound}
-	Memory bandwidth bound is bad. Thus minimizing cache misses is good.
-	
-\end{frame}
-
-\begin{frame}[t]{Cache Misses}
-	defn
-\end{frame}
-
-\begin{frame}[t]{The Strided Algorithm}
+\begin{frame}[t]{Smoothed Striding Algorithm Description}
+	Let $X[1],\ldots, X[s]$ be chosen uniformly at random from $\{1,\ldots, g\}$. Let $U_i$ be the union of the $(X[j]+i)\mod g$-th cache-line from each chunk $C_j$.
+	\begin{figure}
+		\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgHighlighted.png}
+	\end{figure}
 	\begin{itemize}
-		\item Description
-		\item Guarantees
-\end{itemize}	
-The original Strided Algorithm was proposed by Francis and Pannan \cite{FrancisPa92}. 
-An improvement was later proposed by Frias and Petit\cite{Frias08}: the addition of the parameter $b$ to control cache-line size. The original algorithm uses $b=1$. 
-does not consider the cache-line size $b$. Frias and Petit showed that by setting $b$ appropriately, one obtains an algorithm whose empirical performance is close to the state-of-the-art.
-\end{frame}
-
-\begin{frame}[t]{Description}
-\begin{itemize}
-\item \textbf{The Partial Partition Step.} Let $g \in \mathbb{N}$ be a
-  parameter, and assume for simplicity that $gb \mid n$. Partition the
-  array $A$ into $\frac{n}{gb}$ chunks $C_1, \ldots, C_{n / gb}$,
-  each consisting of $g$ cache lines of size $b$.
-	For $i \in \{1, 2, \ldots, g\}$, define 
-  $P_i$ to consist of the $i$-th cache line from each of the
-  chunks $C_1, \ldots, C_{n / gb}$. %One can think of the $P_i$'s as forming a strided partition of array $A$, since consecutive cache lines in $P_i$ are always separated by a fixed stride of $g - 1$ other cache lines.
-
-  The first step of the algorithm is to perform an in-place serial
-  partition on each of the $P_i$s, rearranging the elements within the
-  $P_i$ so that the predecessors come first. %This step requires work $\Theta(n)$ and span $\Theta(n/g)$.
-\item \textbf{The Serial Cleanup Step. }For each $P_i$, define the \defn{splitting position} $v_i$ to be
-  the position in $A$ of the final predecessor in (the already
-  partitioned) $P_i$. Define $v_{\text{min}} = \min\{v_1, \ldots,
-  v_{g}\}$ and define $v_{\text{max}} = \max\{v_1, \ldots, v_{g}\}$. Then the
-  second step of the algorithm is to perform a serial partition on the
-	sub-array \\$A[v_{\text{min}}],\ldots, A[v_{\text{max}}-1]$. This completes the   
-    full partition.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}[t]{Guarantees}
-	\begin{itemize}
-		\item	The Partial Partition step has parallelism, and requires work $\Theta(n)$ and span $\Theta(n/g)$.
-		\item The Cleanup Step of the Strided Algorithm has no parallelism, and thus has span $\Theta(v_{\text{max}} - v_{\text{min}})$.
-		\item In general, this results in an algorithm with linear-span (i.e., no parallelism guarantee).
-		\item However, when the number of predecessors in each of the $P_i$'s is close to equal, the quantity $v_{\text{max}} - v_{\text{min}}$ can be much smaller than $O(n)$.
-		\item For examlpe, if each element of $A$ is selected independently from some distribution, and if $b \in \polylog(n)$ then one can use Hoeffding's Inequality (Chernoff Bound for random variable in $[0,1]$ as opposed to $\{0,1\}$) to get a strong bound for $v_{\text{max}} - v_{\text{min}}$ that hold with high probability in $n$.
-		\item This implies that span optimizes to $\tilde{O}(n^{2/3})$, which results in the number of cache misses being $n / b + \tilde{O}(n^{2/3} / b)$.
+		\item Perform serial partitions on all $U_i$ in parallel.
+		\item The array is partially now partitioned with $A[i]$ a predecessor for all $i < v_{\text{min}}$ and $A[i]$ a successor for all $i \ge v_{\text{max}}$.
 	\end{itemize}
-%     For example, if $b = 1$, and if each element of $A$ is
-% selected independently from some distribution, then one can use
-% Chernoff bounds to prove that with high probability in $n$,
-% $v_{\text{max}} - v_{\text{min}} \le O(\sqrt{n \cdot g \cdot \log
-%   n})$.  The full span of the algorithm is then $\tilde{O}(n/g +
-% \sqrt{n \cdot g})$, which optimizes at $g = n^{1/3}$ to
-% $\tilde{O}(n^{2/3})$. Since the Partial Partition Step incurs only $n
-% / b$ cache misses, the full algorithm incurs $n + \tilde{O}(n^{2/3})$ cache
-% misses on a random array $A$.
-
-% Using Hoeffding's Inequality in place of Chernoff bounds, one can
-% obtain analogous bounds for larger values of $b$; in particular for $b
-% \in \operatorname{polylog}(n)$, the optimal span remains
-% $\tilde{O}(n^{2/3})$ and the number of cache misses becomes $n / b +
-% \tilde{O}(n^{2/3} / b)$ on an array $A$ consisting of randomly sampled
-% elements. 
-  
+	Note that we will make $s = \frac{n}{gb} < \polylog(n)$ so the algorithm remains in-place.
 \end{frame}
 
-\begin{frame}[t]{The Smoothed Striding Algorithm}
-	\begin{itemize}
-		\item Partial Partition Description
-		\item Partial Partition Analysis 
-		\item From Partial Partition to Full Partition
-		\item Hybrid Smoothed Striding Algorithm
-		\begin{itemize}
-			\item Theorem
-			\item Corollary
-		\end{itemize}
-		\item Recursive Smoothed Striding Algorithm
-		\begin{itemize}
-			\item Theorem
-			\item Corollary
-		\end{itemize}
-	\end{itemize}
-The Smoothed Striding Algorithm allows us to achieve span and cache behavior similar to that of the Blocked Strided Algorithm, but on arbitrary inputs.
-\end{frame}
-
-\begin{frame}[t]{Partial Partition Description}
-	\begin{itemize}
-\item Set each of $X[1], \ldots, X[s]$ to be uniformly random and
-  independently selected elements of $\{1, 2, \ldots, g\}$. For
-  $i \in \{1, 2, \ldots, g\}$, and for each $j \in \{1, 2,
-  \ldots, s\}$, define
-  $$G_i(j) = (X[j] + i \pmod g) + (j - 1)g + 1.$$ 
-	Define each $U_i$ for $i \in \{1, \ldots, g\}$ to contain the $G_i(j)$-th cache line of $A$ for each $j \in \{1, 2,
-  \ldots, s\}$. 
-
-\item The algorithm performs an in-place (serial) partition on each
-  $U_i$ (and performs these partitions in parallel with one
-  another). In doing so, the algorithm, also collects
-  $v_{\text{min}}=\min_i{v_i}$, $v_{\text{max}}=\max_i{v_i}$, where
-	each $v_i$ with $i \in \{1, \ldots, g\}$ is defined to be the index
-  of the final predecessor in $A$ (or $0$ if no such predecessor
-  exists).
-	%\footnote{One can calculate $v_{\text{min}}$ and
-    % $v_{\text{max}}$ without explicitly storing each of $v_1, \ldots,
-		% v_{g}$ as follows. Rather than using a standard $g$-way parallel
-		% for-loop to partition each of $U_1, \ldots, U_{g}$, one can
-    % manually implement the parallel for-loop using a recursive
-    % divide-and-conquer approach. Each recursive call in the
-    % divide-and-conquer can then simply collect the maximum and minimum
-    % $v_i$ for the $U_i$'s that are partitioned within that recursive
-    % call. This adds $O(\log n)$ to the total span of the Partial
-    % Partition Step, which is does not affect the overall span
-    % asymptotically. %% In practice, this can also be implemented using
-    %% CilkPlus Reducers (or OpenMP Reductions) \cite{FrigoLe09}, though
-    %% empirically we have found explicitly implementing the
-    %% divide-and-conquer structure to be worthwhile for performance.
-  % }
-\end{itemize}
-The array $A$ is now partially partitioned, i.e. $A[i]$ is a predecessor for all $i \le v_{\text{min}}$, and $A[i]$ is a successor for all $i > v_{\text{max}}$.
-
-\end{frame}
-
-\begin{frame}[t]{Partial Partition Description Comments}
-	\begin{itemize}
-		\item Note that the Partial Partition step is very similar for the Smoothed Striding Algorithm and the Blocked Strided Algorithm. The major difference is that instead of using the $P_i$ which consisted of the $i$-th cache-line from each $C_j$, the Smoothed Striding Algorithm uses a randomly chosen cache line from each $C_j$.
-		\item Note that, to compute the index of the $j$-th cache line in $U_i$, one needs only the value of $X[j]$. Thus the only metadata needed by the algorithm to determine the $U_1, \ldots, U_g$ is the array $X$. If $|X| = s = \frac{n}{gb} \le \operatorname{polylog}(n)$, then the algorithm is in place.
-	\end{itemize}	
-\end{frame}
 
 \begin{frame}[t]{Partial Partition Step Analysis}
-\begin{prop}
-  \label{prop:generalResult}
+\begin{proposition}
   %% The 1/2's are necessary for the final line of the proof to easily go through.
-  
   Let $\epsilon \in (0, 1/2)$ and $\delta \in (0, 1/2)$ such that
   $\epsilon \ge \frac{1}{\poly(n)}$ and $\delta \ge
   \frac{1}{\polylog(n)}$. Suppose $s > \frac{\ln
@@ -259,65 +167,47 @@ The array $A$ is now partially partitioned, i.e. $A[i]$ is a predecessor for all
   span $O\paren*{b \cdot s}$; incurs $\frac{s+n}{b} + O(1)$ cache
   misses; and guarantees with probability $1 - \epsilon$ that
   $$v_{\text{max}}-v_{\text{min}} < 4 n \delta.$$
-\end{prop}
-\end{frame}
+\end{proposition}
 
-\begin{frame}[t]{From Partial Partition to Full Partition}
-In order to fully partition an array, we must apply another algorithm after applying performing the Partial Partition Step analyzed above. 
-We analyze two algorithms for partitioning with the partial partition step.
-The algorithms use $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$) as parameter for the Partial Partition Step. 
-For both algorithms, the choice of $\delta$ results in a tradeoff between cache misses and span. 
-The algorithms techniques for partitioning the array left unpartitioned by the Partial Partition Step are detailed below:
-\end{frame}
-
-\begin{frame}[t]{From Partial Partition to Full Partition}
-\begin{itemize}
-	\item The \defn{Hybrid Smoothed Partition Algorithm} uses an algorithm with span $O(\log n \log \log n)$ to sole the subproblem. The algorithm it uses does not have as good cache behavior as the Partial Partition step, but this is irrelevant because the algorithm is applied to a small subarray. This algorith results in optimal span and cache misses.
-	\item The \defn{Recursive Smoothed Striding Algorithm} uses the Partial Partition step recursively to solve the subproblems. It uses the same parameter $\epsilon$ as on the top-level to guarantee success with high probability in $n$. When recursing $\delta$ is chosen to be $\Theta(1)$ such that the problem size is reduced by half at each step.
-\end{itemize}
 \end{frame}
 
 \begin{frame}[t]{Hybrid Algorithm Analysis - General Theorem}
-\begin{thm}
-	\label{thm:fullPartition}
+\begin{theorem}
 	The Hybrid Smoothed Striding Algorithm algorithm using parameter $\delta\in(0,1/2)$ satisfying $\delta \ge 1/\polylog(n)$: has work $O(n)$; achieves span
         $$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}},$$
 with high probability in $n$; and incurs fewer than 
 $$(n+O(n\delta))/b$$
 cache misses with high probability in $n$.
-\end{thm}
+\end{theorem}
 \end{frame}
 
-\begin{frame}[t]{Hybrid Algorithm Analysis - Corollary for specific parameter settins}
+\begin{frame}[t]{Hybrid Algorithm Analysis - Corollary for specific parameter settings}
 An interesting corollary of the above theorem concerns what happens when $b$ is small (e.g., constant) and we choose $\delta$ to optimize span. 
-\begin{cor}[Corollary of Theorem \ref{thm:fullPartition}]
-	\label{cor:fullPartition}
+\begin{corollary}
 Suppose $b \le o(\log \log n)$. Then the Cache-Efficient Full-Partition Algorithm algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.
-\end{cor}
+\end{corollary}
 \end{frame}
 
 
 \begin{frame}[t]{Recursive Algorithm Analysis - General Theorem}
-	\begin{thm}
-	\label{thm:groupedPartitionAlg}
+	\begin{theorem}
 	With high probability in $n$, the Recursive Smoothed Striding
         algorithm using parameter $\delta \in(0,1/2)$ satisfying
         $\delta \ge 1 / \polylog(n)$: achieves work $O(n)$, attains span
 	$$O\left(b\left(\log^2 n + \frac{\log n}{\delta^2}\right)\right),$$
 	and incurs $(n+O(n \delta))/b$ cache misses. 
-\end{thm}
+	\end{theorem}
 \end{frame}
 
 \begin{frame}[t]{Recursive Algorithm Analysis - Corollary for specific parameter settings}
 A particularly natural parameter setting for the Recursive algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
-\begin{cor}[Corollary of Theorem \ref{thm:groupedPartitionAlg}]
-  \label{cor:groupedPartitionAlg}
+\begin{corollary}
 	With high probability in $n$, the Recursive Smoothed Striding Algorithm using parameter $\delta=1/\sqrt{\log n}$:
   achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log n}))$ cache misses. 
-\end{cor}
+\end{corollary}
 \end{frame}
 
-\begin{frame}[t]{Expiriments}
+\begin{frame}[t]{Experiments}
 	\begin{itemize}
 		\item Strided Algorithm vs Smoothed Striding algorithm
 		\item Cache misses 
@@ -334,7 +224,7 @@ I would like to thank
 \end{frame}
 
 \begin{frame}[t]{References}
-	\bibliographystyle{ACM-Reference-Format}
+	 \bibliographystyle{ACM-Reference-Format}
 	\bibliography{paper}
 \end{frame}
 

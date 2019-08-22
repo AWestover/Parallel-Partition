@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{2}
+\begin{thebibliography}{1}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -46,16 +46,6 @@
   quicksort}.
 \newblock \bibinfo{journal}{\emph{Parallel Comput.}} \bibinfo{volume}{18},
   \bibinfo{number}{5} (\bibinfo{year}{1992}), \bibinfo{pages}{543--550}.
-\newblock
-
-
-\bibitem[\protect\citeauthoryear{Frias and Petit}{Frias and Petit}{2008}]%
-        {Frias08}
-\bibfield{author}{\bibinfo{person}{Leonor Frias} {and} \bibinfo{person}{Jordi
-  Petit}.} \bibinfo{year}{2008}\natexlab{}.
-\newblock \showarticletitle{Parallel partition revisited}. In
-  \bibinfo{booktitle}{\emph{International Workshop on Experimental and
-  Efficient Algorithms}}. Springer, \bibinfo{pages}{142--153}.
 \newblock
 
 

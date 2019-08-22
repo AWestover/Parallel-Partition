@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>strided alg picture</title>
+		<script src="pkgs/p5/p5.min.js" charset="utf-8"></script>
+	</head>
+	<body>
+		<script charset="utf-8">
+let n = 256;  
+let b = 4;
+let g = 8;
+let s = n/(g*b);
+let squareSide = 0.8*1000/s;
+let cacheLineWidth = squareSide/g;
+
+let X = [];
+
+function setup(){
+	createCanvas(1000,250);
+	strokeWeight(1);
+	for (let i = 0; i < s; i++){
+		X.push(Math.floor(Math.random()*g));
+	}
+}
+
+function draw(){
+	background(255);
+	for (let i = 0; i < s; i++){
+		// C_i
+		fill(211,211,211);
+		noStroke();
+		let chunkX = (0.1+i)*1000/s;
+		rect(chunkX, 0, squareSide, squareSide);
+		for (let j = -1; j < g; j++){
+			stroke(0);
+			let cacheLineX = chunkX + (j+1)*cacheLineWidth;
+			line(cacheLineX, 0, cacheLineX, squareSide);
+			if(j == (3+X[i])%g){
+				fill(255,0,0);
+				noStroke();
+				rect(cacheLineX-cacheLineWidth, 0, cacheLineWidth, squareSide);
+			}
+		}
+	}
+}
+console.log("Note: running 'save(fileName)' will save the canvas as an image");
+
+</script>
+	</body>
+</html>

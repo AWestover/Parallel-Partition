@@ -21,21 +21,28 @@ for(let i = 0; i < n; i++){
 	}
 }
 function setup(){
-	createCanvas(500,500);
+	createCanvas(1000,250);
+	strokeWeight(1);
 }
 function draw(){
 	for(let i = 0; i < n; i++){
 		if (A[i] < pivotVal) {
 			fill(0,0,0); // black
+			stroke(255,255,255); // white
 		}
 		else {
 			fill(255,255,255); // white
+			stroke(0,0,0); // black
 		}
-		rect(i*width/n, 0.25*height*(1-A[i]), width/n, 0.25*height*A[i]);
+		rect(i*width/n, height*(1-A[i]), width/n, height*A[i]);
 	}
 	// pivot value
+	noStroke();
 	fill(0,255,0, 250);// green
-	rect(0,(1-pivotVal)*height*0.25,width,10*0.25);
+	rect(0,(1-pivotVal)*height,width,5);
+
+	fill(0,0,0);
+	rect(0,height-1,width,1);
 }
 console.log("Note: running 'save(fileName)' will save the canvas as an image");
 
