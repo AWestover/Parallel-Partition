@@ -10,6 +10,8 @@ let swapSteps = 20;
 let swapTime = speed;
 let swapAmplitude = 1;
 
+let bg = [200,200,200];
+
 function resetAnimation() {
 	A = [];
 	for(let i = 0; i < n; i++){
@@ -27,6 +29,8 @@ function setup(){
 }
 
 function drawState() {
+	background(bg[0],bg[1],bg[2]);
+	noStroke();
 	for(let i = 0; i < n; i++){
 		if (i == low || i == high){
 			stroke(255,255,150); // yellow
@@ -52,7 +56,6 @@ function drawState() {
 }
 
 function aniSwap(i, j, ct){
-	console.log("hey");
 	let xiStart = i*width/n;
 	let xjStart = j*width/n;
 	let xi = xiStart + ct*(xjStart	- xiStart)/swapSteps;
@@ -61,24 +64,31 @@ function aniSwap(i, j, ct){
 	let xj = xjStart - ct*(xjStart	- xiStart)/swapSteps;
 	let yj = height*(1-A[j]) + swapAmplitude * (ct - 0)* (ct - swapSteps);
 
-	// drawState();
+	drawState();
+
+	noStroke();
+	fill(bg[0],bg[1],bg[2]);
+	rect(i*width/n, 0, width/n, height);
+	rect(j*width/n, 0, width/n, height);
 
 	fill(255,0,0);
 	stroke(255,255,255);
 	rect(xi, yi, width/n, height*A[i]);
 	rect(xj, yj, width/n, height*A[j]);
 
+
 	if(ct < swapSteps){
 		setTimeout(function(){ aniSwap(i, j, ct+1); }, swapTime/swapSteps);
 	}
 	else{
+		let tmp = A[high];
+		A[high] = A[low];
+		A[low] = tmp;
 		setTimeout(function(){partitionAnimation();},speed);
 	}
 }
 
 function partitionAnimation(){
-	background(255,255,255);
-	noStroke();
 	if(low >= high){
 		for(let i = 0; i < 10; i++){
 			drawState();
@@ -93,10 +103,6 @@ function partitionAnimation(){
 			high--;
 		}
 		else {
-			let tmp = A[high];
-			A[high] = A[low];
-			A[low] = tmp;
-			drawState();
 			aniSwap(high, low, 0);
 			return;
 		}
