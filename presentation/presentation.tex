@@ -107,11 +107,11 @@
 		A cache miss occurs when the algorithm must load a cache-line not stored in cache into cache.
 	\end{defin}	
 	\begin{itemize}
-		\item Being in-place is desirable 
+		\item In-place is desirable.
 		\item Kuszmaul developed an in-place version of parallel partition.
 		\item His in-place version outperformed the out-of-place standard algorithm.
-		\item But was outperformed in practice by a lower span algorithm
-		\item Experiments show the source of the problem: Memory bandwidth bound, i.e. incurring too many cache misses
+		\item But was outperformed in practice by a more cache efficient, higher span algorithm.
+		\item Experiments show the source of the problem: Memory bandwidth bound, i.e. incurring too many cache misses.
 		\item Note that both temporal and spatial cache efficiency are important.
 	\end{itemize}
 \end{frame}
@@ -170,6 +170,21 @@
 \end{proposition}
 
 \end{frame}
+
+\begin{frame}[t]{From Partial Partition to Full Partition}
+	\emph{Partial Partition Step:}
+	\begin{itemize}
+		\item Use $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability).
+		\item Choice of $\delta$ results in tradeoff between cache misses and span.
+	\end{itemize}
+	\emph{Recursive strategies:}
+	\begin{itemize}
+		\item \defn{Hybrid Smoothed Striding Algorithm}: Use algorithm with span $O(\log n \log \log n)$. Note: recursive algorithm's cache behavior doesn't affect overall cache behavior because subarray is small. This algorithm can be tuned to give optimal span and cache misses.
+		\item \defn{Recursive Smoothed Striding Algorithm}: Use the Partial Partition step recursively to solve subproblems. Recursive applications of the Partial Partition step use the same $\epsilon$ the top-level (to guarantee success with high probability in $n$), and use $\delta \in \Theta(1)$ such that the problem size is reduced by half at each step. This algorithm has slightly worse span, but is very simple to implement.
+	\end{itemize}
+\end{frame}
+
+
 
 \begin{frame}[t]{Hybrid Algorithm Analysis - General Theorem}
 \begin{theorem}

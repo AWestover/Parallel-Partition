@@ -1,2 +1,2 @@
 # parse theorems better (put stuff on separate lines)
-# 3 slides for serialPartition
+# crude animations (multiple slides) for serialPartition?
