@@ -1,0 +1,79 @@
+This is BibTeX, Version 0.99d (TeX Live 2019)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: standaloneWriteup.aux
+The style file: ACM-Reference-Format.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: paper.bib
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=20001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--empty publisher in Anderson90
+Warning--empty address in Anderson90
+Warning--no number and no volume in AxtmannWi17
+Warning--page numbers missing in both pages and numpages fields in AxtmannWi17
+Warning--can't use both volume and number fields in BlellochFi12
+Warning--empty publisher in BlellochFi12
+Warning--empty address in BlellochFi12
+Warning--empty address in CLRS
+Warning--empty publisher in Frias08
+Warning--empty address in Frias08
+Warning--empty publisher in FrigoLe09
+Warning--empty address in FrigoLe09
+Warning--empty publisher in Han01
+Warning--empty address in Han01
+Warning--empty address in HanHe12
+Warning--no number and no volume in Kleen05
+Warning--page numbers missing in both pages and numpages fields in Kleen05
+Warning--empty publisher in LiuKn05
+Warning--empty address in LiuKn05
+Warning--empty publisher in MatiasVi95
+Warning--empty address in MatiasVi95
+Warning--empty publisher in ShunGu15
+Warning--empty address in ShunGu15
+Warning--empty publisher in TsigasZh03
+Warning--empty address in TsigasZh03
+You've used 29 entries,
+            5719 wiz_defined-function locations,
+            1496 strings with 19347 characters,
+and the built_in function-call counts, 35160 in all, are:
+= -- 4642
+> -- 1156
+< -- 0
++ -- 393
+- -- 424
+* -- 2365
+:= -- 3504
+add.period$ -- 147
+call.type$ -- 29
+change.case$ -- 190
+chr.to.int$ -- 29
+cite$ -- 54
+duplicate$ -- 3110
+empty$ -- 2179
+format.name$ -- 516
+if$ -- 8602
+int.to.chr$ -- 2
+int.to.str$ -- 1
+missing$ -- 116
+newline$ -- 263
+num.names$ -- 232
+pop$ -- 1115
+preamble$ -- 1
+purify$ -- 451
+quote$ -- 0
+skip$ -- 1104
+stack$ -- 0
+substring$ -- 2756
+swap$ -- 341
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 617
+warning$ -- 25
+while$ -- 265
+width$ -- 0
+write$ -- 531
+(There were 25 warnings)

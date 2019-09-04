@@ -1,0 +1,55 @@
+\documentclass{article}
+\usepackage[x11names, svgnames, rgb]{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{snakes,arrows,shapes}
+\usepackage{amsmath}
+%
+%
+
+%
+
+%
+
+\begin{document}
+\pagestyle{empty}
+%
+%
+%
+
+\enlargethispage{100cm}
+% Start of code
+\begin{tikzpicture}[>=latex',line join=bevel,scale=0.5]
+%%
+\node (x11) at (135.0bp,306.0bp) [draw,ellipse] {$X_{1,1}$};
+  \node (x21) at (99.0bp,234.0bp) [draw,ellipse] {$X_{2,1}$};
+  \node (x22) at (171.0bp,234.0bp) [draw,ellipse] {$X_{2,2}$};
+  \node (x31) at (27.0bp,162.0bp) [draw,ellipse] {$X_{3,1}$};
+  \node (x32) at (99.0bp,162.0bp) [draw,ellipse] {$X_{3,2}$};
+  \node (x33) at (171.0bp,162.0bp) [draw,ellipse] {$X_{3,3}$};
+  \node (x34) at (243.0bp,162.0bp) [draw,ellipse] {$X_{3,4}$};
+  \node (x41) at (99.0bp,90.0bp) [draw,ellipse] {$X_{4,1}$};
+  \node (x42) at (171.0bp,90.0bp) [draw,ellipse] {$X_{4,2}$};
+  \node (x51) at (135.0bp,18.0bp) [draw,ellipse] {$X_{5,1}$};
+  \draw [->] (x11) ..controls (122.04bp,280.08bp) and (116.85bp,269.69bp)  .. (x21);
+  \draw [->] (x11) ..controls (147.96bp,280.08bp) and (153.15bp,269.69bp)  .. (x22);
+  \draw [->] (x21) ..controls (73.803bp,208.8bp) and (60.685bp,195.68bp)  .. (x31);
+  \draw [->] (x21) ..controls (99.0bp,208.13bp) and (99.0bp,198.97bp)  .. (x32);
+  \draw [->] (x22) ..controls (171.0bp,208.13bp) and (171.0bp,198.97bp)  .. (x33);
+  \draw [->] (x22) ..controls (196.2bp,208.8bp) and (209.32bp,195.68bp)  .. (x34);
+  \draw [->] (x31) ..controls (52.197bp,136.8bp) and (65.315bp,123.68bp)  .. (x41);
+  \draw [->] (x32) ..controls (99.0bp,136.13bp) and (99.0bp,126.97bp)  .. (x41);
+  \draw [->] (x33) ..controls (171.0bp,136.13bp) and (171.0bp,126.97bp)  .. (x42);
+  \draw [->] (x34) ..controls (217.8bp,136.8bp) and (204.68bp,123.68bp)  .. (x42);
+  \draw [->] (x41) ..controls (111.96bp,64.081bp) and (117.15bp,53.693bp)  .. (x51);
+  \draw [->] (x42) ..controls (158.04bp,64.081bp) and (152.85bp,53.693bp)  .. (x51);
+%
+\end{tikzpicture}
+% End of code
+
+%
+\end{document}
+%
+
+
+

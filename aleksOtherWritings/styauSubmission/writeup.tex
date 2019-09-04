@@ -117,7 +117,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 
 % The default list of authors is too long for headers.
-\renewcommand{\shortauthors}{William Kuszmaul and Alek Westover}
+\renewcommand{\shortauthors}{William Kuszmaul}
 
 
 \begin{abstract}
@@ -1790,6 +1790,52 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
     is averaged over five trials.}
   \label{tablesort}
 \end{figure*}
+
+
+\newpage
+\section{Acknowledgements}
+
+This project was performed as part of the MIT PRIMES program at the
+Massachusetts Institute of Technology (MIT). The MIT PRIMES program
+selects talented high-school students in math and computer science
+(through a problem-based application that tests students' mathematics,
+programming, and problem-solving abilities) and gives them
+opportunities to work with MIT graduate students in Math and Computer
+Science on unsolved research projects. This project was performed by
+student Alek Westover with mentorship from MIT Computer Science PhD
+student William Kuszmaul.
+
+The work for the project is split as follows:
+\begin{itemize}
+\item \textbf{Cache-Efficient In-Place Algorithms: }The main
+  contribution of the project is a cache-efficient in-place EREW
+  parallel-partition algorithm with provable guarantees on span and
+  cache-behavior, and with near-state-of-the-art real-world
+  performance.
+
+  The theoretical ideas and analysis behind this algorithm, as well as
+  the software implementation and experimentation of the algorithm are
+  completely due to the student, Alek Westover. The writeup of the
+  algorithm and its analysis were also performed by the student, with
+  minor editing help by the mentor.
+\item \textbf{Non-Cache-Efficient In-Place Algorithms: }The paper also
+  presents a non-cache-efficient in-place algorithm for parallel
+  partition, which generalizes the classic parallel-prefix-based
+  algorithm. This contribution is primarily of theoretical
+  interest. Most of this part of the project was performed prior to
+  the student's involvement. The performance bottlenecks of this
+  algorithm were the motivation for the student's work, which produced
+  algorithms with equally compelling theoretical guarantees and far
+  better practical performance.
+\end{itemize}
+
+The authors would also like to thank Bradley C. Kuszmaul for several
+suggestions that helped simplify the non-cache-efficient in-place
+algorithm. The authors would further like to thank Reza Zadeh for
+introducing them to the parallel-partition problem.
+
+This acknowledgements section was written by the mentor, William
+Kuszmaul.
 
 
 \newpage
