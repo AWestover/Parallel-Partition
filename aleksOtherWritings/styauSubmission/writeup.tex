@@ -121,11 +121,34 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 
 \begin{abstract}
-We present an in-place algorithm for the parallel partition problem that has work $O(n)$ and span $O(\log n \cdot \log \log n)$. The algorithm uses only exclusive read/write shared variables, and can be implemented using parallel-for-loops without any additional concurrency considerations (i.e., the algorithm is EREW). As an immediate consequence, we also get an in-place quicksort algorithm with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
+  The parallel-partition problem, which is the first step of Quicksort
+  and appears in many other algorithms, is given an array $A$ of
+  length $n$, and must partition the array based on some pivot
+  property.  We present two algorithms for the parallel-partition
+  problem. Both algorithms are fully in place, have linear work and
+  polylogarithmic span, and use only exclusive read/write
+  shared-memory variables (i.e., are EREW). This means that they can
+  be implemented using only parallel for loops, and do not require the
+  use of any concurrency mechanisms such as locks or atomic
+  variables. Despite the parallel-partition problem being heavily
+  studied, no algorithms have achieved these theoretical guarantees
+  before.
 
-Using our algorithmic techniques, we implement an (almost) in-place parallel partition. In addition to achieving much better memory utilization, the algorithm leverages its improved cache behavior to achieve a speedup over its out-of-place counterpart. Both algorithms remain bottlenecked by memory bandwidth, however, due to the fact that they require multiple passes over the input array.
+  Our first algorithm is an in-place EREW algorithm with span $O(\log
+  n \cdot \log \log n)$, which is within a factor of $O(\log \log n)$
+  of optimal. Although the algorithm achieves practical performance
+  improvements over the standard out-of-place parallel partition due
+  to improved cache behavior, the algorithm remains bottlenecked by
+  memory bandwidth in practice.
 
-Our second contribution is an in-place EREW algorithm with polylogarithmic span and provably optimal cache behavior, up to small-order factors.  The resulting algorithm achieves near-ideal scaling in practice by avoiding the memory-bandwidth bottleneck. The algorithm's performance is comparable to that the Blocked Strided Algorithm of Francis, Pannan, Frias, and Petit, which is the previous state-of-the art for parallel EREW sorting algorithms, but which lacks theoretical guarantees on its span and cache behavior.
+  Our second algorithm is an in-place EREW algorithm with
+  polylogarithmic span and \emph{provably optimal cache behavior}, up
+  to small-order factors.  The resulting algorithm achieves near-ideal
+  scaling in practice by avoiding the memory-bandwidth bottleneck. The
+  algorithm's performance is comparable to that the Blocked Strided
+  Algorithm of Francis, Pannan, Frias, and Petit, which is the
+  previous state-of-the art for parallel EREW sorting algorithms, but
+  which lacks theoretical guarantees on its span and cache behavior.
 \end{abstract}
 
 %
@@ -236,17 +259,16 @@ additional concurrency considerations.
 
 Our first result is a set of techniques that allows us to adapt the
 standard parallel partition algorithm to be fully in place. The new
-algorithm has work $O(n)$ and span $O(\log n \cdot \log \log
-n)$. As an immediate consequence, we also get a
-simple in-place quicksort algorithm with work $O(n \log n)$ and span
-$O(\log^2 n \log \log n)$.
+algorithm has work $O(n)$ and span $O(\log n \cdot \log \log n)$. As
+an immediate consequence, we also get an in-place quicksort algorithm
+with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
 
-Using our algorithmic techniques, we implement and optimize a
-space-efficient parallel partition. Because the in-place algorithm
-eliminates the use of large auxiliary arrays, the algorithm is able to
-achieve a significant reduction in cache misses over its out-of-place
-counterpart, resulting in performance improvements both in serial and
-in parallel over the standard parallel partition algorithm.
+Using our algorithmic techniques, we implement a space-efficient
+parallel partition. Because the in-place algorithm eliminates the use
+of large auxiliary arrays, the algorithm is able to achieve a
+reduction in cache misses over its out-of-place counterpart, resulting
+in performance improvements over the standard parallel partition
+algorithm.
 
 The in-place algorithm remains bottlenecked by memory bandwidth,
 however, due to the fact that multiple passes over the input array are
@@ -256,15 +278,21 @@ required. The memory-bandwidth bottleneck has led past researchers
 which exhibits theoretical guarantees only on certain random input
 arrays.
 
-Our second main result is an algorithm that we call the \defn{Smoothed
-  Striding Algorithm}. By randomly perturbing the internal structure
-of the Strided Algorithm, and adding a recursion step that was
-previously not possible, we arrive at a new algorithm with provably
-good span and cache behavior. The Smoothed Striding Algorithm is
-in-place, has polylogarithmic span, and exhibits provably optimal
-cache behavior up to small-order factors. In practice, the Smoothed
+The main result of this paper is an algorithm that we call the
+\defn{Smoothed Striding Algorithm}, which achieves theoretical
+guarantees not only on span, work, and memory usage, but also on cache
+behavior. By randomly perturbing the internal structure of the Strided
+Algorithm, and adding a recursion step that was previously not
+possible, we arrive at a new algorithm with provably good span and
+cache behavior. The Smoothed Striding Algorithm is in-place, has
+polylogarithmic span, and exhibits provably optimal cache behavior up
+to small-order factors.
+
+Using the Smoothed Striding Algorithm, we implement and optimize a
+fully in-place parallel partition. The implementation of the Smoothed
 Striding Algorithm performs within 15\% of the Strided Algorithm on a
-large number of threads.
+large number of threads, while achieving theoretical guarantees that
+were previously unattainable.
 
 
 
@@ -1274,7 +1302,8 @@ of the low-space implementation allows for it to achieve a speed
 advantage over its peers, in some cases completing roughly twice as
 fast as the medium-space implementation and four times as fast as the
 low-space implementation. We show that all three implementations are
-bottlenecked by memory throughput, however, suggesting that the cache-optimal Smoothed Striding Algorithm can do better.
+bottlenecked by memory throughput, however, suggesting that the
+cache-optimal Smoothed Striding Algorithm can do better.
 
 In Subsection \ref{subsecstrided}, we evaluate the performance of the
 Recursive Smoothed Striding Algorithm and the Strided Algorithms. The
@@ -1330,7 +1359,14 @@ Our implementations are available at \\ \github.
 
 In this section, we compare four partition implementations,
 incorporating the techniques from Section \ref{secalg} in order to
-achieve space efficiency:
+achieve space efficiency. We find that the performances of each of the
+implementations are closely modeled by cache misses, which allows for
+the more space-efficient algorithms to achieve practical speedups. The
+discussion of cache misses and memory-bandwidth bottlenecks in this
+section also sets the groundwork for understanding the performance of
+the Smoothed Striding Algorithm in Section \ref{subsecstrided}.
+
+The partition implementations considered in this section are:
 \begin{itemize}[leftmargin = .15in]
 \item \emph{A Serial Baseline:} This uses the serial in-place
   partition implementation from GNU Libc quicksort, with minor
@@ -1719,11 +1755,6 @@ concurrent-read-exclusive-write memory) is an important direction of
 future work.
 
 
-\paragraph{Acknowledgments} The authors would like to thank Bradley C. Kuszmaul for several suggestions that helped simplify both the algorithm and its exposition. The authors would also like to thank Reza Zadeh for encouragement and advice.
-
-This research was supported in part by NSF Grants 1314547 and 1533644. 
-
-
 \begin{figure*}
   \begin{center}
     \CILKtable 
@@ -1793,6 +1824,11 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
 
 
 \newpage
+
+\phantom{foobar}
+
+\newpage
+
 \section{Acknowledgements}
 
 This project was performed as part of the MIT PRIMES program at the
@@ -1837,8 +1873,12 @@ introducing them to the parallel-partition problem.
 This acknowledgements section was written by the mentor, William
 Kuszmaul.
 
+\newpage
+
+\phantom{foobar}
 
 \newpage
+
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{paper}
 
