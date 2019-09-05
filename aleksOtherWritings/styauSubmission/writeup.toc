@@ -1,0 +1,12 @@
+\contentsline {section}{Contents}{1}{section*.1}% 
+\contentsline {section}{Abstract}{2}{section*.2}% 
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}% 
+\contentsline {section}{\numberline {2}Preliminaries}{4}{section.2}% 
+\contentsline {section}{\numberline {3}An In-Place Algorithm with Span $O(\qopname \relax o{log}n \qopname \relax o{log}\qopname \relax o{log}n)$}{5}{section.3}% 
+\contentsline {section}{\numberline {4}A Cache Efficient In-Place Parallel Partition}{7}{section.4}% 
+\contentsline {section}{\numberline {5}Performance Comparisons}{12}{section.5}% 
+\contentsline {subsection}{\numberline {5.1}Comparing Parallel-Prefix-Based Algorithms}{12}{subsection.5.1}% 
+\contentsline {subsection}{\numberline {5.2}Comparing the Smoothed Striding and Strided Algorithms}{14}{subsection.5.2}% 
+\contentsline {section}{\numberline {6}Conclusion and Open Questions}{14}{section.6}% 
+\contentsline {section}{\numberline {7}Acknowledgements}{18}{section.7}% 
+\contentsline {section}{References}{19}{section*.9}% 
