@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d (TeX Live 2019)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: summary.aux
+The style file: plain.bst
+Database file #1: paper.bib
+Warning--can't use both volume and number fields in BlellochFi12
+You've used 12 entries,
+            2118 wiz_defined-function locations,
+            588 strings with 5969 characters,
+and the built_in function-call counts, 4364 in all, are:
+= -- 443
+> -- 194
+< -- 4
++ -- 79
+- -- 64
+* -- 314
+:= -- 708
+add.period$ -- 38
+call.type$ -- 12
+change.case$ -- 68
+chr.to.int$ -- 0
+cite$ -- 13
+duplicate$ -- 161
+empty$ -- 341
+format.name$ -- 64
+if$ -- 919
+int.to.chr$ -- 0
+int.to.str$ -- 12
+missing$ -- 11
+newline$ -- 62
+num.names$ -- 24
+pop$ -- 67
+preamble$ -- 1
+purify$ -- 56
+quote$ -- 0
+skip$ -- 119
+stack$ -- 0
+substring$ -- 302
+swap$ -- 42
+text.length$ -- 4
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 48
+warning$ -- 1
+while$ -- 45
+width$ -- 14
+write$ -- 134
+(There was 1 warning)

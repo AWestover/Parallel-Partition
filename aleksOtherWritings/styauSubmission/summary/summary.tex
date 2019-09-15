@@ -1,0 +1,164 @@
+\documentclass[journal, onecolumn]{IEEEtran}
+\usepackage{amsmath}
+\def\E{\operatorname{\mathbb{E}}}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\newcommand{\defn}[1]       {{\textit{\textbf{\boldmath #1}}}}
+\newcommand{\poly}{\operatorname{poly}}
+\newcommand{\polylog}{\operatorname{polylog}}
+\usepackage{cite} %% important for citations
+
+\title{Summary}
+\author{Alek Westover}
+\begin{document}
+\maketitle
+The parallel-partition problem, which is the first step of Quicksort and appears in many other algorithms, is given an array $A$ of length $n$, and must partition the array based on some pivot property. 
+When partitioning an array relative to some pivot value $p$, $A[i]$ is labelled a predecessor if $A[i] \le p$ and a successor otherwise.
+
+% In our model of parallelism an algorithm can achieve parallelism through the use of parallel-for-loops.
+% Formally, a parallel-for-loop is given a range $R \in \mathbb{N}$, a
+% constant number of arguments $\arg_1, \arg_2, \ldots, \arg_c$, and a
+% body of code. For each $i \in \{1, \ldots, R\}$, the loop launches a
+% thread that is given loop-counter $i$ and local copies of the
+% arguments $\arg_1, \arg_2, \ldots, \arg_c$. 
+% The threads are then taken up by processors and the iterations of the loop are performed in parallel. 
+% Only after every iteration of the loop is complete can control flow continue past the loop.
+% The scheduler is assumed to contribute no overhead to the
+% span. In particular, if each iteration of a
+% parallel-for-loop has span $s$, then the full parallel loop has span
+% $s + O(1)$ \cite{Blelloch96,AcarBl16}.
+
+% A parallel algorithm may be run on an arbitrary number $p$ of
+% processors. The algorithm itself is oblivious to $p$, however, leaving
+% the assignment of threads to processors up to a scheduler.
+
+% A parallel algorithm can be measured by its \defn{work}, the time needed to execute in serial denoted by $T_1$, and its \defn{span}, the time to execute on infinitely many processors denoted by $T_\infty$. 
+
+% The work $T_1$ and span $T_\infty$ can be used to quantify the time $T_p$
+% that an algorithm requires to execute on $p$ processors using a greedy
+% online scheduler. If the scheduler is assumed to contribute no
+% overhead, then Brent's Theorem \cite{Brent74} states that for any
+% $p$,
+% $$T_1 / p \le T_p \le T_1 / p + T_\infty.$$
+% The work-stealing algorithms used in the Cilk extension of C/C++ realize
+% the guarantee offered by Brent's Theorem within a constant factor
+% \cite{BlumofeJo96,BlumofeLe99}, with the added caveat that parallel-for-loops typically induce an additional additive overhead of $O(\log
+% R)$. 
+
+% Memory is \defn{exclusive-read} and \defn{exclusive-write}. That is, no two threads are ever permitted to attempt to read or write to the same variable concurrently. 
+% The exclusive-read exclusive-write memory model is sometime referred
+% to as the \defn{EREW model} (see, e.g., \cite{Hagerup89}).
+
+% Note that threads are not in lockstep (i.e., they may progress at arbitrary different speeds), and thus the EREW model requires algorithms to be data-race free in order to avoid the possibility of non-exclusive data accesses.
+
+% In an \defn{in-place} algorithm, each thread is given $O(\polylog n)$
+% memory upon creation that is deallocated when the thread dies. This
+% memory can be shared with the thread's children. However, the depth of
+% the parent-child tree is not permitted to exceed $O(\polylog n)$.
+
+A parallel algorithm can be measured by its \defn{work}, the time
+needed to execute in serial, and its \defn{span}, the time to execute
+on infinitely many processors.
+
+There is a well-known algorithm for parallel partition on arrays of size $n$ with work $O(n)$ and span
+$O(\log n)$ \cite{Blelloch96,AcarBl16}. Moreover, the algorithm uses
+only exclusive read/write shared memory variables (i.e., it is an
+\defn{EREW} algorithm). This eliminates the need for concurrency
+mechanisms such as locks and atomic variables, and ensures good
+behavior even if the time to access a location is a function of the
+number of threads trying to access it (or its cache line)
+concurrently. EREW algorithms also have the advantage that their
+behavior is internally deterministic, meaning that
+the behavior of the algorithm will not differ from run to run, which
+makes test coverage, debugging, and reasoning about performance
+substantially easier \cite{BlellochFi12}.
+
+The parallel-partition algorithm suffers from using a large amount of
+auxiliary memory, however. Whereas the serial algorithm is typically
+implemented in place, the parallel algorithm relies on the use of two
+auxiliary arrays of size $n$. To the best of our knowledge, the only
+known linear-work and $\operatorname{polylog}(n)$-span algorithms for
+parallel partition that are in-place require the use of atomic
+operations (e.g, fetch-and-add)
+\cite{HeidelbergerNo90,AxtmannWi17,TsigasZh03}.
+
+An algorithm's memory efficiency can be critical on large inputs. The
+memory consumption of an algorithm determines the largest problem size
+that can be executed in memory. Many external memory algorithms (i.e.,
+algorithms for problems too large to fit in memory) perform large
+subproblems in memory; the size of these subproblems is again
+bottlenecked by the algorithm's memory-overhead \cite{Vitter08}. In
+multi-user systems, processes with larger memory-footprints can hog
+the cache and the memory bandwidth, slowing down other processes.
+
+For sorting algorithms, in particular, special attention to memory
+efficiency is often given. This is because (a) a user calling the sort
+function may already be using almost all of the memory in the system;
+and (b) sorting algorithms, and especially parallel sorting
+algorithms, are often bottlenecked by memory bandwidth. The latter
+property, in particular, means that any parallel sorting algorithm
+that wishes to achieve state-of-the art performance on a large
+multi-processor machine must be (at least close to) in place.
+
+Currently the only practical in-place parallel sorting algorithms
+either rely heavily on atomic operations or other concurrency
+mechanisms \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03}, or eschew
+theoretical guarantees \cite{FrancisPa92}. Parallel merge sort
+\cite{Hagerup89} was made in-place by Katajainen \cite{Katajainen93},
+but has proven too sophisticated for practical applications. Bitonic
+sort \cite{BlellochLe98} is naturally in-place, and can be practical
+in certain applications on super computers, but suffers in general
+from requiring work $\Theta(n \log^2 n)$ rather than $O(n \log
+n)$. Parallel quicksort, on the other hand, despite the many efforts
+to optimize it \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03,
+  FrancisPa92, Frias08}, has eluded any in-place EREW (or CREW i.e. \emph{concurrent-read exclusive-write})
+algorithms due to its reliance on parallel partition.
+
+
+We show that parallel partition can be implemented in place, and
+without the use of concurrency mechanisms. All of the algorithms
+considered in this paper use only exclusive read/write shared
+variables, and can be implemented using parallel-for-loops without any
+additional concurrency considerations. 
+
+Our first result is a set of techniques that allows us to adapt the
+standard parallel partition algorithm to be fully in place. The new
+algorithm has work $O(n)$ and span $O(\log n \cdot \log \log n)$. As
+an immediate consequence, we also get an in-place quicksort algorithm
+with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
+
+Using our algorithmic techniques, we implement a space-efficient
+parallel partition. Because the in-place algorithm eliminates the use
+of large auxiliary arrays, the algorithm is able to achieve a
+reduction in cache misses over its out-of-place counterpart, resulting
+in performance improvements over the standard parallel partition
+algorithm.
+
+The in-place algorithm remains bottlenecked by memory bandwidth,
+however, due to the fact that multiple passes over the input array are
+required. The memory-bandwidth bottleneck has led past researchers
+\cite{FrancisPa92, Frias08} to introduce the so-called \defn{Strided
+  Algorithm}, which has near optimal cache behavior in practice, but
+which exhibits theoretical guarantees only on certain random input
+arrays.
+
+The main result of this paper is an algorithm that we call the
+\defn{Smoothed Striding Algorithm}, which achieves theoretical
+guarantees not only on span, work, and memory usage, but also on cache
+behavior. By randomly perturbing the internal structure of the Strided
+Algorithm, and adding a recursion step that was previously not
+possible, we arrive at a new algorithm with provably good span and
+cache behavior. The Smoothed Striding Algorithm is in-place, has
+polylogarithmic span, and exhibits provably optimal cache behavior up
+to small-order factors.
+
+Using the Smoothed Striding Algorithm, we implement and optimize a
+fully in-place parallel partition. The implementation of the Smoothed
+Striding Algorithm performs within 15\% of the Strided Algorithm on a
+large number of threads, while achieving theoretical guarantees that
+were previously unattainable.
+
+\bibliography{paper}{}
+\bibliographystyle{plain}
+
+\end{document}

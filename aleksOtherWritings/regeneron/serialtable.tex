@@ -5,7 +5,7 @@
 \begin{axis}[
 width = 5 in,
 height = 4in,
-title={Slowdown Versus Input Size in Serial},
+title={Slowdown Over Serial Partition Versus Input Size in Serial},
 xtick pos=left,
 ytick pos=left,
 ymax = 6,
@@ -24,7 +24,7 @@ scatter/classes=%
 %% In-Place
 \addplot coordinates {( 23, 1.82895) ( 24, 1.81639) ( 25, 1.83007) ( 26, 1.83905) ( 27, 1.84722) ( 28, 1.89343) ( 29, 1.90068) ( 30, 1.91837) };
 %% In-Place Prefix-Sum
-\addplot coordinates {( 23, 2.75658) ( 24, 2.71803) ( 25, 2.68137) ( 26, 2.67157) ( 27, 2.67443) ( 28, 2.70131) ( 29, 2.70551) ( 30, 2.71713) };
+% \addplot coordinates {( 23, 2.75658) ( 24, 2.71803) ( 25, 2.68137) ( 26, 2.67157) ( 27, 2.67443) ( 28, 2.70131) ( 29, 2.70551) ( 30, 2.71713) };
 %% Out-of-Place
 \addplot coordinates {( 23, 4.31579) ( 24, 4.26885) ( 25, 4.20098) ( 26, 4.18464) ( 27, 4.18546) ( 28, 4.22519) ( 29, 4.22257) ( 30, 4.23265) };
 %% %% High-Span
@@ -33,7 +33,7 @@ scatter/classes=%
 \addplot coordinates {( 23, 1.55263) ( 24, 1.54426) ( 25, 1.53431) ( 26, 1.53431) ( 27, 1.53554) ( 28, 1.53491) ( 29, 1.55852) ( 30, 1.53317) };
 %% Strided
 \addplot coordinates {( 23, 1.53289) ( 24, 1.53443) ( 25, 1.53105) ( 26, 1.52778) ( 27, 1.53064) ( 28, 1.52613) ( 29, 1.5246) ( 30, 1.52919) };
-\legend{Low-Space, Med-Space, High-Space, Smoothed Striding, Strided}
+\legend{Low-Space, High-Space, Smoothed Striding, Strided} % Low-Space, Med-Space, High-Space, Smoothed Striding, Strided
 \end{axis}
 \end{tikzpicture}
 }

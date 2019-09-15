@@ -92,19 +92,75 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 
 % The default list of authors is too long for headers.
-\renewcommand{\shortauthors}{William Kuszmaul}
+\renewcommand{\shortauthors}{Alek Westover}
+
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+ 
+        \Huge
+        \textbf{In-Place Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
+ 
+        \vspace{0.5cm}
+        \LARGE
+				An Algorithm With Provably Optimal Cache Behavior
+ 
+        \vspace{1.5cm}
+				\vfill
+ 
+        \textbf{Alek Westover}
+
+        \vspace{1.5cm}
+				Belmont High School
+
+				Massachusetts, USA
+
+        \vspace{1.5cm}
+				Mentor: William Kuszmaul (MIT)
+ 
+        \vspace{0.8cm}
+				MIT PRIMES Computer Science Research Program
+ 
+ 
+        \Large
+ 
+    \end{center}
+\end{titlepage}
 
 
-\begin{abstract}
-We present an in-place EREW algorithm with polylogarithmic span and provably optimal cache behavior, up to small-order factors.  
-The resulting algorithm achieves near-ideal scaling in practice by avoiding the memory-bandwidth bottleneck. 
-The algorithm's performance is comparable to that the Blocked Strided Algorithm of Francis, Pannan, Frias, and Petit, which is the previous state-of-the art for parallel EREW sorting algorithms, but which lacks theoretical guarantees on its span and cache behavior.
+
+\begin{abstract} The parallel-partition problem, which is the first step of
+	Quicksort and appears in many other algorithms, is given an array $A$ of
+	length $n$, and must partition the array based on some pivot property. The
+	standard solution for the parallel-partition problem is out-of-place which
+	prevents it from having spatial-locality.  Kuszmaul developed an in-place
+	solution for the parallel-partition problem, but it performs multiple passes
+	over the input array which prevents it from having temporal-locality.  The
+	Blocked Strided Algorithm of Francis, Pannan, Frias, and Petit, is in-place
+	and under certain conditions performs little more than a single pass over the
+	array.  Because of this, for certain inputs the Blocked Strided Algorithm
+	incurs very few cache misses and thus performs well.
+
+	We present an in-place EREW algorithm with polylogarithmic span and provably
+	optimal cache behavior, up to small-order factors.  The resulting algorithm
+	achieves near-ideal scaling in practice by avoiding the memory-bandwidth
+	bottleneck.  The algorithm's performance is comparable to that of the Blocked
+	Strided Algorithm, the previous state-of-the art for parallel EREW sorting
+	algorithms, but which lacks theoretical guarantees on its span and cache
+	behavior.
+
+
+% This means that they can be implemented using only parallel for loops, and do
+	% not require the use of any concurrency mechanisms such as locks or atomic
+	% variables. Despite the parallel-partition problem being heavily studied, no
+	% algorithms have achieved these theoretical guarantees before.
+
 \end{abstract}
 
 
 
 \maketitle
-
+\onecolumn
 
 
 
@@ -183,42 +239,46 @@ algorithms due to its reliance on parallel partition.\footnote{In aCRCW
   not. CREW stands for \emph{concurrent-read exclusive-write}.}
 
 \paragraph{Results}
-We will highlight past work demonstrating that parallel partition can be implemented in place.
-However, this in-place implementation remains bottlenecked by memory bandwidth, due to the fact that multiple passes over the input array are
-required. 
+We will highlight past work demonstrating that parallel partition can be
+implemented in place. However, this in-place implementation remains
+bottlenecked by memory bandwidth, due to the fact that multiple passes over the
+input array are required. 
 
-The memory-bandwidth bottleneck has led past researchers
-\cite{FrancisPa92, Frias08} to introduce the so-called \defn{Strided
-  Algorithm}, which has near optimal cache behavior in practice, but
-which exhibits theoretical guarantees only on certain inputs such as random input
-arrays.
+The memory-bandwidth bottleneck has led past researchers \cite{FrancisPa92,
+Frias08} to introduce the so-called \defn{Strided Algorithm}, which has near
+optimal cache behavior in practice, but which exhibits theoretical guarantees
+only on certain inputs such as random input arrays.
 
-Our main result is an algorithm that we call the \defn{Smoothed
-  Striding Algorithm}. By randomly perturbing the internal structure
-of the Strided Algorithm, and adding a recursion step that was
-previously not possible, we arrive at a new algorithm with provably
-good span and cache behavior. The Smoothed Striding Algorithm is
-in-place, has polylogarithmic span, and exhibits provably optimal
-cache behavior up to small-order factors. In practice, the Smoothed
-Striding Algorithm performs within 15\% of the Strided Algorithm on a
+Our main result is an algorithm that we call the \defn{Smoothed Striding
+Algorithm}. By randomly perturbing the internal structure of the Strided
+Algorithm, and adding a recursion step that was previously not possible, we
+arrive at a new algorithm with provably good span and cache behavior. The
+Smoothed Striding Algorithm is in-place, has polylogarithmic span, and exhibits
+provably optimal cache behavior up to small-order factors. In practice, the
+Smoothed Striding Algorithm performs within 15\% of the Strided Algorithm on a
 large number of threads.
 
 
 
 \section{Preliminaries}\label{secprelim}
 
-We begin by describing the the parallelism and memory model used in
-the paper, and by presenting background on parallel partition.
+We begin by describing the the parallelism and memory model used in the paper,
+and by presenting background on parallel partition.
 
-\paragraph{Workflow Model} We consider a simple language-based model of parallelism in which algorithms achieve parallelism through the use of \defn{parallel-for-loops} (see, e.g.,
-\cite{Blelloch96,AcarBl16,CLRS}); function calls within the inner loop
-then allow for more complicated parallel structures (e.g., recursion). Our algorithms can also be implemented in the less restrictive PRAM model \cite{Blelloch96, AcarBl16}.
+\paragraph{Workflow Model} We consider a simple language-based model of
+parallelism in which algorithms achieve parallelism through the use of
+\defn{parallel-for-loops} (see, e.g., \cite{Blelloch96,AcarBl16,CLRS});
+function calls within the inner loop then allow for more complicated parallel
+structures (e.g., recursion). Our algorithms can also be implemented in the
+less restrictive PRAM model \cite{Blelloch96, AcarBl16}.
 
-Formally, a parallel-for-loop is given a range $R \in \mathbb{N}$, a
-constant number of arguments $\arg_1, \arg_2, \ldots, \arg_c$, and a
-body of code. For each $i \in \{1, \ldots, R\}$, the loop launches a
-thread that is given loop-counter $i$ and local copies of the
-arguments $\arg_1, \arg_2, \ldots, \arg_c$. The threads are then taken up by processors and the iterations of the loop are performed in parallel. Only after every iteration of the loop is complete can control flow continue past the loop.
+Formally, a parallel-for-loop is given a range $R \in \mathbb{N}$, a constant
+number of arguments $\arg_1, \arg_2, \ldots, \arg_c$, and a body of code. For
+each $i \in \{1, \ldots, R\}$, the loop launches a thread that is given
+loop-counter $i$ and local copies of the arguments $\arg_1, \arg_2, \ldots,
+\arg_c$. The threads are then taken up by processors and the iterations of the
+loop are performed in parallel. Only after every iteration of the loop is
+complete can control flow continue past the loop.
 
 A parallel algorithm may be run on an arbitrary number $p$ of
 processors. The algorithm itself is oblivious to $p$, however, leaving
@@ -241,8 +301,8 @@ $$T_1 / p \le T_p \le T_1 / p + T_\infty.$$
 
 The work-stealing algorithms used in the Cilk extension of C/C++ realize
 the guarantee offered by Brent's Theorem within a constant factor
-\cite{BlumofeJo96,BlumofeLe99}, with the added caveat that parallel-for-loops typically induce an additional additive overhead of $O(\log
-R)$. 
+\cite{BlumofeJo96,BlumofeLe99}, with the added caveat that parallel-for-loops
+typically induce an additional additive overhead of $O(\log R)$. 
 
 \paragraph{Memory Model} Memory is \defn{exclusive-read} and \defn{exclusive-write}. That is, no two threads are ever permitted to attempt to read or write to the same variable concurrently. 
 The exclusive-read exclusive-write memory model is sometime referred
@@ -255,7 +315,17 @@ memory upon creation that is deallocated when the thread dies. This
 memory can be shared with the thread's children. However, the depth of
 the parent-child tree is not permitted to exceed $O(\polylog n)$.
 
-Whereas the EREW memory model prohibits concurrent accesses to memory, on the other side of the spectrum are CRCW (concurrent-read-concurrent-write) models, which allow for both reads and writes to be performed concurrently (and in some variants even allow for atomic operations) \cite{Blelloch96,AcarBl16,MatiasVi95}. One approach to designing efficient EREW algorithms is to simulate efficient CRCW algorithms in the EREW model \cite{MatiasVi95}. The known simulation techniques require substantial space overhead, however, preventing the design of in-place algorithms \cite{MatiasVi95}.\footnote{The known simulation techniques also increase the total work in the original algorithm, although this can be acceptable if only a small number of atomic operations need to be simulated.}
+Whereas the EREW memory model prohibits concurrent accesses to memory, on the
+other side of the spectrum are CRCW (concurrent-read-concurrent-write) models,
+which allow for both reads and writes to be performed concurrently (and in some
+variants even allow for atomic operations)
+\cite{Blelloch96,AcarBl16,MatiasVi95}. One approach to designing efficient EREW
+algorithms is to simulate efficient CRCW algorithms in the EREW model
+\cite{MatiasVi95}. The known simulation techniques require substantial space
+overhead, however, preventing the design of in-place algorithms
+\cite{MatiasVi95}.\footnote{The known simulation techniques also increase the
+total work in the original algorithm, although this can be acceptable if only a
+small number of atomic operations need to be simulated.}
 
 %% HERE: Is where we can talk about the more powerful alternative to EREW, and there relationship, and why we can't just simulate CRCW (or, more importantly, ERCW). Make it clear that the Exclusive Read part is not actually very important -- it's the exclusive write part that's hard.
 
@@ -328,7 +398,8 @@ Note that the serial partition described makes a single pass over the $n$ elemen
 	\caption{Serial Partition}
 	\label{alg:serialPartition}
 	\begin{algorithmic}
-		\State $\text{low} \gets 0; \text{high} \gets n-1$
+		\State $\text{low} \gets 0$
+		\State $\text{high} \gets n-1$
 		\While{$\text{low} < \text{high}$} 
 			\While{$A[\text{low}] \leq \text{pivotValue}$}
 				\State $\text{low} \gets \text{low}+1$
@@ -389,19 +460,26 @@ array $A$ into $p$ parts and assigns one part to each thread. Reducing
 the space below $o(n)$ has remained open until now, even when the
 number of threads is fixed.
 
-\paragraph{An In-Place Algorithm with Span $O(\log n \log \log n)$}\label{secalg}
-\note{need reference here, should reference the theorem}
-William Kuszmaul previously designed an algorithm for parallel
-partition with span $O(\log n \log \log n)$. Each thread in the
-algorithm requires memory at most $O(\log n)$.
+\paragraph{An In-Place Parallel Partition}
+\note{need reference here?} By using linear-space the above parallel partition
+algorithm incurs a large number of cache misses due to its lack of spatial
+locality.  Kuszmaul modified the out-of-place parallel-prefix based algorithm
+to make it in-place.  His new algorithm has span $O(\log n \log \log n)$ which
+is close to the $O(\log n)$ span of the standard algorithm.  Because of its
+spatial locality, Kuszmaul's in-place algorithm outperforms the standard
+linear-space parallel partition algorithm in practice.  However experiments
+also revealed that Kuszmaul's in-place algorithm was still bottlenecked by
+cache misses.  Kuszmaul's algorithm performs multiple passes over the array, so
+it incurs cache misses due to a lack of temporal locality.  The lack of
+temporal locality means that memory bandwidth bound becomes a major factor in
+determining whether further speedup is possible.
 
 
 
 \section{A Cache Efficient In-Place Parallel Partition for \emph{Random} Input Arrays}\label{sec:strided}
 
-In Section \ref{secexp}, we will see that, although the techniques
-introduced in Section \ref{secalg} achieve speedups over the classic
-parallel-prefix-based partition algorithm, they nonetheless continue
+In Section \ref{secexp}, we will see that, although Kuszmaul's in-place algorithm achieves speedups over the classic
+parallel-prefix-based partition algorithm, it nonetheless continues
 to be bottlenecked by cache misses. In this section, we introduce a
 second algorithm, called the \defn{Smoothed Striding Algorithm}, which
 exhibits provably optimal cache behavior (up to small-order
@@ -414,7 +492,17 @@ polylogarithmic span.
 
 
 \paragraph{The Strided Algorithm Description \cite{FrancisPa92}}
-The Smoothed Striding Algorithm borrows several structural ideas from a previous algorithm of Francis and Pannan \cite{FrancisPa92}, which we call the Strided Algorithm. The Strided Algorithm is designed to behave well on random arrays $A$, achieving span $\tilde{O}(n^{2/3})$ and exhibiting only $n/b + \tilde{O}(n^{2/3} / b)$  cache misses on such inputs. On worst-case inputs, however, the Strided Algorithm has span $\Omega(n)$ and incurs $n/b + \Omega(n/b)$ cache misses. Our algorithm, the Smoothed Striding Algorithm, will build on the Strided Algorithm by randomly perturbing the internal structure of the original algorithm; in doing so, we are able to provide provable guarantees on arbitrary inputs, and to add a recursion step that was previously impossible.
+The Smoothed Striding Algorithm borrows several structural ideas from a
+previous algorithm of Francis and Pannan \cite{FrancisPa92}, which we call the
+Strided Algorithm. The Strided Algorithm is designed to behave well on random
+arrays $A$, achieving span $\tilde{O}(n^{2/3})$ and exhibiting only $n/b +
+\tilde{O}(n^{2/3} / b)$  cache misses on such inputs. On worst-case inputs,
+however, the Strided Algorithm has span $\Omega(n)$ and incurs $n/b +
+\Omega(n/b)$ cache misses. Our algorithm, the Smoothed Striding Algorithm, will
+build on the Strided Algorithm by randomly perturbing the internal structure of
+the original algorithm; in doing so, we are able to provide provable guarantees
+on arbitrary inputs, and to add a recursion step that was previously
+impossible.
 
 The original \defn{Strided Algorithm} consists of two steps: 
 \begin{itemize}
@@ -538,48 +626,58 @@ $$v_{max}-v_{min} = O(\sqrt{t\cdot n\log n}).$$
 \end{proof}
 Using this lemma we can now prove Theorem \ref{thm:stridedAlg}.
 
-\begin{proof}[Proof of Theorem \ref{thm:stridedAlg}]
-$ $\\
-\paragraph{Span}
-There are 2 contributions to the span of our algorithm.
-First, there is a contribution of $\frac{n}{t}$ for performing serial partitions on each $P_i$ in parallel because serial partition has a running time that is on the order of the input array, and $|P_i| = \frac{n}{t}$.
-Second, there is a contribution from performing a serial partition on the subarray of size $v_{min} - v_{max}$ which is $O(\sqrt{t\cdot n\log n})$ by Lemma \ref{lem:epsSmallFP}.
-Thus the total span is 
-$$T_\infty = O(n/t+\sqrt{t\cdot n \log n}).$$ \\
-We can choose $t$ in order to minimize span.
-To minimize span, ignore the log factor and set 
-$$n/t = \sqrt{t\cdot n} \implies t=n^{1/3}.$$
-This yields the minimum span, because if either term could be decreased, then the function would not be at a minimum, so the terms must be equal.
-This yields a span of $O(n^{2/3}).$
+\begin{proof}[Proof of Theorem \ref{thm:stridedAlg}] $ $\\ \paragraph{Span}
+	There are 2 contributions to the span of our algorithm.  First, there is a
+	contribution of $\frac{n}{t}$ for performing serial partitions on each $P_i$
+	in parallel because serial partition has a running time that is on the order
+	of the input array, and $|P_i| = \frac{n}{t}$.  Second, there is a
+	contribution from performing a serial partition on the subarray of size
+	$v_{min} - v_{max}$ which is $O(\sqrt{t\cdot n\log n})$ by Lemma
+	\ref{lem:epsSmallFP}.  Thus the total span is $$T_\infty = O(n/t+\sqrt{t\cdot
+	n \log n}).$$ \\ We can choose $t$ in order to minimize span.  To minimize
+	span, ignore the log factor and set $$n/t = \sqrt{t\cdot n} \implies
+	t=n^{1/3}.$$ This yields the minimum span, because if either term could be
+	decreased, then the function would not be at a minimum, so the terms must be
+	equal.  This yields a span of $O(n^{2/3}).$
 
-\paragraph{Cache Misses}
-The number of cache misses in a serial partition is the input size, so the total number of cache misses in this program is $t \cdot \frac{n}{t}$ from the serial partitioning of the $P_i$s in parallel, plus $O(\sqrt{t\cdot n\log n})$ for when the algorithm performs a serial partition on the subarray. So the total number of cache misses is $$n + O(\sqrt{t\cdot n\log n}).$$
-To show that the second term in this sum becomes insignificant compared to $n$ as $n$ grows, we take 
-$$\lim_{n\to\infty}\frac{\sqrt{t\cdot n \log n}}{n} = \sqrt{\lim_{n\to\infty}\frac{t\cdot \log n}{n}}.$$
-We can't choose $t>n$, and making $t = o(\frac{n}{\log n})$ is a reasonable constraint which guarantees that,
-$$\lim_{n\to\infty}\frac{t}{\paren*{\frac{n}{\log n}}} = 0.$$
-Thus, the algorithm only incurs $n+o(n) = n(1+o(1))$ cache misses.
+\paragraph{Cache Misses} The number of cache misses in a serial partition is
+the input size, so the total number of cache misses in this program is $t \cdot
+\frac{n}{t}$ from the serial partitioning of the $P_i$s in parallel, plus
+$O(\sqrt{t\cdot n\log n})$ for when the algorithm performs a serial partition
+on the subarray. So the total number of cache misses is $$n + O(\sqrt{t\cdot
+n\log n}).$$ To show that the second term in this sum becomes insignificant
+compared to $n$ as $n$ grows, we take $$\lim_{n\to\infty}\frac{\sqrt{t\cdot n
+\log n}}{n} = \sqrt{\lim_{n\to\infty}\frac{t\cdot \log n}{n}}.$$ We can't
+choose $t>n$, and making $t = o(\frac{n}{\log n})$ is a reasonable constraint
+which guarantees that, $$\lim_{n\to\infty}\frac{t}{\paren*{\frac{n}{\log n}}} =
+0.$$ Thus, the algorithm only incurs $n+o(n) = n(1+o(1))$ cache misses.
 \end{proof}
 
 \paragraph{Spatial locality}
-The Strided Algorithm as described above is good because of the low number of cache misses, but it is not good in that there is no spatial locality in referencing elements of each $P_i$.
-A way to increase spatial cache friendliness of the algorithm is to redefine the parts $P_i$s using blocks of adjacent elements instead of individual elements each separated by $t$ indices for each $P_i$.
-Let $b$ be the \defn{block size}. \\
-To compute $v_i$, the index into $A$ of the first successor in the partitioned $P_i$, we must now compute which block the index $x_i$ into $P_i$ falls in, denoted by $w_i$ and where within the block $x_i$ falls, denoted $m_i$ as follows:
-$$w_i = \floor*{ \frac{x_i}{b} },\,\, m_i=x_i \mod b.$$
-Once we have $w_i$ and $m_i$ we compute $v_i$ as follows:
-$$v_i = t\cdot b\cdot w_i + (i-1)b+m_i.$$
-But we don't need that much detail.
-More simply this is, 
-$$v_i = O(t\cdot b \cdot w_i) = O\paren*{x_i\cdot t}.$$
-Where the absorption into the big-O notation is reasonable because $m_i < b,\,\, i<t$ so the other terms get absorbed in the big-O notation, and we can also drop the floor and cancel the $b$. 
-Note that this is the same expression we got for the conversion from $x_i$ to $v_i$ as last time (in big-O notation).
-So we once again get the same bound on $v_{max}-v_{min}$, which doesn't actually depend on $b$, that is, with high probability
-$$v_{max}-v_{min} = O(\sqrt{t\cdot n\log n}).$$
+The Strided Algorithm as described above is good because of the low number of
+cache misses, but it is not good in that there is no spatial locality in
+referencing elements of each $P_i$.  A way to increase spatial cache
+friendliness of the algorithm is to redefine the parts $P_i$s using blocks of
+adjacent elements instead of individual elements each separated by $t$ indices
+for each $P_i$.  Let $b$ be the \defn{block size}. \\ To compute $v_i$, the
+index into $A$ of the first successor in the partitioned $P_i$, we must now
+compute which block the index $x_i$ into $P_i$ falls in, denoted by $w_i$ and
+where within the block $x_i$ falls, denoted $m_i$ as follows: $$w_i =
+\Big\lfloor \frac{x_i}{b} \Big\rfloor,\,\, m_i=x_i \mod b.$$ Once we have $w_i$
+and $m_i$ we compute $v_i$ as follows: $$v_i = t\cdot b\cdot w_i +
+(i-1)b+m_i.$$ But we don't need that much detail.  More simply this is, $$v_i =
+O(t\cdot b \cdot w_i) = O\paren*{x_i\cdot t}.$$ Where the absorption into the
+big-O notation is reasonable because $m_i < b,\,\, i<t$ so the other terms get
+absorbed in the big-O notation, and we can also drop the floor and cancel the
+$b$.  Note that this is the same expression we got for the conversion from
+$x_i$ to $v_i$ as last time (in big-O notation).  So we once again get the same
+bound on $v_{max}-v_{min}$, which doesn't actually depend on $b$, that is, with
+high probability $$v_{max}-v_{min} = O(\sqrt{t\cdot n\log n}).$$
 
-\paragraph{Summary}
-It is not satisfactory that this algorithm does not have theoretical guarantees for arbitrary arrays. 
-We use the ideas of this algorithm to create a new algorithm that has have theoretical guarantees on arbitrary inputs.
+\paragraph{Summary} It is not satisfactory that this algorithm does not have
+theoretical guarantees for arbitrary arrays.  We use the ideas of this
+algorithm to create a new algorithm that has have theoretical guarantees on
+arbitrary inputs.
 
 
 %% With this optimization, one advantage of the Strided Algorithm is that when $v_{\text{max}} - v_{\text{min}}$ is small, the total number of cache misses by the algorithm is close to the same as for a single scan through the data. 
@@ -637,15 +735,14 @@ incurs $n (1 + o(1))$ cache misses.
 
 The recursive structure of the Smoothed Striding Algorithm allows for
 the algorithm to achieve polylogarithmic span. As an alternative to
-recursing, one can also use the in-place algorithm from Section
-\ref{secalg} in order to partition \\ $A[v_{\text{min}}], \ldots,
-  A[v_{\text{max}} - 1]$. This results in an improved span (since the
-algorithm from Section \ref{secalg} has span only $O(\log n \log \log
+recursing, one can also use Kuszmaul's in-place algorithm in order to partition \\ $A[v_{\text{min}}], \ldots,
+  A[v_{\text{max}} - 1]$. This results in an improved span (since Kuszmaul's
+in-place algorithm has span only $O(\log n \log \log
 n)$), while still incurring only $n (1 + o(1))$ cache misses (since
-the cache-inefficient algorithm from Section \ref{secalg} is only used
+Kuzmaul's cache-inefficient algorithm is only used
 on a small subarray of $A$). We analyze both the recursive version of
 the Smoothed Striding Algorithm, and the version which uses as a final
-step the algorithm from Section \ref{secalg}; one significant advantage
+step Kuszmaul's in-place algorithm; one significant advantage
 of the recursive version is that it is simple to implement in
 practice.
 
@@ -847,10 +944,6 @@ that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
 %% \end{align*}
 
 
-%% \alek{i'm kind of confused by this derivation. I think you should add some explanation}
-%% \alek{also, I think that the bounds that you get on $U_i(j)$ shouldn't be symmetric}
-%% \alek{in fact, here is what I think the derivation should look like: }
-%% \alek{
   Recall that $G_i(j)$ denotes the index within $A$ of the $j$ th cache-line contained in $U_i$. By the definition of $G_i(j)$, $$(j - 1)g + 1 \le G_i(j) \le jg.$$ Note that $A[v_i]$ will occur in the $\lceil s\mu_i \rceil$-th cache-line of $U_i$ because $U_i$ is composed of $s$ cache lines. Hence $$(\lceil s\mu_i \rceil - 1) g b + 1 \le v_i \le \lceil s\mu_i \rceil g b,$$
   which means that
   $$s\mu_i g b - gb - 1 \le v_i \le s\mu_i g b + gb.$$ Since $sgb =
@@ -1013,50 +1106,46 @@ A particularly natural parameter setting for the Recursive algorithm occurs at $
 
 \section{Performance Comparisons}\label{secexp}
 
-In this section, we implement the techniques from Sections
-\ref{secalg} and \ref{sec:smoothing} to build space-efficient and
-in-place parallel-partition functions.
-
+In this section, we implement the Smoothed-Striding algorithm and compare its performance to that of previously developed algorithms.
+This demonstrates the practical importance of our guarantees on cache-misses, and also demonstrates that our guarantees do not come at a large performance loss compared to the Blocked Strided Algorithm which lacks these guarantees.
 
 Each implementation considers an array of $n$ 64-bit integers, and
 partitions them based on a pivot. The integers in the array are
 initially generated so that each is randomly either larger or smaller
 than the pivot.
 
-In Subsection \ref{subsecclassic}, we evaluate the techniques in
-Section \ref{secalg} for transforming the standard
-parallel-prefix-based partition algorithm into an in-place
-algorithm. We compare the performance of three parallel-partition
-implementations: (1) The \defn{high-space} implementation which
-follows the standard parallel-partition algorithm exactly; (2) a
-\defn{medium-space} implementation which reduces the space used for
-the Parallel-Prefix phase; and (3) a \defn{low-space} implementation
-which further eliminates the auxiliary space used in the Reordering
-phase of the algorithm. The low-space implementation still uses a
-small amount of auxiliary memory for the parallel-prefix, storing
-every $O(\log n)$-th element of the parallel-prefix array explicitly
-rather than using the implicit-storage approach in Section
-\ref{secalg}. Nonetheless the space consumption is several orders of
-magnitude smaller than the original algorithm.
 
-In addition to achieving a space-reduction, the better cache-behavior
-of the low-space implementation allows for it to achieve a speed
-advantage over its peers, in some cases completing roughly twice as
-fast as the medium-space implementation and four times as fast as the
-low-space implementation. We show that all three implementations are
-bottlenecked by memory throughput, however, suggesting that the cache-optimal Smoothed Striding Algorithm can do better.
+%%% OUTLINE:
+%% speedup
+%% slowdown
+%% memory bandwidth
+%%% speed up quicksort
 
-In Subsection \ref{subsecstrided}, we evaluate the performance of the
-Recursive Smoothed Striding Algorithm and the Strided Algorithms. The
-cache efficiency of the two algorithms allows for them to achieve
-substantially better scaling than their parallel-prefix-based
-counterparts. The Strided Algorithm tends to slightly outperform the
-Smoothed Striding Algorithm, though on 18 threads their performance is
-within 15\% of one-another. We conclude that the Smoothed Striding
-Algorithm allows for one to obtain empirical performance comparable to
-that of the Strided Algorithm, while simultaneously achieving the
-provable guarantees on span and cache-efficiency missing from the
-original Strided Algorithm.
+% We show the speedup of the algorithms over serial partition, we show the slowdown over serial partition when the parallel algorithms are given a single thread, and we show how the memory bandwidth bound is a performance bottleneck for non-cache efficient algorithms.
+We compare the following 5 partition algorithms:
+\begin{itemize}
+	\item \defn{Serial:} The serial partition algorithm algorithm serves as a baseline that we use to measure performance of parallel algorithms. 
+	\item \defn{High-Space:} The standard out-of-place parallel prefix sum based algorithm \footnote{The optimization of reducing the prefix-sum by a factor of $O(\log n)$ at the top level of recursion, rather than simply by a factor of two, can also be applied to the standard parallel-prefix algorithm when constructing a prefix-sum array of size $n$. Even without the space reduction, this reduces the (constant) overhead in the parallel prefix sum, while keeping the overall span of the parallel-prefix operation at $O(\log n)$. We perform this optimization in the high-space implementation.}
+	\item \defn{Low-Space:} Kusmzaul's in-place parallel prefix sum based algorithm. \footnote{The low-space implementation still uses a small amount of auxiliary memory for the parallel-prefix, storing every $O(\log n)$-th element of the parallel-prefix array explicitly rather than using the implicit-storage approach originally developed by Kuszmaul. Nonetheless the space consumption is several orders of magnitude smaller than the original algorithm.}
+	\item \defn{Blocked Strided:} The Blocked Strided algorithm which only has guarantees for certain inputs such as random inputs. \footnote{Note that we do not test this algorithm with inputs that we know to be adversarial to it.}
+	\item \defn{Smoothed Striding:} The algorithm we developed in this paper which adds randomization to the Blocked Strided algorithm's internal structure to obviate the need for specific inputs.
+\end{itemize}
+We show that the algorithms which achieve space-reduction over the standard parallel partition algorithm achieve better cache-behavior which allows for it to achieve a speedup.
+We show that the High-Space and Low-Space algorithms are bottlenecked by memory throughput and that the Blocked Strided and Smoothed-Striding algorithms are not bottlenecked by memory throughput.
+The cache efficiency of the Blocked Strided and Smoothed Striding algorithm allows them to avoid the memory bandwidth bound and achieve substantially better scaling than the parallel-prefix-based parallel partition algorithms.
+The Strided Algorithm tends to slightly outperform the Smoothed Striding Algorithm, though on 18 threads their performance is within 15\% of one-another. We conclude that the Smoothed Striding Algorithm allows for one to obtain empirical performance comparable to that of the Strided Algorithm, while simultaneously achieving the provable guarantees on span and cache-efficiency missing from the original Strided Algorithm.
+
+% In Subsection \ref{subsecstrided}, we evaluate the performance of the
+% Recursive Smoothed Striding Algorithm and the Strided Algorithms. The
+% cache efficiency of the two algorithms allows for them to achieve
+% substantially better scaling than their parallel-prefix-based
+% counterparts. The Strided Algorithm tends to slightly outperform the
+% Smoothed Striding Algorithm, though on 18 threads their performance is
+% within 15\% of one-another. We conclude that the Smoothed Striding
+% Algorithm allows for one to obtain empirical performance comparable to
+% that of the Strided Algorithm, while simultaneously achieving the
+% provable guarantees on span and cache-efficiency missing from the
+% original Strided Algorithm.
 
 
 %% In Subsection \ref{subsechighspan}, we present a fourth
@@ -1096,30 +1185,41 @@ and at optimization level three.
 Our implementations are available at \\ \github.
 
 
-\subsection{Comparing Parallel-Prefix-Based Algorithms}\label{subsecclassic}
+\paragraph{Implementation Details}
+In each implementation, the parallelism is achieved through simple
+parallel-for-loops, with one exception at the beginning of the
+low-space implementation, when the number of predecessors in the input
+array is computed. Although CilkPlus Reducers (or OpenMP Reductions)
+could be used to perform this parallel summation within a
+parallel-for-loop \cite{FrigoLe09}, we found a slightly more ad-hoc
+approach to be faster: Using a simple recursive structure, we manually
+implemented a parallel-for-loop with Cilk Spawns and Syncs, allowing
+for the summation to be performed within the recursion.
 
-In this section, we compare four partition implementations,
-incorporating the techniques from Section \ref{secalg} in order to
-achieve space efficiency:
-\begin{itemize}[leftmargin = .15in]
-\item \emph{A Serial Baseline:} This uses the serial in-place
-  partition implementation from GNU Libc quicksort, with minor
-  adaptions to optimize it for the case of sorting 64-bit integers
-  (i.e., inlining the comparison function, etc.).
-\item \emph{The High-Space Parallel Implementation:} This uses the
-  standard parallel partition algorithm \cite{Blelloch96,AcarBl16}, as
-  described in Section \ref{secprelim}. The space overhead is roughly
-  $2n$ eight-byte words.
-\item \emph{The Medium-Space Parallel Implementation:} Starting with
-  the high-space implementation, we reduce the space used by the
-  Parallel-Prefix phase by only constructing every $O(\log n)$-th
-  element of the prefix-sum array $B$, as in Section
-  \ref{secalg}. (Here $O(\log n)$ is hard-coded as 64.) The array $B$
-  is initialized to be of size $n / 64$, with each component equal to
-  a sum of 64 elements, and then a parallel prefix sum is computed on
-  the array $B$. Rather than implicitly encoding the elements of $B$ in
-  $A$, we use an auxiliary array of size $n / 64$ to explicitly store
-  the prefix sums.
+
+
+% In this section, we compare four partition implementations,
+% incorporating the techniques from Section \ref{secalg} in order to
+% achieve space efficiency:
+% \begin{itemize}[leftmargin = .15in]
+% \item \emph{A Serial Baseline:} This uses the serial in-place
+%   partition implementation from GNU Libc quicksort, with minor
+%   adaptions to optimize it for the case of sorting 64-bit integers
+%   (i.e., inlining the comparison function, etc.).
+% \item \emph{The High-Space Parallel Implementation:} This uses the
+%   standard parallel partition algorithm \cite{Blelloch96,AcarBl16}, as
+%   described in Section \ref{secprelim}. The space overhead is roughly
+%   $2n$ eight-byte words.
+% \item \emph{The Medium-Space Parallel Implementation:} Starting with
+%   the high-space implementation, we reduce the space used by the
+%   Parallel-Prefix phase by only constructing every $O(\log n)$-th
+%   element of the prefix-sum array $B$, as in Section
+%   \ref{secalg}. (Here $O(\log n)$ is hard-coded as 64.) The array $B$
+%   is initialized to be of size $n / 64$, with each component equal to
+%   a sum of 64 elements, and then a parallel prefix sum is computed on
+%   the array $B$. Rather than implicitly encoding the elements of $B$ in
+%   $A$, we use an auxiliary array of size $n / 64$ to explicitly store
+%   the prefix sums.
 
   %% \footnote{We suspect that an implementation in which
   %%   the values are implicitly stored could also be made fast. In
@@ -1127,25 +1227,25 @@ achieve space efficiency:
   %%   whatever constant overhead is induced by the implicit storage of
   %%   values. Nonetheless, the auxiliary array is already quite small
   %%   relative to the input and is more practical to implement.}
-  The algorithm
-  has a space overhead of $\frac{n}{32} + n$ eight-byte
-  words.\footnote{In addition to the auxiliary array of size $n / 64$,
-    we use a series of smaller arrays of sizes $n / 128, n / 256,
-    \ldots$ in the recursive computation of the prefix sum. The
-    alternative of performing the parallel-prefix sum in place, as in
-    Section \ref{secalg}, tends to be less cache-friendly in
-    practice.}
-\item \emph{The Low-Space Parallel Implementation:}
-Starting with the medium-space implementation, we make the reordering
-phase completely in-place using the preprocessing technique in Section
-\ref{secalg}.\footnote{Depending on whether the majority of elements
-  are predecessors are successors, the algorithm goes down separate
-  (but symmetric) code paths. In our timed experiments we test only
-  with inputs containing more predecessors than successors, since this
-  the slower of the two cases (by a very slight amount) for our
-  implementation.} The only space overhead in this implementation is
-the $\frac{n}{32}$ additional 8-byte words used in the prefix sum.
-\end{itemize}
+%   The algorithm
+%   has a space overhead of $\frac{n}{32} + n$ eight-byte
+%   words.\footnote{In addition to the auxiliary array of size $n / 64$,
+%     we use a series of smaller arrays of sizes $n / 128, n / 256,
+%     \ldots$ in the recursive computation of the prefix sum. The
+%     alternative of performing the parallel-prefix sum in place, as in
+%     Section \ref{secalg}, tends to be less cache-friendly in
+%     practice.}
+% \item \emph{The Low-Space Parallel Implementation:}
+% Starting with the medium-space implementation, we make the reordering
+% phase completely in-place using the preprocessing technique in Section
+% \ref{secalg}.\footnote{Depending on whether the majority of elements
+%   are predecessors are successors, the algorithm goes down separate
+%   (but symmetric) code paths. In our timed experiments we test only
+%   with inputs containing more predecessors than successors, since this
+%   the slower of the two cases (by a very slight amount) for our
+%   implementation.} The only space overhead in this implementation is
+% the $\frac{n}{32}$ additional 8-byte words used in the prefix sum.
+% \end{itemize}
 
 %% All three parallel-implementations have work $O(n)$ The high- and
 %% medium- space implementations have span $O(\log n)$, while the
@@ -1153,33 +1253,22 @@ the $\frac{n}{32}$ additional 8-byte words used in the prefix sum.
 %% for convenience of implementation parallel-for-loops are broken into
 %% chunks of size $64 = O(\log n)$).
 
-We remark that the ample parallelism of the low-space algorithm makes
-it so that for large inputs the value $64$ can easily be increased
-substantially without negatively effecting algorithm performance. For
-example, on an input of size $2^{28}$, increasing it to $4096$ has
-essentially no effect on the empirical runtime while bringing the
-auxiliary space-consumption down to a $\frac{1}{2048}$-fraction of the
-input size. (In fact, the increase from 64 to 4096 results in roughly
-a 5\% speedup.)
+% We remark that the ample parallelism of the low-space algorithm makes
+% it so that for large inputs the value $64$ can easily be increased
+% substantially without negatively effecting algorithm performance. For
+% example, on an input of size $2^{28}$, increasing it to $4096$ has
+% essentially no effect on the empirical runtime while bringing the
+% auxiliary space-consumption down to a $\frac{1}{2048}$-fraction of the
+% input size. (In fact, the increase from 64 to 4096 results in roughly
+% a 5\% speedup.)
 
-\paragraph{An Additional Optimization for The High-Space Implementation}
-The optimization of reducing the prefix-sum by a factor of $O(\log n)$
-at the top level of recursion, rather than simply by a factor of two,
-can also be applied to the standard parallel-prefix algorithm when
-constructing a prefix-sum array of size $n$. Even without the space
-reduction, this reduces the (constant) overhead in the parallel prefix
-sum, while keeping the overall span of the parallel-prefix operation
-at $O(\log n)$. We perform this optimization in the high-space
-implementation.
-
-\paragraph{Performance Comparison}
+\paragraph{Space-Optimization Performance Gains}
 Figure \ref{tablecilk} graphs the speedup of the each of the parallel
 algorithms over the serial algorithm, using varying numbers of worker
 threads on an 18-core machine with a fixed input size of $n =
-2^{30}$. Both space optimizations result in performance improvements,
-with the low-space implementation performing almost twice as well as
-the medium-space implementation on eighteen threads, and almost four
-times as well as the high-space implementation. %% Similar speedups are
+2^{30}$. All space optimizations result in performance improvements, with the
+low-space implementation performing almost four times as well as the high-space
+implementation on eighteen threads. %% Similar speedups are
 %% achieved on smaller inputs; see Figure \ref{tablecilk2}, which graphs
 %% speedup for input sizes starting at $2^{23}$.
 
@@ -1189,22 +1278,22 @@ for-loops to eliminate scheduler overhead. As the input-size varies,
 the ratios of the runtimes vary only slightly. The low-space
 implementation performs within a factor of roughly 1.9 of the serial
 implementation. As in Figure \ref{tablecilk},
-both space optimizations result in performance improvements.
+all space optimizations result in performance improvements.
 
 \paragraph{The Source of the Speedup}
-If we compare the number of instructions performed by the three
-parallel implementations, then the medium-space algorithm would seem
-to be the clear winner. Using Cachegrind to profile the number of
-instructions performed in a (serial) execution on an input of size
-$2^{28}$,\footnote{This smaller problem size is used to compensate for the fact that Cachegrind can be somewhat slow.} the high-space, medium-space, and low-space implementations
-perform 4.4 billion, 2.9 billion, and 4.6 billion instructions,
-respectively.
+% If we compare the number of instructions performed by the three
+% parallel implementations, then the medium-space algorithm would seem
+% to be the clear winner. Using Cachegrind to profile the number of
+% instructions performed in a (serial) execution on an input of size
+% $2^{28}$,\footnote{This smaller problem size is used to compensate for the fact that Cachegrind can be somewhat slow.} the high-space, medium-space, and low-space implementations
+% perform 4.4 billion, 2.9 billion, and 4.6 billion instructions,
+% respectively.
 
-Cache misses tell a different story, however. Using Cachegrind to
-profile the number of top-level cache misses in a (serial) execution
-on an input of size $2^{28}$, the high-space, medium-space, and
-low-space implementations incur 305 million, 171 million, and 124
-million cache misses, respectively.
+% Cache misses tell a different story, however.
+Using Cachegrind to profile the number of top-level cache misses in a (serial) execution
+on an input of size $2^{28}$, the high-space and
+low-space implementations incur 305 million and 124
+million cache misses respectively.
 
 To a first approximation, the number of cache misses by each algorithm
 is proportional to the number of times that the algorithm scans
@@ -1265,21 +1354,10 @@ roughly six times better than its performance on a single core, and
 then scales more poorly on the second socket as it becomes
 bottlenecked by memory bandwidth.
 
-\paragraph{Implementation Details}
-In each implementation, the parallelism is achieved through simple
-parallel-for-loops, with one exception at the beginning of the
-low-space implementation, when the number of predecessors in the input
-array is computed. Although CilkPlus Reducers (or OpenMP Reductions)
-could be used to perform this parallel summation within a
-parallel-for-loop \cite{FrigoLe09}, we found a slightly more ad-hoc
-approach to be faster: Using a simple recursive structure, we manually
-implemented a parallel-for-loop with Cilk Spawns and Syncs, allowing
-for the summation to be performed within the recursion.
 
+\paragraph{Comparing the Smoothed Striding and Strided Algorithms} 
 
-\subsection{Comparing the Smoothed Striding and Strided Algorithms} \label{subsecstrided}
-
-In this section we consider the performance of the Strided Algorithm
+We now consider the performance of the Strided Algorithm
 and the Recursive Smoothed Striding Algorithm. Past work
 \cite{Frias08} found that, on large numbers of threads, the Strided
 Algorithm has performance close to that of other non-EREW state-of-the
@@ -1489,9 +1567,61 @@ concurrent-read-exclusive-write memory) is an important direction of
 future work.
 
 
-\paragraph{Acknowledgments} The authors would like to thank Bradley C. Kuszmaul for several suggestions that helped simplify both the algorithm and its exposition. The authors would also like to thank Reza Zadeh for encouragement and advice.
+\section{Acknowledgements}
 
-This research was supported in part by NSF Grants 1314547 and 1533644. 
+This project was performed as part of the MIT PRIMES program at the
+Massachusetts Institute of Technology (MIT). The MIT PRIMES program
+selects talented high-school students in math and computer science
+(through a problem-based application that tests students' mathematics,
+programming, and problem-solving abilities) and gives them
+opportunities to work with MIT graduate students in Math and Computer
+Science on unsolved research projects. This project was performed by
+student Alek Westover with mentorship from MIT Computer Science PhD
+student William Kuszmaul.
+
+William Kuszmaul's prior work on developing an in-place parallel-partition algorithm was motivation for the student's project.
+Kuszmaul's in-place algorithm is primarily of theoretical interest, and its performance bottlenecks led to the direction of research of cache-efficient algorithms.
+The main contribution of the project is a cache-efficient in-place EREW parallel-partition algorithm with provable guarantees on span and cache-behavior, and with near-state-of-the-art real-world performance.
+  The theoretical ideas and analysis behind this algorithm, as well as the software implementation and experimentation of the algorithm are completely due to the student, Alek Westover. The writeup of the algorithm and its analysis were also performed by the student, with minor editing help by the mentor.
+
+
+% The work for the project is split as follows:
+% \begin{itemize}
+% \item \textbf{Cache-Efficient In-Place Algorithms: }The main
+%   contribution of the project is a cache-efficient in-place EREW
+%   parallel-partition algorithm with provable guarantees on span and
+%   cache-behavior, and with near-state-of-the-art real-world
+%   performance.
+
+%   The theoretical ideas and analysis behind this algorithm, as well as
+%   the software implementation and experimentation of the algorithm are
+%   completely due to the student, Alek Westover. The writeup of the
+%   algorithm and its analysis were also performed by the student, with
+%   minor editing help by the mentor.
+% \item \textbf{Non-Cache-Efficient In-Place Algorithms: }The paper also
+%   presents a non-cache-efficient in-place algorithm for parallel
+%   partition, which generalizes the classic parallel-prefix-based
+%   algorithm. This contribution is primarily of theoretical
+%   interest. Most of this part of the project was performed prior to
+%   the student's involvement. The performance bottlenecks of this
+%   algorithm were the motivation for the student's work, which produced
+%   algorithms with equally compelling theoretical guarantees and far
+%   better practical performance.
+% \end{itemize}
+
+The authors would also like to thank Bradley C. Kuszmaul for several
+suggestions that helped simplify the non-cache-efficient in-place
+algorithm. The authors would further like to thank Reza Zadeh for
+introducing them to the parallel-partition problem.
+
+% This acknowledgements section was written by the mentor, William
+% Kuszmaul.
+
+\clearpage
+
+% \paragraph{Acknowledgments} The authors would like to thank Bradley C. Kuszmaul for several suggestions that helped simplify both the algorithm and its exposition. The authors would also like to thank Reza Zadeh for encouragement and advice.
+
+% This research was supported in part by NSF Grants 1314547 and 1533644. 
 
 
 \begin{figure*}
@@ -1561,8 +1691,8 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
   \label{tablesort}
 \end{figure*}
 
+\clearpage
 
-\newpage
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{paper}
 

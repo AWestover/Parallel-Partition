@@ -1,0 +1,68 @@
+\begin{thebibliography}{10}
+
+\bibitem{AcarBl16}
+Umut~A Acar and Guy Blelloch.
+\newblock Algorithm design: Parallel and sequential, 2016.
+
+\bibitem{AxtmannWi17}
+Michael Axtmann, Sascha Witt, Daniel Ferizovic, and Peter Sanders.
+\newblock In-place parallel super scalar samplesort.
+\newblock {\em arXiv preprint arXiv:1705.02257}, 2017.
+
+\bibitem{Blelloch96}
+Guy~E Blelloch.
+\newblock Programming parallel algorithms.
+\newblock {\em Communications of the ACM}, 39(3):85--97, 1996.
+
+\bibitem{BlellochFi12}
+Guy~E Blelloch, Jeremy~T Fineman, Phillip~B Gibbons, and Julian Shun.
+\newblock Internally deterministic parallel algorithms can be fast.
+\newblock In {\em ACM SIGPLAN Notices}, volume~47, pages 181--192. ACM, 2012.
+
+\bibitem{BlellochLe98}
+Guy~E. Blelloch, Charles~E. Leiserson, Bruce~M Maggs, C~Greg Plaxton, Stephen~J
+  Smith, and Marco Zagha.
+\newblock An experimental analysis of parallel sorting algorithms.
+\newblock {\em Theory of Computing Systems}, 31(2):135--167, 1998.
+
+\bibitem{FrancisPa92}
+Rhys~S. Francis and LJH Pannan.
+\newblock A parallel partition for enhanced parallel quicksort.
+\newblock {\em Parallel Computing}, 18(5):543--550, 1992.
+
+\bibitem{Frias08}
+Leonor Frias and Jordi Petit.
+\newblock Parallel partition revisited.
+\newblock In {\em International Workshop on Experimental and Efficient
+  Algorithms}, pages 142--153. Springer, 2008.
+
+\bibitem{Hagerup89}
+Torben Hagerup and Christine R{\"u}b.
+\newblock Optimal merging and sorting on the erew pram.
+\newblock {\em Information Processing Letters}, 33(4):181--185, 1989.
+
+\bibitem{HeidelbergerNo90}
+Philip Heidelberger, Alan Norton, and John~T. Robinson.
+\newblock Parallel quicksort using fetch-and-add.
+\newblock {\em IEEE Transactions on Computers}, 39(1):133--138, 1990.
+
+\bibitem{Katajainen93}
+Jyrki Katajainen, Christos Levcopoulos, and Ola Petersson.
+\newblock Space-efficient parallel merging.
+\newblock {\em RAIRO-Theoretical Informatics and Applications}, 27(4):295--310,
+  1993.
+
+\bibitem{TsigasZh03}
+Philippas Tsigas and Yi~Zhang.
+\newblock A simple, fast parallel implementation of quicksort and its
+  performance evaluation on sun enterprise 10000.
+\newblock In {\em Proceedings of the Eleventh Euromicro Conference on Parallel,
+  Distributed and Network-Based Processing}, page 372. IEEE, 2003.
+
+\bibitem{Vitter08}
+Jeffrey~Scott Vitter.
+\newblock Algorithms and data structures for external memory.
+\newblock {\em Foundations and Trends{\textregistered} in Theoretical Computer
+  Science}, 2(4):305--474, 2008.
+
+\end{thebibliography}

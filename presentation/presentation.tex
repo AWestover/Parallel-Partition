@@ -29,6 +29,27 @@
 
 \usepackage{hyperref}
 
+\usepackage{tikz,pgfplots}
+\usepackage{etoolbox}
+%% This makes the colors annoyingly bright, but at least they're easy to distinguish.
+\pgfplotsset{
+  every  tick/.style={red,}, minor x tick num=1,
+  cycle list={teal,every mark/.append style={fill=teal!80!black},mark=*\\%
+orange,every mark/.append style={fill=orange!80!black},mark=square*\\%
+cyan!60!black,every mark/.append style={fill=cyan!80!black},mark=otimes*\\%
+red!70!white,mark=star\\%
+lime!80!black,every mark/.append style={fill=lime},mark=diamond*\\%
+red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=*\\%
+yellow!60!black,densely dashed,
+every mark/.append style={solid,fill=yellow!80!black},mark=square*\\%
+black,every mark/.append style={solid,fill=gray},mark=otimes*\\%
+blue,densely dashed,mark=star,every mark/.append style=solid\\%
+red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamond*\\%
+}
+}
+
+\input{paralleltable.tex}
+\input{serialtable.tex}
 
 \title{Cache-Efficient Parallel Partition Algorithms}
 \author{Alek Westover}
@@ -107,16 +128,18 @@
 		A cache miss occurs when the algorithm must load a cache-line not stored in cache into cache.
 	\end{defin}	
 	\begin{itemize}
-		\item In-place is desirable.
-		\item Kuszmaul developed an in-place version of parallel partition.
-		\item His in-place version outperformed the out-of-place standard algorithm.
-		\item But was outperformed in practice by a more cache efficient, higher span algorithm.
-		\item Experiments show the source of the problem: Memory bandwidth bound, i.e. incurring too many cache misses.
-		\item Note that both temporal and spatial cache efficiency are important.
+		\item In-place $\implies$ spatial-locality  
+		\item Kuszmaul developed in-place parallel partition algorithm
+			\begin{itemize}
+				\item Outperforms standard out-of-place algorithm
+				\item Outperformed by more cache-efficient higher span algorithm
+			\end{itemize}
+		\item Experiments show Memory Bandwidth Bound (incurring too many cache misses) is the problem
+		\item Want Temporal and Spatial locality
 	\end{itemize}
 \end{frame}
 
-\begin{frame}[t]{Strided Algorithm cite{FrancisPa92, Frias08} Description}
+\begin{frame}[t]{Strided Algorithm \cite{FrancisPa92, Frias08} Description}
 	Partition $A$ into chunks $C_1,C_2,\ldots C_n/gb$ each consisting of $g$ cache lines of size $b$. Let $P_i$ be the union of the $i$-th cache-line from each chunk $C_j$.
 	\begin{figure}
 		\includegraphics[width=\linewidth]{imgs/stridedAlgHighlighted.png}
@@ -139,6 +162,16 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}[t]{Blocked Strided Algorithm to Smoothed Striding Algorithm} %% favorite slide ;)
+	\textbf{Blocked Strided Algorithm $P_i$.}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{imgs/stridedAlgHighlighted.png}
+	\end{figure}
+	\textbf{Smoothed-Striding Algorithm $U_i$.}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgHighlighted.png}
+	\end{figure}
+\end{frame}
 
 \begin{frame}[t]{Smoothed Striding Algorithm Description}
 	Let $X[1],\ldots, X[s]$ be chosen uniformly at random from $\{1,\ldots, g\}$. Let $U_i$ be the union of the $(X[j]+i)\mod g$-th cache-line from each chunk $C_j$.
@@ -186,47 +219,77 @@
 
 
 
-\begin{frame}[t]{Hybrid Algorithm Analysis - General Theorem}
-\begin{theorem}
-	The Hybrid Smoothed Striding Algorithm algorithm using parameter $\delta\in(0,1/2)$ satisfying $\delta \ge 1/\polylog(n)$: has work $O(n)$; achieves span
-        $$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}},$$
-with high probability in $n$; and incurs fewer than 
-$$(n+O(n\delta))/b$$
-cache misses with high probability in $n$.
-\end{theorem}
+% \begin{frame}[t]{Hybrid Algorithm Analysis - General Theorem}
+% \begin{theorem}
+%   The Hybrid Smoothed Striding Algorithm algorithm using parameter $\delta\in(0,1/2)$ satisfying $\delta \ge 1/\polylog(n)$: has work $O(n)$; achieves span
+%         $$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}},$$
+% with high probability in $n$; and incurs fewer than 
+% $$(n+O(n\delta))/b$$
+% cache misses with high probability in $n$.
+% \end{theorem}
+% \end{frame}
+
+% \begin{frame}[t]{Hybrid Algorithm Analysis - Corollary for specific parameter settings}
+% An interesting corollary of the above theorem concerns what happens when $b$ is small (e.g., constant) and we choose $\delta$ to optimize span. 
+% \begin{corollary}
+% Suppose $b \le o(\log \log n)$. Then the Cache-Efficient Full-Partition Algorithm algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.
+% \end{corollary}
+% \end{frame}
+
+
+% \begin{frame}[t]{Recursive Algorithm Analysis - General Theorem}
+%   \begin{theorem}
+%   With high probability in $n$, the Recursive Smoothed Striding
+%         algorithm using parameter $\delta \in(0,1/2)$ satisfying
+%         $\delta \ge 1 / \polylog(n)$: achieves work $O(n)$, attains span
+%   $$O\left(b\left(\log^2 n + \frac{\log n}{\delta^2}\right)\right),$$
+%   and incurs $(n+O(n \delta))/b$ cache misses. 
+%   \end{theorem}
+% \end{frame}
+
+% \begin{frame}[t]{Recursive Algorithm Analysis - Corollary for specific parameter settings}
+% A particularly natural parameter setting for the Recursive algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
+% \begin{corollary}
+%   With high probability in $n$, the Recursive Smoothed Striding Algorithm using parameter $\delta=1/\sqrt{\log n}$:
+%   achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log n}))$ cache misses. 
+% \end{corollary}
+% \end{frame}
+
+% \begin{frame}[t]{Experiments}
+%   \begin{itemize}
+%     \item Strided Algorithm vs Smoothed Striding algorithm
+%     \item Cache misses 
+%   \end{itemize}
+% \end{frame}
+
+\begin{frame}[t]{Space Reduction (Spatial Locality) Yields Speedup}
+	\begin{figure*}
+		\begin{center}
+			\CILKtable
+		\end{center}
+	\end{figure*}
 \end{frame}
 
-\begin{frame}[t]{Hybrid Algorithm Analysis - Corollary for specific parameter settings}
-An interesting corollary of the above theorem concerns what happens when $b$ is small (e.g., constant) and we choose $\delta$ to optimize span. 
-\begin{corollary}
-Suppose $b \le o(\log \log n)$. Then the Cache-Efficient Full-Partition Algorithm algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.
-\end{corollary}
+\begin{frame}[t]{Space Reduction (Spatial Locality) Yields Speedup}
+	\begin{figure*}
+		\begin{center}
+			\serialtable
+		\end{center}
+	\end{figure*}
 \end{frame}
-
-
-\begin{frame}[t]{Recursive Algorithm Analysis - General Theorem}
-	\begin{theorem}
-	With high probability in $n$, the Recursive Smoothed Striding
-        algorithm using parameter $\delta \in(0,1/2)$ satisfying
-        $\delta \ge 1 / \polylog(n)$: achieves work $O(n)$, attains span
-	$$O\left(b\left(\log^2 n + \frac{\log n}{\delta^2}\right)\right),$$
-	and incurs $(n+O(n \delta))/b$ cache misses. 
-	\end{theorem}
+\begin{frame}[t]{Few passes over input (Temporal locality) reduces memory bandwidth bound}
+	\begin{figure*}
+		\begin{center}
+			\partitionbandwidthboundtable
+		\end{center}
+	\end{figure*}
 \end{frame}
-
-\begin{frame}[t]{Recursive Algorithm Analysis - Corollary for specific parameter settings}
-A particularly natural parameter setting for the Recursive algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
-\begin{corollary}
-	With high probability in $n$, the Recursive Smoothed Striding Algorithm using parameter $\delta=1/\sqrt{\log n}$:
-  achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log n}))$ cache misses. 
-\end{corollary}
-\end{frame}
-
-\begin{frame}[t]{Experiments}
-	\begin{itemize}
-		\item Strided Algorithm vs Smoothed Striding algorithm
-		\item Cache misses 
-	\end{itemize}
+\begin{frame}[t]{Smoothed-Striding algorithm is comparable to Blocked Strided algorithm}
+	\begin{figure*}
+\begin{center}
+		\CILKsorttable
+\end{center}
+	\end{figure*}
 \end{frame}
 
 \begin{frame}[t]{Acknowledgments}
@@ -239,7 +302,7 @@ I would like to thank
 \end{frame}
 
 \begin{frame}[t]{References}
-	 \bibliographystyle{ACM-Reference-Format}
+	 \bibliographystyle{plain}
 	\bibliography{paper}
 \end{frame}
 
