@@ -1,5 +1,10 @@
 \begin{thebibliography}{1}
 
+\bibitem{Brent74}
+Richard~P Brent.
+\newblock The parallel evaluation of general arithmetic expressions.
+\newblock {\em Journal of the ACM (JACM)}, 21(2):201--206, 1974.
+
 \bibitem{FrancisPa92}
 Rhys~S. Francis and LJH Pannan.
 \newblock A parallel partition for enhanced parallel quicksort.
