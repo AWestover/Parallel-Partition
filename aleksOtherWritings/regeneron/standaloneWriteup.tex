@@ -1,5 +1,12 @@
-\documentclass[sigplan, 10pt, nonacm]{acmart}
-\usepackage[moderate]{savetrees}
+% Choose a font that is clearly legible and appropriate for a research paper. The font size
+% should appear on the page at least as large as Times New Roman 11pt font. Captions
+% may be smaller if legible.
+% Use 1.5 line spacing and 1” margins on all sides. Do not use multiple columns. 
+
+\documentclass[11pt]{article}
+\usepackage[left=1in,right=1in,top=1in,bottom=1in]{geometry}
+\usepackage[moderate]{savetrees} % I think this messes with the linespread thing...
+\linespread{1.25} % THIS MULTIPLIES the skip factor, which defaults to 1.2 in LaTex, by 1.25, thus making the line spacing 1.5
 
 \newcommand{\note}[1]{\textcolor{red}{#1}}
 
@@ -40,7 +47,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \newcommand{\poly}{\operatorname{poly}}
 \newcommand{\polylog}{\operatorname{polylog}}
 \newcommand{\github}{\url{github.com/awestover/Parallel-Partition}}
-\newcommand{\defn}[1]       {{\textit{\textbf{\boldmath #1}}}}
+\newcommand{\defn}[1]{{\textit{\textbf{\boldmath #1}}} }
 \renewcommand{\paragraph}[1]{\vspace{0.09in}\noindent{\bf \boldmath #1.}} 
 \usepackage{amsmath}
 \def\E{\operatorname{\mathbb{E}}}
@@ -71,28 +78,24 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \newtheorem{observation}[thm]{Observation}
 
 \usepackage{hyperref}
-
+\usepackage{cite}
+\usepackage{natbib}
 
 
 \begin{document}
-\title[]{Cache-Efficient Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
-\subtitle{}
+\title{Cache-Efficient Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
 
 \author{William Kuszmaul}
-\authornote{Supported by a Hertz Fellowship and a NSF GRFP Fellowship}
-\affiliation{%
-  \institution{Massachusetts Institute of Technology}
-}
-\email{kuszmaul@mit.edu}
+% \affiliation{ \institution{Massachusetts Institute of Technology} }
+% \email{kuszmaul@mit.edu}
 
 
 \author{Alek Westover}
-\authornote{Supported by MIT PRIMES.}
-\email{alek.westover@gmail.com}
-
+% \authornote{Supported by MIT PRIMES.}
+% \email{alek.westover@gmail.com}
 
 % The default list of authors is too long for headers.
-\renewcommand{\shortauthors}{Alek Westover}
+% \renewcommand{\shortauthors}{Alek Westover}
 
 \begin{titlepage}
     \begin{center}
@@ -128,27 +131,29 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \end{titlepage}
 
 
-
-\begin{abstract} The parallel-partition problem, which is the first step of
+\maketitle
+\begin{abstract} The parallel-partition problem, which is essential to Parallel
 	Quicksort and appears in many other algorithms, is given an array $A$ of
 	length $n$, and must partition the array based on some pivot property. The
-	standard solution for the parallel-partition problem is out-of-place which
-	prevents it from having spatial-locality.  Kuszmaul developed an in-place
-	solution for the parallel-partition problem, but it performs multiple passes
-	over the input array which prevents it from having temporal-locality.  The
-	Blocked Strided Algorithm of Francis, Pannan, Frias, and Petit, is in-place
-	and under certain conditions performs little more than a single pass over the
-	array.  Because of this, for certain inputs the Blocked Strided Algorithm
-	incurs very few cache misses and thus performs well.
+	standard solution to the parallel-partition problem is out-of-place. Having
+	an in-place algorithm is desirable because it makes the algorithm faster in
+	practice and because sorting problems are often memory intensive so extra
+	space may be undesirable or high cost. Kuszmaul developed an in-place
+	algorithm for the parallel-partition problem, but the algorithm performs
+	multiple passes over the array and thus its performance is bottlenecked by
+	memory-bandwidth. The Blocked Strided Algorithm of Francis, Pannan, Frias, and
+	Petit is in-place and under certain conditions performs little more than a
+	single pass over the array. Because of this, for certain inputs the Blocked
+	Strided Algorithm incurs very few cache misses and thus performs well.
+	However in general this algorithm has no theoretical guarantees on span and
+	cache-behavior.
 
 	We present an in-place EREW algorithm with polylogarithmic span and provably
 	optimal cache behavior, up to small-order factors.  The resulting algorithm
 	achieves near-ideal scaling in practice by avoiding the memory-bandwidth
-	bottleneck.  The algorithm's performance is comparable to that of the Blocked
+	bottleneck. The algorithm's performance is comparable to that of the Blocked
 	Strided Algorithm, the previous state-of-the art for parallel EREW sorting
-	algorithms, but which lacks theoretical guarantees on its span and cache
-	behavior.
-
+	algorithms.
 
 % This means that they can be implemented using only parallel for loops, and do
 	% not require the use of any concurrency mechanisms such as locks or atomic
@@ -156,11 +161,6 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 	% algorithms have achieved these theoretical guarantees before.
 
 \end{abstract}
-
-
-
-\maketitle
-\onecolumn
 
 
 
@@ -195,7 +195,7 @@ the behavior of the algorithm will not differ from run to run, which
 makes test coverage, debugging, and reasoning about performance
 substantially easier \cite{BlellochFi12}.
 
-The parallel-partition algorithm suffers from using a large amount of
+This parallel-partition algorithm suffers from using a large amount of
 auxiliary memory, however. Whereas the serial algorithm is typically
 implemented in place, the parallel algorithm relies on the use of two
 auxiliary arrays of size $n$. To the best of our knowledge, the only
@@ -234,9 +234,9 @@ from requiring work $\Theta(n \log^2 n)$ rather than $O(n \log
 n)$. Parallel quicksort, on the other hand, despite the many efforts
 to optimize it \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03,
   FrancisPa92, Frias08}, has eluded any in-place EREW (or CREW)
-algorithms due to its reliance on parallel partition.\footnote{In aCRCW
-  \defn{CREW} algorithm, reads may be concurrent, but writes may
-  not. CREW stands for \emph{concurrent-read exclusive-write}.}
+algorithms due to its reliance on parallel partition.\footnote{In a \defn{CREW}
+algorithm, reads may be concurrent, but writes may not. CREW stands for
+\emph{concurrent-read exclusive-write}.}
 
 \paragraph{Results}
 We will highlight past work demonstrating that parallel partition can be
@@ -1003,7 +1003,7 @@ Suppose $b \le o(\log \log n)$. Then the Cache-Efficient Full-Partition Algorith
 	$$\frac{n}{b}+O\paren*{\frac{\log n}{b\delta^2}}+O(1)$$ 
   cache misses.
 
-  By Theorem \ref{thminplace}, the subproblem of partitioning of \\ $A[v_{\text{min}} + 1], \ldots,
+  The subproblem of partitioning $A[v_{\text{min}} + 1], \ldots,
    A[v_{\text{max}}]$ takes work $O(n)$. With high probability in $n$,
   the subproblem has size less than $4n\delta$, which means that the subproblem
   achieves span
@@ -1182,7 +1182,7 @@ be performed on shared values such as $n$ and the pointer to the input
 array. Our code is compiled using g++ 7.3.0, with \emph{march=native}
 and at optimization level three. 
 
-Our implementations are available at \\ \github.
+Our implementations are available at \github.
 
 
 \paragraph{Implementation Details}
@@ -1693,7 +1693,7 @@ introducing them to the parallel-partition problem.
 
 \clearpage
 
-\bibliographystyle{ACM-Reference-Format}
+\bibliographystyle{plain}
 \bibliography{paper}
 
 \end{document}

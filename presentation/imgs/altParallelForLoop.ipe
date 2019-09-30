@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70212" creator="Ipe 7.2.12">
-<info created="D:20190923142441" modified="D:20190923211243"/>
+<info created="D:20190923142441" modified="D:20190929154451"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -254,7 +254,7 @@ h
 <page>
 <layer name="alpha"/>
 <view layers="alpha" active="alpha"/>
-<path layer="alpha" stroke="black">
+<path layer="alpha" matrix="0.350877 0 0 0.542634 30.3158 354.357" stroke="black">
 256 768 m
 256 704
 192 640
@@ -263,7 +263,7 @@ h
 256 448
 256 384 c
 </path>
-<path stroke="black">
+<path matrix="0.350877 0 0 0.542634 30.3158 354.357" stroke="black">
 256 768 m
 256 704
 320 640
@@ -273,7 +273,7 @@ h
 256 384
 256 384 c
 </path>
-<path stroke="black">
+<path matrix="0.350877 0 0 0.542634 30.3158 354.357" stroke="black">
 256 768 m
 192 704
 128 640
@@ -283,7 +283,7 @@ h
 256 384
 256 384 c
 </path>
-<path stroke="black">
+<path matrix="0.350877 0 0 0.542634 30.3158 354.357" stroke="black">
 256 768 m
 320 704
 384 640
@@ -293,75 +293,52 @@ h
 256 384
 256 384 c
 </path>
-<path stroke="black">
+<path matrix="0.350877 0 0 0.242215 30.3158 585.079" stroke="black">
 256 768 m
 256 832 l
 256 832 l
 </path>
-<path stroke="black">
+<path matrix="0.350877 0 0 0.292633 30.3158 450.357" stroke="black">
 256 384 m
 256 320 l
 </path>
-<path stroke="black" pen="ultrafat" arrow="normal/normal">
+<path matrix="0.350877 0 0 0.542634 14.3158 346.357" stroke="black" pen="ultrafat" arrow="normal/normal">
 96 768 m
 96 384 l
 </path>
-<text matrix="1 0 0 1 48 128" transformations="translations" pos="64 576" stroke="black" type="label" width="43.302" height="14.116" depth="0" valign="baseline" size="huge">Time</text>
-<path stroke="black" pen="ultrafat">
+<path matrix="0.780416 0 0 0.664794 -27.5378 285.947" stroke="black" fill="black">
 112 592 m
 112 560 l
 144 560 l
 144 592 l
 h
 </path>
-<path stroke="black" pen="ultrafat">
-176 592 m
-176 560 l
-208 560 l
-208 592 l
-h
-</path>
-<path stroke="black" pen="ultrafat">
-304 592 m
-304 560 l
-336 560 l
-336 592 l
-h
-</path>
-<path stroke="black" pen="ultrafat">
-368 592 m
-368 560 l
-400 560 l
-400 592 l
-h
-</path>
-<path stroke="black" fill="black">
+<text matrix="1 0 0 1 -8 32" transformations="translations" pos="32 736" stroke="black" type="label" width="51.946" height="16.934" depth="0" valign="baseline" size="Huge">Time</text>
+<text matrix="1 0 0 1 -52 80" transformations="translations" pos="76 668" stroke="white" type="label" width="14.448" height="8.173" depth="1.79" valign="baseline" size="large" style="math">X_1</text>
+<text matrix="1 0 0 1 -16 -4" transformations="translations" pos="76 668" stroke="white" type="label" width="24.313" height="14.119" depth="3.1" valign="baseline" size="huge" style="math">X_1</text>
+<path matrix="0.891526 0 0 0.664794 -11.1892 285.947" stroke="black" fill="black">
 112 592 m
 112 560 l
 144 560 l
 144 592 l
 h
 </path>
-<path stroke="black" fill="black">
-176 592 m
-176 560 l
-208 560 l
-208 592 l
+<path matrix="0.872702 0 0 0.664794 27.173 285.947" stroke="black" fill="black">
+112 592 m
+112 560 l
+144 560 l
+144 592 l
 h
 </path>
-<path stroke="black" fill="black">
-304 592 m
-304 560 l
-336 560 l
-336 592 l
+<path matrix="0.891526 0 0 0.664794 56.8108 285.947" stroke="black" fill="black">
+112 592 m
+112 560 l
+144 560 l
+144 592 l
 h
 </path>
-<path stroke="black" fill="black">
-368 592 m
-368 560 l
-400 560 l
-400 592 l
-h
-</path>
+<text matrix="1 0 0 1 -4 -4" transformations="translations" pos="96 668" stroke="white" type="label" width="24.313" height="14.119" depth="3.1" valign="baseline" size="huge" style="math">X_2</text>
+<text matrix="1 0 0 1 32 -4" transformations="translations" pos="96 668" stroke="white" type="label" width="24.313" height="14.119" depth="3.1" valign="baseline" size="huge" style="math">X_3</text>
+<text matrix="-1.27217 0 0 0.63964 282.375 235.604" transformations="translations" pos="96 668" stroke="white" type="label" width="24.313" height="14.119" depth="3.1" valign="baseline" size="huge" style="math">X_4</text>
 </page>
 </ipe>

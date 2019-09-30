@@ -9,8 +9,8 @@
 	<body>
 		<script charset="utf-8">
 let pivotVal = Math.random();
-let n = 100;
-let numPreds = 40;
+let n = 50;
+let numPreds = 22;
 let A = [];
 for(let i = 0; i < n; i++){
 	if(i < numPreds){
@@ -22,10 +22,13 @@ for(let i = 0; i < n; i++){
 }
 function setup(){
 	createCanvas(1000,250);
-	strokeWeight(1);
+	strokeWeight(2);
 }
 function draw(){
+	fill(255,255,255);
+	stroke(0,0,0);
 	for(let i = 0; i < n; i++){
+		/*
 		if (A[i] < pivotVal) {
 			fill(0,0,0); // black
 			stroke(255,255,255); // white
@@ -34,8 +37,10 @@ function draw(){
 			fill(255,255,255); // white
 			stroke(0,0,0); // black
 		}
-		rect(i*width/n, height*(1-A[i]), width/n, height*A[i]);
+		*/
+		rect(i*width/n, height*(1-A[i]), width/(2*n), height*A[i]);
 	}
+	/*
 	// pivot value
 	noStroke();
 	fill(0,255,0, 250);// green
@@ -43,6 +48,7 @@ function draw(){
 
 	fill(0,0,0);
 	rect(0,height-1,width,1);
+	*/
 }
 console.log("Note: running 'save(fileName)' will save the canvas as an image");
 
