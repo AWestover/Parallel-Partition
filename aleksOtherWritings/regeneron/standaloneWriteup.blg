@@ -4,45 +4,45 @@ The top-level auxiliary file: standaloneWriteup.aux
 The style file: plain.bst
 Database file #1: paper.bib
 Warning--can't use both volume and number fields in BlellochFi12
-You've used 29 entries,
+You've used 30 entries,
             2118 wiz_defined-function locations,
-            704 strings with 8904 characters,
-and the built_in function-call counts, 10865 in all, are:
-= -- 1126
-> -- 451
+            710 strings with 9030 characters,
+and the built_in function-call counts, 11069 in all, are:
+= -- 1146
+> -- 458
 < -- 11
-+ -- 185
-- -- 148
-* -- 746
-:= -- 1720
-add.period$ -- 96
-call.type$ -- 29
-change.case$ -- 160
++ -- 188
+- -- 150
+* -- 754
+:= -- 1759
+add.period$ -- 99
+call.type$ -- 30
+change.case$ -- 164
 chr.to.int$ -- 0
-cite$ -- 30
-duplicate$ -- 429
-empty$ -- 869
-format.name$ -- 148
-if$ -- 2337
+cite$ -- 31
+duplicate$ -- 439
+empty$ -- 886
+format.name$ -- 150
+if$ -- 2378
 int.to.chr$ -- 0
-int.to.str$ -- 29
-missing$ -- 29
-newline$ -- 147
-num.names$ -- 58
-pop$ -- 169
+int.to.str$ -- 30
+missing$ -- 30
+newline$ -- 152
+num.names$ -- 60
+pop$ -- 173
 preamble$ -- 1
-purify$ -- 132
+purify$ -- 135
 quote$ -- 0
-skip$ -- 316
+skip$ -- 323
 stack$ -- 0
-substring$ -- 776
-swap$ -- 124
+substring$ -- 781
+swap$ -- 125
 text.length$ -- 11
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 114
+type$ -- 118
 warning$ -- 1
-while$ -- 116
-width$ -- 31
-write$ -- 326
+while$ -- 118
+width$ -- 32
+write$ -- 336
 (There was 1 warning)

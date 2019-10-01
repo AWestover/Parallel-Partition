@@ -121,6 +121,12 @@ Andi Kleen.
 \newblock A numa api for linux.
 \newblock {\em Novel Inc}, 2005.
 
+\bibitem{KuszmaulWe19}
+William Kuszmaul.
+\newblock In-place parallel-partition algorithms using exclusive-read-and-write
+  memory.
+\newblock {\em APOCS}, 2019.
+
 \bibitem{LiuKn05}
 Jie Liu, Clinton Knowles, and Adam~Brian Davis.
 \newblock A cost optimal parallel quicksorting and its implementation on a

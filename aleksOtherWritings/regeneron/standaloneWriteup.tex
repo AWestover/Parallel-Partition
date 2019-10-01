@@ -83,7 +83,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 
 \begin{document}
-\title{Cache-Efficient Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
+\title{Cache-Efficient Parallel-Partition Algorithms \\using Exclusive-Read-and-Write Memory}
 
 \author{William Kuszmaul}
 % \affiliation{ \institution{Massachusetts Institute of Technology} }
@@ -102,11 +102,11 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
         \vspace*{1cm}
  
         \Huge
-        \textbf{In-Place Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
+        \textbf{Cache-Efficient Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
  
         \vspace{0.5cm}
         \LARGE
-				An Algorithm With Provably Optimal Cache Behavior
+				An In-Place Algorithm With Provably Optimal Cache Behavior
  
         \vspace{1.5cm}
 				\vfill
@@ -367,32 +367,33 @@ for our algorithm analyses, however; instead it will suffice to assume
 that certain small arrays are pinned in cache and that other evictions
 are performed via LRU.
 
+\paragraph{The Partition Problem}
+The partition problem takes an input array $A$ of size $n$,
+and a \defn{decider function} $\dec$ that determines for each element
+$A[i] \in A$ whether or not $A[i]$ is a \defn{predecessor} or a
+\defn{successor}. That is, $\dec(A[i]) = 1$ if $A[i]$ is a
+predecessor, and $\dec(A[i]) = 0$ if $A[i]$ is a successor. The
+behavior of the partition algorithm is to reorder the elements in the
+array $A$ so that the predecessors appear before the successors.
 
 
-\paragraph{Serial Partition Problem}
-We breifly describe the serial partition problem and the algorithm typically used to solve it which is used extensively in our parallel partition algorithms. 
-The serial partition problem takes in an array, and then reorders the array according to a decider function and returns the number of predecessors in the array.
-Upon completion of the serial partition algorithm, which runs fully in-place, if $k$ is the number of predecessors in the array then for all $i < k$, $A[i]$ is a predecessor, and for all $i \ge k$, $A[i]$ is a successor. 
-In the case of the decider function "$A[i] \leq \text{pivot value}$", as is the case in the partition used for quicksort to sort an array in ascending order, this corresponds to placing all elements with values less than or equal to the pivot value before the elements with values greater than or equal to the pivot value.
-Thus, by recursively sorting the predecessors and the successors, the entire array is sorted. 
-This is because the predecessor portion of the array is sorted, the successor portion of the array is sorted, and the predecessors occur before the successors, so the whole array is sorted.
-The serial partition algorithm works as follows: 
+\paragraph{The Serial Partition Algorithm}
+In our parallel algorithms for the partition problem we perform serial partitions on disjoint subarrays of the array.
+The serial partition algorithm runs fully in-place and incurs work  linear in the input size i.e. $O(N)$. 
+Also, crucially, the serial partition algorithm makes a single pass over the array, so it incurs only $n/b$ cache misses where $b$ is the size of a cache line.
+See Algorithm \ref{alg:serialPartition} for a pseudocode implementation of this algorithm. 
 
 % \begin{samepage}
-\begin{enumerate}
-	\item{Initialize \defn{low} to point at the beginning of the array, and initialize \defn{high} to point at the end of the array}
-	\item{Increment low until $A[\text{low}]$ is a successor}
-	\item{Decrement high until $A[\text{high}]$ is a predecessor}
-	\item{Swap values $A[\text{low}]$ and $A[\text{high}]$ in the array}
-	\item{Repeat steps 3-5 until $\text{high} \geq \text{low}$ which means that all elements in the array have been processed}
-	\item{If $A[\text{low}]$ is a predecessor increment $A[\text{low}]$ by $1$ so that $A[\text{low}]$ is the first successor in $A$, which is now partitioned}
-\end{enumerate}
+% \begin{enumerate}
+%   \item{Initialize \defn{low} to point at the beginning of the array, and initialize \defn{high} to point at the end of the array}
+%   \item{Increment low until $A[\text{low}]$ is a successor}
+%   \item{Decrement high until $A[\text{high}]$ is a predecessor}
+%   \item{Swap values $A[\text{low}]$ and $A[\text{high}]$ in the array}
+%   \item{Repeat steps 3-5 until $\text{high} \geq \text{low}$ which means that all elements in the array have been processed}
+%   \item{If $A[\text{low}]$ is a predecessor increment $A[\text{low}]$ by $1$ so that $A[\text{low}]$ is the first successor in $A$, which is now partitioned}
+% \end{enumerate}
 % \end{samepage}
 
-See Algorithm \ref{alg:serialPartition} for a pseudocode implementation of this algorithm. 
-Note that the serial partition described makes a single pass over the $n$ elements in the array meaning that it incurs $O(n)$ cache misses, and also it has running time (i.e. work) $O(n)$.
-
-\vspace{5mm}
 \begin{samepage}
 \begin{algorithm}
 	\caption{Serial Partition}
@@ -415,16 +416,6 @@ Note that the serial partition described makes a single pass over the $n$ elemen
 	\end{algorithmic}	
 \end{algorithm}
 \end{samepage}
-
-\paragraph{The Parallel Partition Problem}
-The parallel partition problem takes an input array $A$ of size $n$,
-and a \defn{decider function} $\dec$ that determines for each element
-$A[i] \in A$ whether or not $A[i]$ is a \defn{predecessor} or a
-\defn{successor}. That is, $\dec(A[i]) = 1$ if $A[i]$ is a
-predecessor, and $\dec(A[i]) = 0$ if $A[i]$ is a successor. The
-behavior of the parallel partition is to reorder the elements in the
-array $A$ so that the predecessors appear before the successors.
-
 
 \paragraph{The (Standard) Linear-Space Parallel Partition} The linear-space implementation of parallel partition consists of two phases \cite{Blelloch96,AcarBl16}:
 
@@ -456,53 +447,36 @@ stable but not in place. The algorithm uses two auxiliary arrays of
 size $n$. Kiu, Knowles, and Davis \cite{LiuKn05} were able to reduce
 the extra space consumption to $n + p$ under the assumption that the
 number of processors $p$ is hard-coded; their algorithm breaks the
-array $A$ into $p$ parts and assigns one part to each thread. Reducing
-the space below $o(n)$ has remained open until now, even when the
-number of threads is fixed.
+array $A$ into $p$ parts and assigns one part to each thread. 
 
 \paragraph{An In-Place Parallel Partition}
-\note{need reference here?} By using linear-space the above parallel partition
-algorithm incurs a large number of cache misses due to its lack of spatial
-locality.  Kuszmaul modified the out-of-place parallel-prefix based algorithm
-to make it in-place.  His new algorithm has span $O(\log n \log \log n)$ which
-is close to the $O(\log n)$ span of the standard algorithm.  Because of its
-spatial locality, Kuszmaul's in-place algorithm outperforms the standard
-linear-space parallel partition algorithm in practice.  However experiments
-also revealed that Kuszmaul's in-place algorithm was still bottlenecked by
-cache misses.  Kuszmaul's algorithm performs multiple passes over the array, so
-it incurs cache misses due to a lack of temporal locality.  The lack of
-temporal locality means that memory bandwidth bound becomes a major factor in
-determining whether further speedup is possible.
+Kuszmaul\cite{KuszmaulWe19} created an in-place parallel-prefix-sum based
+algorithm for parallel partition.  Kuszmaul's algorithm has span $O(\log n \log
+\log n)$ which is comparable to the $O(\log n)$ span of the standard algorithm.
+Because Kuszmaul's algorithm is in-place it has better cache-behavior,
+specifically better spatial locality.  Because of the improved cache behavior
+Kuszmaul's in-place algorithm outperforms the standard linear-space parallel
+partition algorithm in practice.  However, experiments also reveal that
+Kuszmaul's in-place algorithm is still bottlenecked by cache misses. Kuszmaul's
+algorithm is does not have optimal temporal locality. Because the algorithm
+performs multiple passes over the array it incurs more cache misses than is
+optimal.  Because of the suboptimal cache-behavior, the memory bandwidth bound
+bottlenecks the algorithm which prevents optimal scaling.
 
 
+\section{Cache-Efficient Parallel Partition for \emph{Random} Input Arrays}\label{sec:strided}
 
-\section{A Cache Efficient In-Place Parallel Partition for \emph{Random} Input Arrays}\label{sec:strided}
-
-In Section \ref{secexp}, we will see that, although Kuszmaul's in-place algorithm achieves speedups over the classic
-parallel-prefix-based partition algorithm, it nonetheless continues
-to be bottlenecked by cache misses. In this section, we introduce a
-second algorithm, called the \defn{Smoothed Striding Algorithm}, which
-exhibits provably optimal cache behavior (up to small-order
-factors). The Smoothed Striding Algorithm is fully in-place and has
-polylogarithmic span.
-
-%% In this section, we follow the convention of 0-indexing arrays (i.e.,
-%% every array starts with element $0$), in order to allow for modular
-%% arithmetic to be performed on array indices.
-
+In this Section we present and analyze the Strided Algorithm \cite{FrancisPa92}.
+The Strided Algorithm lacks theoretical guarantees in general, but we prove
+that for random inputs it has desirable cache behavior.
 
 \paragraph{The Strided Algorithm Description \cite{FrancisPa92}}
-The Smoothed Striding Algorithm borrows several structural ideas from a
-previous algorithm of Francis and Pannan \cite{FrancisPa92}, which we call the
-Strided Algorithm. The Strided Algorithm is designed to behave well on random
+The Strided Algorithm is designed to behave well on random
 arrays $A$, achieving span $\tilde{O}(n^{2/3})$ and exhibiting only $n/b +
 \tilde{O}(n^{2/3} / b)$  cache misses on such inputs. On worst-case inputs,
 however, the Strided Algorithm has span $\Omega(n)$ and incurs $n/b +
-\Omega(n/b)$ cache misses. Our algorithm, the Smoothed Striding Algorithm, will
-build on the Strided Algorithm by randomly perturbing the internal structure of
-the original algorithm; in doing so, we are able to provide provable guarantees
-on arbitrary inputs, and to add a recursion step that was previously
-impossible.
+\Omega(n/b)$ cache misses. 
+% Our algorithm, the Smoothed Striding Algorithm, will build on the Strided Algorithm by randomly perturbing the internal structure of the original algorithm; in doing so, we are able to provide provable guarantees on arbitrary inputs, and to add a recursion step that was previously impossible.
 
 The original \defn{Strided Algorithm} consists of two steps: 
 \begin{itemize}
@@ -682,7 +656,7 @@ arbitrary inputs.
 
 %% With this optimization, one advantage of the Strided Algorithm is that when $v_{\text{max}} - v_{\text{min}}$ is small, the total number of cache misses by the algorithm is close to the same as for a single scan through the data. 
 
-\section{A Cache Efficient In-Place Parallel Partition for \emph{Arbitrary} Input Arrays}\label{sec:smoothing}
+\section{Cache-Efficient Parallel Partition for \emph{Arbitrary} Input Arrays}\label{sec:smoothing}
 \paragraph{The Smoothed Striding Algorithm Description}
 To obtain an algorithm with provable guarantees for all inputs $A$, we
 randomly perturb the internal structure of each of the $P_i$'s. Define
