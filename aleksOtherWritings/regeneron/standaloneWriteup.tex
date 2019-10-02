@@ -267,10 +267,11 @@ and by presenting background on parallel partition.
 
 \paragraph{Workflow Model} We consider a simple language-based model of
 parallelism in which algorithms achieve parallelism through the use of
-\defn{parallel-for-loops} (see, e.g., \cite{Blelloch96,AcarBl16,CLRS});
-function calls within the inner loop then allow for more complicated parallel
-structures (e.g., recursion). Our algorithms can also be implemented in the
-less restrictive PRAM model \cite{Blelloch96, AcarBl16}.
+\defn{parallel-for-loops} (see, e.g.,
+\cite{Blelloch96,AcarBl16,CLRS}).  Function calls within
+parallel-for-loops then allow for more complicated parallel structures
+(e.g., recursion). Our algorithms can also be implemented in the less
+restrictive PRAM model \cite{Blelloch96, AcarBl16}.
 
 Formally, a parallel-for-loop is given a range $R \in \mathbb{N}$, a constant
 number of arguments $\arg_1, \arg_2, \ldots, \arg_c$, and a body of code. For
@@ -310,10 +311,10 @@ to as the \defn{EREW model} (see, e.g., \cite{Hagerup89}).
 
 Note that threads are not in lockstep (i.e., they may progress at arbitrary different speeds), and thus the EREW model requires algorithms to be data-race free in order to avoid the possibility of non-exclusive data accesses.
 
-In an \defn{in-place} algorithm, each thread is given $O(\polylog n)$
+In an \defn{in-place} algorithm, each thread is given $O(\polylog(n))$
 memory upon creation that is deallocated when the thread dies. This
 memory can be shared with the thread's children. However, the depth of
-the parent-child tree is not permitted to exceed $O(\polylog n)$.
+the parent-child tree is not permitted to exceed $O(\polylog(n))$.
 
 Whereas the EREW memory model prohibits concurrent accesses to memory, on the
 other side of the spectrum are CRCW (concurrent-read-concurrent-write) models,
@@ -337,7 +338,7 @@ small number of atomic operations need to be simulated.}
 \paragraph{Modeling Cache Misses}
 We treat memory as consisting of fixed-size cache lines of some
 size $b$. Each processor is assumed to have a small cache of
-$\operatorname{polylog}{n}$ cache lines.  A cache miss occurs on a
+$\polylog(n)$ cache lines.  A cache miss occurs on a
 processor when the line being accessed is not currently in cache, in
 which case some other line is evicted from cache to make room for the
 new entry.  Each cache is managed with a LRU (Least Recently Used)
@@ -345,7 +346,7 @@ eviction policy; when child threads are created, they inherit their
 cache contents from their parent.
 
 We will also assume that the algorithm can choose for certain small
-arrays to be pinned in cache (i.e. their entries are never evicted
+arrays to be pinned in cache (i.e., their entries are never evicted
 from cache).  This assumption is without loss of generality in the
 sense that LRU eviction is competitive (up to resource augmentation)
 with the optimal off-line eviction strategy OPT (i.e. Furthest in the
@@ -380,7 +381,7 @@ array $A$ so that the predecessors appear before the successors.
 \paragraph{The Serial Partition Algorithm}
 In our parallel algorithms for the partition problem we perform serial partitions on disjoint subarrays of the array.
 The serial partition algorithm runs fully in-place and incurs work  linear in the input size i.e. $O(N)$. 
-Also, crucially, the serial partition algorithm makes a single pass over the array, so it incurs only $n/b$ cache misses where $b$ is the size of a cache line.
+Also, crucially, the serial partition algorithm makes a single pass over the array, so it incurs only $\lceil n/b \rceil$ cache misses where $b$ is the size of a cache line.
 See Algorithm \ref{alg:serialPartition} for a pseudocode implementation of this algorithm. 
 
 % \begin{samepage}
@@ -406,12 +407,12 @@ See Algorithm \ref{alg:serialPartition} for a pseudocode implementation of this 
 				\State $\text{low} \gets \text{low}+1$
 			\EndWhile
 			\While{$A[\text{high}] > \text{pivotValue}$}
-				\State $high \gets high-1$
+				\State $\text{high} \gets \text{high}-1$
 			\EndWhile
 			\State Swap $A[\text{low}]$ and $A[\text{high}]$
 		\EndWhile
 		\If{$A[\text{low}] \leq \text{pivotValue}$}
-			\State $low \gets low+1$
+			\State $\text{low} \gets \text{low}+1$
 		\EndIf
 	\end{algorithmic}	
 \end{algorithm}
@@ -450,18 +451,33 @@ number of processors $p$ is hard-coded; their algorithm breaks the
 array $A$ into $p$ parts and assigns one part to each thread. 
 
 \paragraph{An In-Place Parallel Partition}
-Kuszmaul\cite{KuszmaulWe19} created an in-place parallel-prefix-sum based
-algorithm for parallel partition.  Kuszmaul's algorithm has span $O(\log n \log
-\log n)$ which is comparable to the $O(\log n)$ span of the standard algorithm.
-Because Kuszmaul's algorithm is in-place it has better cache-behavior,
-specifically better spatial locality.  Because of the improved cache behavior
-Kuszmaul's in-place algorithm outperforms the standard linear-space parallel
-partition algorithm in practice.  However, experiments also reveal that
-Kuszmaul's in-place algorithm is still bottlenecked by cache misses. Kuszmaul's
-algorithm is does not have optimal temporal locality. Because the algorithm
-performs multiple passes over the array it incurs more cache misses than is
-optimal.  Because of the suboptimal cache-behavior, the memory bandwidth bound
-bottlenecks the algorithm which prevents optimal scaling.
+In recent work, Kuszmaul \cite{KuszmaulWe19} introduced a collection
+of theoretical techniques that could be used to make the standard
+parallel partition algorithm in place. The resulting algorithm
+achieves span $O(\log n \log \log n)$, which is only slightly larger
+than the $O(\log n)$ span of the standard algorithm.
+
+By being in place, Kuszmaul's algorithm achieves fewer total cache
+misses than the standard algorithm. As a result, Kuszmaul's algorithm
+substantially outperforms the standard linear-space parallel partition
+algorithm in practice.
+
+On large numbers of processors, however, Kuszmaul's algorithm becomes
+bottlenecked by memory bandwidth constraints, preventing linear
+scaling in performance. This is because, even though the algorithm is
+in-place, the multiple passes that it makes over the input cause poor
+cache behavior. In contrast, parallel algorithms that are designed to
+optimize cache behavior in practice, at the cost of lacking
+theoretical guarantees on span, can perform much faster
+\cite{FrancisPa92, Frias08}.
+
+Like Kuszmaul's algorithm, the algorithms presented in this paper are
+in place and achieve polylogarithmic span. Additionally, the
+algorithms achieve \emph{provably optimal} cache behavior, up to
+small-order factors. In Section \ref{secexp}, we show that these
+theoretical guarantees also translate to practical speedups, allowing
+us to avoid the performance bottlnecks exhibited by Kuszmaul's
+algorithm \cite{KuszmaulWe19}.
 
 
 \section{Cache-Efficient Parallel Partition for \emph{Random} Input Arrays}\label{sec:strided}
