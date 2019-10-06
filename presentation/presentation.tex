@@ -65,6 +65,10 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \input{paralleltable.tex}
 \input{serialtable.tex}
 
+\usepackage{xcolor}
+\newcommand{\citefont}[1]{{\tiny \textcolor{Gray}{#1}}}
+
+
 \title{Cache-Efficient Parallel Partition Algorithms}
 \author{Alek Westover}
 \institute{MIT PRIMES}
@@ -109,13 +113,16 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 	\begin{columns}[T] % align columns
 	\begin{column}{.45\textwidth}
 	Fundamental primitive: \defn{Parallel for loop}
-	\vspace{1cm}
-	\begin{algorithmic}
-		\State \textbf{parallel-for} $i \in \{1,2,3,4\}$
-		\State \hskip0.7cm do $X_i$
-		\State \textbf{endparallel-for}
+	\vspace{2cm}
 
-\end{algorithmic}
+        \textbf{Parallel-For $i$ from $1$ to $4$: } \\
+        \hspace{1 cm} \textbf{Do }$X_i$
+
+%	\begin{algorithmic}
+%		\State \textbf{parallel-for} $i \in \{1,2,3,4\}$
+%		\State \hskip0.7cm do $X_i$
+%		\State \textbf{endparallel-for}
+%\end{algorithmic}
 
 	\end{column}
 	\hfill
@@ -129,20 +136,10 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \end{frame}
 
 
-
 \begin{frame}[t]{What is a Parallel Algorithm?}
 	More complicated parallel structures can be made by combining parallel for loops and recursion.
 	\begin{columns}[T] % align columns
 	\begin{column}{.45\textwidth}
-		\vspace{0.5cm}
-		\defn{$T_p$}: Time to run on $p$ processors\\
-		\vspace{0.5cm}
-		Important extreme cases:\\
-		\vspace{0.1cm}
-		\defn{Work:} $T_1$, time to run in serial, \\ "sum of all work"\\
-		\vspace{0.15cm}
-		\defn{Span:} $T_\infty$, time to run on infinitely many processors,\\ 
-		"height of the graph"
 	\end{column}
 	\hfill
 	\begin{column}{.60\textwidth}
@@ -152,6 +149,34 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 	\end{column}
 	\end{columns}
 \end{frame}
+
+\begin{frame}[t]{\defn{$T_p$}: Time to run on $p$ processors}
+	\begin{columns}[T] % align columns
+	\begin{column}{.60\textwidth}
+		\begin{figure}
+			\includegraphics[width=0.8\linewidth]{imgs/altParallelForLoopComposition.eps}
+		\end{figure}
+	\end{column}
+	\hfill
+	\begin{column}{.45\textwidth}
+		Important extreme cases:\\
+		\vspace{0.3cm}
+		\defn{Work:} $T_1$, 
+		\begin{itemize}
+			\item time to run in serial
+			\item "sum of all work"
+		\end{itemize}
+		\vspace{0.3cm}
+		\defn{Span:} $T_\infty$,
+		\begin{itemize}
+			\item time to run on infinitely many processors,\\ 
+			\item "height of the graph"
+		\end{itemize}	
+	\end{column}
+	\end{columns}
+\end{frame}
+
+
 
 \begin{frame}[t]{Bounding $T_p$ with Work and Span}
 % \begin{defin}[$T_p$]
@@ -163,12 +188,13 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 % \begin{defin}[Span]
 %   Running time on infinitely many processors. $T_\infty = \sum_i 1$.
 % \end{defin}	
-	\defn{Brent's Theorem:} [Brent, 74]
+	\defn{Brent's Theorem:} \citefont{[Brent, 74]}
 % \begin{theorem}[Brent's Theorem]
 	% $$T_p = \sum_i \Big\lceil \frac{W_i}{p} \Big\rceil \le \sum_i \Big( \frac{W_i}{p}+1 \Big) = \frac{T_1}{p}+T_\infty.$$	
-	$$T_p = \Theta\Big(\frac{T_1}{p}+T_\infty\Big)$$
+	$$T_p = \Theta\left(\frac{T_1}{p}+T_\infty\right)$$
 % \end{theorem}
-	Brent's Theorem implies that analyzing an algorithm's work and span is sufficient to determine the algorithms performance on $p$ processors.
+	$ $\\ \vspace{1cm}
+	\textbf{Take away:} Work $T_1$ and span $T_\infty$ determine $T_p$.
 \end{frame}
 
 
@@ -186,50 +212,88 @@ Total span: $O(\log n)$
 \end{frame}
 
 \begin{frame}[t]{The Problem}
-	\onslide<1->{The Standard Algorithm is slow in practice. Why?}
+	\onslide<1->{Why is the Standard Algorithm is slow in practice?}
+	\begin{columns}[T] % align columns
+	\begin{column}{.65\textwidth}
 	\begin{itemize}
-		\item<2-> Algorithm is not in-place
-		\item<3-> Algorithm has poor cache behavior
+		\item<2-> Uses extra memory % not in place
+		\item<3-> Makes multiple passes over array
 	\end{itemize}
+	\end{column}
+	\begin{column}{.35\textwidth}
+	\onslide<4->{\hspace{-1cm}$\Biggr\}\text{ "bad cache behavior"}$}
+	\end{column}
+	\end{columns}
 	\vspace{0.4 cm}
 
-	\onslide<4->{\ But the fastest algorithms in practice lack theoretical guarantees}
+	\onslide<5->{But fastest algorithms in practice lack theoretical guarantees}
 	\begin{itemize}
-		\item<5-> Lock-based and atomic-variable based algorithms
-		\item<6-> The Strided Algorithm [Francis and Pannan, 92; Frias and Petit, 08]: 
-		\onslide<6->{No locks or atomic-variables, but no bound on span in general}
+		\item<6-> Lock-based and atomic-variable based algorithms
+		\item<7-> The Strided Algorithm\\ \citefont{[Francis and Pannan, 92; Frias and Petit, 08]}\\ 
+		\onslide<8->{No locks or atomic-variables,\\but no bound on span in general}
 	\end{itemize}
-	\onslide<7-> {
+	\onslide<9-> {
 	\vspace{0.4cm}
 	\textbf{Our Question:}
 Can we create an algorithm with theoretical guarantees that is fast in practice?}
 \end{frame}
 
-\begin{frame}[t]{Cache Efficiency}
-	Rough definition:\\
-	The number of passes over the input data. \\
-	\vspace{1cm}
-	A cache-efficient algorithm will make relatively few requests to load data from memory into cache where it can be manipulated. \\
-	\vspace{1cm}
-	Poor cache behavior will harm an algorithms performance in practice.
-
-\end{frame}
+% \begin{frame}[t]{Cache Efficiency}
+%   Rough definition:\\
+%   The number of passes over the input data. \\
+%   \vspace{1cm}
+%   A cache-efficient algorithm will make relatively few requests to load data from memory into cache where it can be manipulated. \\
+%   \vspace{1cm}
+%   Poor cache behavior will harm an algorithms performance in practice.
+% \end{frame}
 
 \begin{frame}[t]{Our Result}
 	We created a randomized algorithm for the parallel partition problem: the \defn{Smoothed-Striding Algorithm}.\\
 	\vspace{0.5cm}
-	The Smoothed-Striding algorithm:
+	The Smoothed-Striding algorithm has...
 	\begin{itemize}
-		\item Has polylogarithmic span like the Standard Algorithm
-		\item Has theoretically optimal cache behavior (up to low order factors)
-		\item Has performance comparable to that of the Strided Algorithm
+		\item performance comparable to that of the Strided Algorithm
+		\item polylogarithmic span like the Standard Algorithm
+		\item theoretically optimal cache behavior 
 	\end{itemize}
 \end{frame}
 
-\begin{frame}[t]{The Smoothed-Striding Algorithm's performance}
+% \begin{frame}[t]{The Smoothed-Striding Algorithm's performance}
+%   \begin{figure}
+%     \begin{center}
+%       \CILKtable
+%     \end{center}
+%   \end{figure}
+% \end{frame}
+
+\begin{frame}[t]{Algorithm Comparison}
+	\begin{columns}[T] % align columns
+	\begin{column}{.45\textwidth}
+		\textbf{Strided Algorithm}\\\citefont{[Francis and Pannan, 92; Frias and Petit, 08]}\\
+		\vspace{0.25cm}
+		\begin{itemize}
+			\item Good cache behavior in practice\\\hfill
+			\item Worst case span is $T_\infty \approx n$\\\hfill
+			\item But: on random inputs span is $T_\infty = \tilde{O}(n^{2/3})$
+		\end{itemize}
+	\end{column}
+	\hfill
+	\begin{column}{.55\textwidth}
+		\textbf{Smoothed-Striding Algorithm}\\\citefont{}\\
+		\vspace{0.25cm}
+		\begin{itemize}
+			\item Provably optimal cache behavior\\\hfill
+			\item Span is $O(\log n \log\log n)$ with high probability in $n$\\\hfill
+			\item Uses randomization inside the algorithm to remove the need for randomized input
+		\end{itemize}
+	\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Speedup over Serial Partition: Smoothed-Striding Algorithm's performance}
 	\begin{figure}
 		\begin{center}
-			\CILKtable
+			\includegraphics[width=0.9\linewidth]{imgs/compiledGraph.eps}
 		\end{center}
 	\end{figure}
 \end{frame}
@@ -268,7 +332,21 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 %   \end{figure}	
 % \end{frame}
 
-\begin{frame}[t]{Strided Algorithm Description [Francis and Pannan, 92; Frias and Petit, 08]}
+\begin{frame}[t]{}
+	\vfill
+	\begin{center}
+		{\Huge The Strided Algorithm}\\
+		\citefont{[Francis and Pannan, 92; Frias and Petit, 08]}
+	\end{center}
+	\vfill
+\end{frame}
+
+
+%% BILL NOTES:
+%% extra slide introducing v_i (v_4?...)
+%% extra slide for partition vmin through vmax in serial 
+
+\begin{frame}[t]{}%{Strided Algorithm Description}
 	\vspace{0.25cm}
 	\begin{overprint}
 	\onslide<1>Logically partition the array into chunks of adjacent elements:
@@ -288,10 +366,36 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 	\vspace{0.25cm}
 	\begin{overprint}
 	\onslide<3>This step is highly parallel.
-	\onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
+	% \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
 	\onslide<5> Note that this step has no parallelism. In general this results in span $O(n)$. However, if the number of elements less than the pivot in each $P_i$ is similar, then size of the subarray to be partitioned can be very small.
 	\end{overprint}
-	
+\end{frame}
+
+\begin{frame}[t]{}%{Strided Algorithm Description}
+	\vspace{0.25cm}
+	\begin{overprint}
+	\onslide<1>Logically partition the array into chunks of adjacent elements:
+	\onslide<2>Form groups $P_i$ where $P_i$ contains the $i$-th element from each chunk:
+	\onslide<3>Perform serial partitions on each $P_i$ in parallel over the $P_i$'s:
+	\onslide<5>Identify the splitting index $v_i$ (the first element greater than the pivot) of each $P_i$. 
+	\onslide<7>Partition the subarray from the minimum splitting index to the maximum splitting index in serial. This completes the partition. 
+	\end{overprint}
+	\vspace{0.25cm}
+	\begin{overprint}
+	\onslide<1>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_1.png}
+	\onslide<2>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_2.png}
+	\onslide<3>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_3.png}
+	\onslide<4>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_35.png}
+	\onslide<5>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_4.png}
+	\onslide<6>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_45.png}
+	\onslide<7>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_5.png}
+	\end{overprint}
+	\vspace{0.25cm}
+	\begin{overprint}
+	\onslide<3>This step is highly parallel.
+	% \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
+	\onslide<7> Note that this step has no parallelism. In general this results in span $O(n)$. However, if the number of elements less than the pivot in each $P_i$ is similar, then size of the subarray to be partitioned can be very small.
+	\end{overprint}
 \end{frame}
 
 % \begin{frame}[t]{Strided Algorithm Description [Francis and Pannan, 92; Frias and Petit, 08]}
@@ -320,21 +424,29 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 %   \end{itemize}
 % \end{frame}
 
-\begin{frame}[t]{The Smoothed Striding Algorithm} 
-	The Smoothed-Striding Algorithm creates groups analogous to the Strided Algorithm's $P_i$'s, but rather than taking the $i$-th element from each chunk of the array to form groups $P_i$, the Smoothed-Striding algorithm takes a random element from each chunk for each of the groups $U_i$.
+% \begin{frame}[t]{The Smoothed Striding Algorithm} 
+%   The Smoothed-Striding Algorithm creates groups analogous to the Strided Algorithm's $P_i$'s, but rather than taking the $i$-th element from each chunk of the array to form groups $P_i$, the Smoothed-Striding algorithm takes a random element from each chunk for each of the groups $U_i$.
 
-	\textbf{Blocked Strided Algorithm $P_i$.}
-	\begin{figure}
-		\includegraphics[width=\linewidth]{imgs/stridedAlgHighlighted.png}
-	\end{figure}
-	\textbf{Smoothed-Striding Algorithm $U_i$.}
-	\begin{figure}
-		\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgHighlighted.png}
-	\end{figure}
+%   \textbf{Blocked Strided Algorithm $P_i$.}
+%   \begin{figure}
+%     \includegraphics[width=\linewidth]{imgs/stridedAlgHighlighted.png}
+%   \end{figure}
+%   \textbf{Smoothed-Striding Algorithm $U_i$.}
+%   \begin{figure}
+%     \includegraphics[width=\linewidth]{imgs/smoothedStridingAlgHighlighted.png}
+%   \end{figure}
+% \end{frame}
+
+
+\begin{frame}[t]{}
+	\vfill
+	\begin{center}
+		{\Huge The Smoothed-Striding Algorithm}
+	\end{center}
+	\vfill
 \end{frame}
 
-
-\begin{frame}[t]{Smoothed Striding Algorithm Description}
+\begin{frame}[t]{}%{Smoothed Striding Algorithm Description}
 	\vspace{0.25cm}
 	\begin{overprint}
 	\onslide<1>Logically partition the array into chunks of adjacent elements:
@@ -354,20 +466,61 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 	\vspace{0.25cm}
 	\begin{overprint}
 	\onslide<3>This step is highly parallel.
-	\onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
+	% \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
 	\onslide<5>Unlike in the Strided Algorithm this step has parallelism, and is guaranteed to only run on a small subarray. The Strided Algorithm could not recurse here because the subproblem is a worst case input for it.
 	\end{overprint}
-	
 \end{frame}
 
-\begin{frame}[t]{Technical Notes}
-	Storing the groups $U_i$ is a challenge. We can't explicitely store them because then the algorithm would not be in-place. By design they do not have a regular structure like the $P_i$ of the Strided Algorithm.\\
-	The solution is to store $U_1$ and then specify that all other $U_i$'s are a circular shift within the chunks of $U_1$.\\
-	More precisely, Let $X[1],\ldots, X[s]$ be chosen uniformly at random from $\{1,\ldots, g\}$. 
-	Then let $U_i$ be the union of the $(X[j]+i)\mod g$-th cache-line from each chunk $C_j$.\\
-	Note that the $U_i$'s are not indpendent, but this doesn't affect the union bound.\\
-	\vspace{0.5cm}
-	In order to compute the minimum and maxmium splitting indices $v_{\min}, v_{\max}$ in parallel we use a recursive structure rather than a parallel-for loop.
+\begin{frame}[t]{}%{Smoothed Striding Algorithm Description}
+	\vspace{0.25cm}
+	\begin{overprint}
+	\onslide<1>Logically partition the array into chunks of adjacent elements:
+	\onslide<2>Form groups $U_i$ where $U_i$ contains the $i$-th element from each chunk:
+	\onslide<3>Perform serial partitions on each $U_i$ in parallel over the $U_i$'s:
+	\onslide<4>Identify the splitting index $v_i$ (the first element greater than the pivot) of each $P_i$. 
+	\onslide<5>Recursively apply this algorithm to partition the subarray from the minimum splitting index to the maximum splitting index in serial. This completes the partition. 
+	\end{overprint}
+	\vspace{0.25cm}
+	\begin{overprint}
+	\onslide<1>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_1.png}
+	\onslide<2>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_2.png}
+	\onslide<3>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_3.png}
+	\onslide<4>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_35.png}
+	\onslide<5>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_4.png}
+	\onslide<6>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_45.png}
+	\onslide<7>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_5.png}
+	\end{overprint}
+	\vspace{0.25cm}
+	\begin{overprint}
+	\onslide<3>This step is highly parallel.
+	% \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
+	\onslide<7>Unlike in the Strided Algorithm this step has parallelism, and is guaranteed to only run on a small subarray. The Strided Algorithm could not recurse here because the subproblem is a worst case input for it.
+	\end{overprint}
+\end{frame}
+
+% \begin{frame}[t]{Technical Notes}
+%   Storing the groups $U_i$ is a challenge. We can't explicitly store them because then the algorithm would not be in-place. By design they do not have a regular structure like the $P_i$ of the Strided Algorithm.\\
+%   The solution is to store $U_1$ and then specify that all other $U_i$'s are a circular shift within the chunks of $U_1$.\\
+%   More precisely, Let $X[1],\ldots, X[s]$ be chosen uniformly at random from $\{1,\ldots, g\}$. 
+%   Then let $U_i$ be the union of the $(X[j]+i)\mod g$-th cache-line from each chunk $C_j$.\\
+%   Note that the $U_i$'s are not indpendent, but this doesn't affect the union bound.\\
+%   \vspace{0.5cm}
+%   In order to compute the minimum and maxmium splitting indices $v_{\min}, v_{\max}$ in parallel we use a recursive structure rather than a parallel-for loop.
+% \end{frame}
+
+\begin{frame}[t]{A Key Challenge}
+How do we store the $U_i$'s if they are all random?	\\
+\vspace{0.5cm}
+If we stored the parts that made up each $U_i$ we would not be in-place.\\
+\vspace{0.5cm}
+\textbf{Blocked Strided Algorithm $P_i$.}
+\begin{figure}
+	\includegraphics[width=\linewidth]{imgs/stridedAlgHighlighted.png}
+\end{figure}
+\textbf{Smoothed-Striding Algorithm $U_i$.}
+\begin{figure}
+	\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgHighlighted.png}
+\end{figure}
 \end{frame}
 
 
@@ -456,8 +609,12 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 
 
 \begin{frame}[t]{Open Questions}
-	By recursively applying the Smoothed-Striding algorithm get an algorithm for parallel partition that incurs $n(1+o(1))$ cache misses and has span $O(b\log^2 n)$.\\
+	By recursively applying the Smoothed-Striding algorithm we get an algorithm for
+	parallel partition that incurs $n(1+o(1))$ cache misses and has span
+	$O(b\log^2 n)$.\\
+	\vspace{0.25cm}
 	There are techniques for improving this span to $O(\log n\log\log n)$ while retaining the cache behavior.\\
+	\vspace{0.25cm}
 	But the standard algorithm has span $O(\log n)$.\\
 	\vspace{1cm}
 	Can we construct an algorithm that achieves optimal cache behavior and span $O(\log n)$?
