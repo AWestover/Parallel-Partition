@@ -82,13 +82,13 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 	\onslide<1->{
 		An unpartitioned array:\\
 		\vspace{0.25cm}
-		\includegraphics[width=\linewidth]{imgs/partitionDefn1Ann.eps}\\
+		\includegraphics[width=\linewidth]{imgs/partitionDefn/partitionDefn1Ann.eps}\\
 		\vspace{1.5cm}
 	}
 	\onslide<2->{
 		An array partitioned relative to a pivot value:\\
 		\vspace{0.25cm}
-		\includegraphics[width=\linewidth]{imgs/partitionDefn2Ann.eps}
+		\includegraphics[width=\linewidth]{imgs/partitionDefn/partitionDefn2Ann.eps}
 	}
 \end{frame}
 
@@ -128,7 +128,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 	\hfill
 	\begin{column}{.60\textwidth}
 	\begin{figure}
-		\includegraphics[width=0.75\linewidth]{imgs/altParallelForLoop.eps}
+		\includegraphics[width=0.75\linewidth]{imgs/parallelForLoop/altParallelForLoop.eps}
 	\end{figure}
 	\end{column}
 	\end{columns}
@@ -144,7 +144,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 	\hfill
 	\begin{column}{.60\textwidth}
 		\begin{figure}
-			\includegraphics[width=0.8\linewidth]{imgs/altParallelForLoopComposition.eps}
+			\includegraphics[width=0.8\linewidth]{imgs/parallelForLoop/altParallelForLoopComposition.eps}
 		\end{figure}
 	\end{column}
 	\end{columns}
@@ -154,7 +154,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 	\begin{columns}[T] % align columns
 	\begin{column}{.60\textwidth}
 		\begin{figure}
-			\includegraphics[width=0.8\linewidth]{imgs/altParallelForLoopComposition.eps}
+			\includegraphics[width=0.8\linewidth]{imgs/parallelForLoop/altParallelForLoopComposition.eps}
 		\end{figure}
 	\end{column}
 	\hfill
@@ -324,10 +324,10 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 % \begin{frame}[t]{The Serial Partition Algorithm}
 % \begin{figure}
 %     \begin{overprint}
-%       \onslide<1>\includegraphics[width=\linewidth]{imgs/serialPartition1.eps}
-%     \onslide<2>\includegraphics[width=\linewidth]{imgs/serialPartition2.eps}
-%     \onslide<3>\includegraphics[width=\linewidth]{imgs/serialPartition3.eps}
-%     \onslide<4->\includegraphics[width=\linewidth]{imgs/serialPartition4.eps}
+%       \onslide<1>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition1.eps}
+%     \onslide<2>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition2.eps}
+%     \onslide<3>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition3.eps}
+%     \onslide<4->\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition4.eps}
 %     \end{overprint}
 %   \end{figure}	
 % \end{frame}
@@ -346,30 +346,30 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 %% extra slide introducing v_i (v_4?...)
 %% extra slide for partition vmin through vmax in serial 
 
-\begin{frame}[t]{}%{Strided Algorithm Description}
-	\vspace{0.25cm}
-	\begin{overprint}
-	\onslide<1>Logically partition the array into chunks of adjacent elements:
-	\onslide<2>Form groups $P_i$ where $P_i$ contains the $i$-th element from each chunk:
-	\onslide<3>Perform serial partitions on each $P_i$ in parallel over the $P_i$'s:
-	\onslide<4>Identify the splitting index $v_i$ (the first element greater than the pivot) of each $P_i$. 
-	\onslide<5>Partition the subarray from the minimum splitting index to the maximum splitting index in serial. This completes the partition. 
-	\end{overprint}
-	\vspace{0.25cm}
-	\begin{overprint}
-	\onslide<1>\includegraphics[width=\linewidth]{imgs/stridedAlgSim1Ann.eps}
-	\onslide<2>\includegraphics[width=\linewidth]{imgs/stridedAlgSim2Ann.eps}
-	\onslide<3>\includegraphics[width=\linewidth]{imgs/stridedAlgSim3Ann.eps}
-	\onslide<4>\includegraphics[width=\linewidth]{imgs/stridedAlgSim4Ann.eps}
-	\onslide<5>\includegraphics[width=\linewidth]{imgs/stridedAlgSim5Ann.eps}
-	\end{overprint}
-	\vspace{0.25cm}
-	\begin{overprint}
-	\onslide<3>This step is highly parallel.
-	% \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
-	\onslide<5> Note that this step has no parallelism. In general this results in span $O(n)$. However, if the number of elements less than the pivot in each $P_i$ is similar, then size of the subarray to be partitioned can be very small.
-	\end{overprint}
-\end{frame}
+% \begin{frame}[t]{}%{Strided Algorithm Description}
+%   \vspace{0.25cm}
+%   \begin{overprint}
+%   \onslide<1>Logically partition the array into chunks of adjacent elements:
+%   \onslide<2>Form groups $P_i$ where $P_i$ contains the $i$-th element from each chunk:
+%   \onslide<3>Perform serial partitions on each $P_i$ in parallel over the $P_i$'s:
+%   \onslide<4>Identify the splitting index $v_i$ (the first element greater than the pivot) of each $P_i$. 
+%   \onslide<5>Partition the subarray from the minimum splitting index to the maximum splitting index in serial. This completes the partition. 
+%   \end{overprint}
+%   \vspace{0.25cm}
+%   \begin{overprint}
+%   \onslide<1>\includegraphics[width=\linewidth]{imgs/oldStridedAlgSim/stridedAlgSim1Ann.eps}
+%   \onslide<2>\includegraphics[width=\linewidth]{imgs/oldStridedAlgSim/stridedAlgSim2Ann.eps}
+%   \onslide<3>\includegraphics[width=\linewidth]{imgs/oldStridedAlgSim/stridedAlgSim3Ann.eps}
+%   \onslide<4>\includegraphics[width=\linewidth]{imgs/oldStridedAlgSim/stridedAlgSim4Ann.eps}
+%   \onslide<5>\includegraphics[width=\linewidth]{imgs/oldStridedAlgSim/stridedAlgSim5Ann.eps}
+%   \end{overprint}
+%   \vspace{0.25cm}
+%   \begin{overprint}
+%   \onslide<3>This step is highly parallel.
+%   % \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
+%   \onslide<5> Note that this step has no parallelism. In general this results in span $O(n)$. However, if the number of elements less than the pivot in each $P_i$ is similar, then size of the subarray to be partitioned can be very small.
+%   \end{overprint}
+% \end{frame}
 
 \begin{frame}[t]{}%{Strided Algorithm Description}
 	\vspace{0.25cm}
@@ -382,13 +382,13 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
-	\onslide<1>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_1.png}
-	\onslide<2>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_2.png}
-	\onslide<3>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_3.png}
-	\onslide<4>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_35.png}
-	\onslide<5>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_4.png}
-	\onslide<6>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_45.png}
-	\onslide<7>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_5.png}
+	\onslide<1>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_1.eps}
+	\onslide<2>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_2.eps}
+	\onslide<3>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_3.eps}
+	\onslide<4>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_35.eps}
+	\onslide<5>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_4.eps}
+	\onslide<6>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_45.eps}
+	\onslide<7>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_5.eps}
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
@@ -446,30 +446,30 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 	\vfill
 \end{frame}
 
-\begin{frame}[t]{}%{Smoothed Striding Algorithm Description}
-	\vspace{0.25cm}
-	\begin{overprint}
-	\onslide<1>Logically partition the array into chunks of adjacent elements:
-	\onslide<2>Form groups $U_i$ where $U_i$ contains the $i$-th element from each chunk:
-	\onslide<3>Perform serial partitions on each $U_i$ in parallel over the $U_i$'s:
-	\onslide<4>Identify the splitting index $v_i$ (the first element greater than the pivot) of each $P_i$. 
-	\onslide<5>Recursively apply this algorithm to partition the subarray from the minimum splitting index to the maximum splitting index in serial. This completes the partition. 
-	\end{overprint}
-	\vspace{0.25cm}
-	\begin{overprint}
-	\onslide<1>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim1Ann.eps}
-	\onslide<2>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim2Ann.eps}
-	\onslide<3>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim3Ann.eps}
-	\onslide<4>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim4Ann.eps}
-	\onslide<5>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim5Ann.eps}
-	\end{overprint}
-	\vspace{0.25cm}
-	\begin{overprint}
-	\onslide<3>This step is highly parallel.
-	% \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
-	\onslide<5>Unlike in the Strided Algorithm this step has parallelism, and is guaranteed to only run on a small subarray. The Strided Algorithm could not recurse here because the subproblem is a worst case input for it.
-	\end{overprint}
-\end{frame}
+% \begin{frame}[t]{}%{Smoothed Striding Algorithm Description}
+%   \vspace{0.25cm}
+%   \begin{overprint}
+%   \onslide<1>Logically partition the array into chunks of adjacent elements:
+%   \onslide<2>Form groups $U_i$ where $U_i$ contains the $i$-th element from each chunk:
+%   \onslide<3>Perform serial partitions on each $U_i$ in parallel over the $U_i$'s:
+%   \onslide<4>Identify the splitting index $v_i$ (the first element greater than the pivot) of each $P_i$. 
+%   \onslide<5>Recursively apply this algorithm to partition the subarray from the minimum splitting index to the maximum splitting index in serial. This completes the partition. 
+%   \end{overprint}
+%   \vspace{0.25cm}
+%   \begin{overprint}
+%   \onslide<1>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim1Ann.eps}
+%   \onslide<2>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim2Ann.eps}
+%   \onslide<3>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim3Ann.eps}
+%   \onslide<4>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim4Ann.eps}
+%   \onslide<5>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim5Ann.eps}
+%   \end{overprint}
+%   \vspace{0.25cm}
+%   \begin{overprint}
+%   \onslide<3>This step is highly parallel.
+%   % \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
+%   \onslide<5>Unlike in the Strided Algorithm this step has parallelism, and is guaranteed to only run on a small subarray. The Strided Algorithm could not recurse here because the subproblem is a worst case input for it.
+%   \end{overprint}
+% \end{frame}
 
 \begin{frame}[t]{}%{Smoothed Striding Algorithm Description}
 	\vspace{0.25cm}
@@ -482,13 +482,13 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
-	\onslide<1>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_1.png}
-	\onslide<2>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_2.png}
-	\onslide<3>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_3.png}
-	\onslide<4>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_35.png}
-	\onslide<5>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_4.png}
-	\onslide<6>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_45.png}
-	\onslide<7>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_5.png}
+	\onslide<1>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_1.eps}
+	\onslide<2>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_2.eps}
+	\onslide<3>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_3.eps}
+	\onslide<4>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_35.eps}
+	\onslide<5>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_4.eps}
+	\onslide<6>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_45.eps}
+	\onslide<7>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_5.eps}
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
