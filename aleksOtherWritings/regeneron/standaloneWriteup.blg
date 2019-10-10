@@ -6,7 +6,7 @@ Database file #1: paper.bib
 Warning--can't use both volume and number fields in BlellochFi12
 You've used 30 entries,
             2118 wiz_defined-function locations,
-            710 strings with 9030 characters,
+            710 strings with 9026 characters,
 and the built_in function-call counts, 11069 in all, are:
 = -- 1146
 > -- 458

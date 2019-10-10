@@ -121,7 +121,7 @@ Andi Kleen.
 \newblock A numa api for linux.
 \newblock {\em Novel Inc}, 2005.
 
-\bibitem{KuszmaulWe19}
+\bibitem{Kuszmaul19}
 William Kuszmaul.
 \newblock In-place parallel-partition algorithms using exclusive-read-and-write
   memory.
