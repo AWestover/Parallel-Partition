@@ -21,6 +21,7 @@
 %% END Beamer Layout %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{graphicx}
 \usepackage{algpseudocode}
+\usepackage{soul}
 
 \usepackage{mathtools}
 \newcommand{\defeq}{\vcentcolon=}
@@ -230,7 +231,7 @@ Total span: $O(\log n)$
 	\begin{itemize}
 		\item<6-> Lock-based and atomic-variable based algorithms\\ \citefont{[Michael Axtmann, Sascha Witt, Daniel Ferizovic, and Peter Sanders, 2017; Philip Heidelberger, Alan Norton, and John T. Robinson, 1990; Philippas Tsigas and Yi Zhang, 2003]}
 		\item<7-> The Strided Algorithm\\ \citefont{[Francis and Pannan, 92; Frias and Petit, 08]}\\ 
-		\onslide<8->{No locks or atomic-variables,\\but no bound on span in general}
+		\onslide<8->{No locks or atomic-variables, but no bound on span}
 	\end{itemize}
 	\onslide<9-> {
 	\vspace{0.2cm}
@@ -247,14 +248,16 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 %   Poor cache behavior will harm an algorithms performance in practice.
 % \end{frame}
 
-\begin{frame}[t]{Our Result}
-	We created a randomized algorithm for the parallel partition problem: the \defn{Smoothed-Striding Algorithm}.\\
+\begin{frame}[t]{Our Result: The Smoothed-Striding Algorithm}
 	\vspace{0.5cm}
-	The Smoothed-Striding algorithm has...
+	The Smoothed-Striding algorithm:
 	\begin{itemize}
-		\item performance comparable to that of the Strided Algorithm
-		\item polylogarithmic span like the Standard Algorithm
-		\item theoretically optimal cache behavior 
+		\item has linear work and polylogarithmic span \\
+			{\color{blue} (like the Standard Algorithm)}
+		\item is fast in practice \\
+			{\color{blue} (like the Strided Algorithm)}
+		\item 	has theoretically optimal cache behavior \\
+			{\color{blue} (unlike any past algorithm)}
 	\end{itemize}
 \end{frame}
 
@@ -266,15 +269,15 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 %   \end{figure}
 % \end{frame}
 
-\begin{frame}[t]{Algorithm Comparison}
+\begin{frame}[t]{Strided Versus Smoothed Strided Algorithm}
 	\begin{columns}[T] % align columns
 	\begin{column}{.45\textwidth}
 		\textbf{Strided Algorithm}\\\citefont{[Francis and Pannan, 92; Frias and Petit, 08]}\\
 		\vspace{0.25cm}
 		\begin{itemize}
 			\item Good cache behavior in practice\\\hfill
-			\item Worst case span is $T_\infty \approx n$\\\hfill
-			\item But: on random inputs span is $T_\infty = \tilde{O}(n^{2/3})$
+			\item Worst case span is $T_\infty \approx n$\\\hfill\\\hfill
+			\item On random inputs span is $T_\infty = \tilde{O}(n^{2/3})$
 		\end{itemize}
 	\end{column}
 	\hfill
@@ -283,8 +286,8 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 		\vspace{0.25cm}
 		\begin{itemize}
 			\item Provably optimal cache behavior\\\hfill
-			\item Span is $O(\log n \log\log n)$ with high probability in $n$\\\hfill
-			\item Uses randomization inside the algorithm to remove the need for randomized input
+			\item Span is \\$T_\infty = O(\log n \log\log n)$\\ with high probability in $n$\\\hfill
+			\item Uses randomization \emph{inside} the algorithm % both about the recursion step and the no worst case inputs thing
 		\end{itemize}
 	\end{column}
 	\end{columns}
@@ -375,10 +378,13 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 	\vspace{0.25cm}
 	\begin{overprint}
 	\onslide<1>Logically partition the array into chunks of adjacent elements:
-	\onslide<2>Form groups $P_i$ where $P_i$ contains the $i$-th element from each chunk:
+	\onslide<2>Form groups $P_i$ that contain the $i$-th element from each chunk:
 	\onslide<3>Perform serial partitions on each $P_i$ in parallel over the $P_i$'s:
-	\onslide<5>Identify the splitting index $v_i$ (the first element greater than the pivot) of each $P_i$. 
-	\onslide<7>Partition the subarray from the minimum splitting index to the maximum splitting index in serial. This completes the partition. 
+	\onslide<4>Define $v_i=$ index of first element greater than the pivot in $P_i$. 
+	\onslide<5>Identify leftmost and rightmost $v_i$.  
+	\onslide<6> \textbf{Final step:} Recursively partition the subarray
+	\onslide<7> \st{\textbf{Final step:} Recursively partition the subarray}  
+	\onslide<8> \st{\textbf{Final step:} Recursively partition the subarray}  
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
@@ -388,13 +394,17 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 	\onslide<4>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_35.eps}
 	\onslide<5>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_4.eps}
 	\onslide<6>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_45.eps}
-	\onslide<7>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_5.eps}
+	\onslide<7>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_45.eps}
+	\onslide<8>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_45.eps}
+	% \onslide<9>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_5.eps}
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
 	\onslide<3>This step is highly parallel.
 	% \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
-	\onslide<7> Note that this step has no parallelism. In general this results in span $O(n)$. However, if the number of elements less than the pivot in each $P_i$ is similar, then size of the subarray to be partitioned can be very small.
+\onslide<7> \begin{itemize} \item Recursion is impossible!  \item \textbf{Final Step: }Partition the subarray \emph{in serial}.  \end{itemize} \vspace{1cm} Subproblem Span $T_\infty \approx v_{\max} - v_{\min}$
+\onslide<8> \begin{itemize} \item Recursion is impossible!  \item \textbf{Final Step: }Partition the subarray \emph{in serial}.  \end{itemize} \vspace{1cm} Subproblem Span $T_\infty \approx v_{\max} - v_{\min}$ {\color{blue} $\longleftarrow \,\, n $ in worst case.}
+	% \onslide<9> Note that this step has no parallelism. In general this results in span $O(n)$. However, if the number of elements less than the pivot in each $P_i$ is similar, then size of the subarray to be partitioned can be very small.
 	\end{overprint}
 \end{frame}
 
@@ -471,14 +481,17 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 %   \end{overprint}
 % \end{frame}
 
+%% possibly make a terrbile pun joke "get it parallelism"
 \begin{frame}[t]{}%{Smoothed Striding Algorithm Description}
 	\vspace{0.25cm}
 	\begin{overprint}
 	\onslide<1>Logically partition the array into chunks of adjacent elements:
-	\onslide<2>Form groups $U_i$ where $U_i$ contains the $i$-th element from each chunk:
+	\onslide<2>\textbf{Key difference:} Form groups $U_i$ that contain a random element from each chunk (rather than containing the $i$-th element from each each chunk every time as the Strided Algorithm's $P_i$'s do)
 	\onslide<3>Perform serial partitions on each $U_i$ in parallel over the $U_i$'s:
-	\onslide<4>Identify the splitting index $v_i$ (the first element greater than the pivot) of each $P_i$. 
-	\onslide<5>Recursively apply this algorithm to partition the subarray from the minimum splitting index to the maximum splitting index in serial. This completes the partition. 
+	\onslide<4>Define $v_i = $ index of first element greater than the pivot in $U_i$. 
+	\onslide<5>Identify leftmost and rightmost $v_i$.
+	\onslide<6>\textbf{Final step:} Recursively partition the subarray
+	\onslide<7>\textbf{Final step:} Recursively partition the subarray
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
@@ -488,13 +501,17 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 	\onslide<4>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_35.eps}
 	\onslide<5>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_4.eps}
 	\onslide<6>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_45.eps}
-	\onslide<7>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_5.eps}
+	\onslide<7>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_45.eps}
+	% \onslide<8>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_45.eps}
+	% \onslide<9>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_5.eps}
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
 	\onslide<3>This step is highly parallel.
 	% \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
-	\onslide<7>Unlike in the Strided Algorithm this step has parallelism, and is guaranteed to only run on a small subarray. The Strided Algorithm could not recurse here because the subproblem is a worst case input for it.
+	% \onslide<7>Unlike in the Strided Algorithm this step has parallelism, and is guaranteed to only run on a small subarray. The Strided Algorithm could not recurse here because the subproblem is a worst case input for it.
+\onslide<7> \begin{itemize} \item Recursion is now possible!  \end{itemize} \vspace{1cm} Subproblem can be solved with an In-Place algorithm that has span $O(\log n \log \log n)$.
+% \onslide<8> \begin{itemize} \item Recursion is now possible!  \end{itemize} \vspace{1cm} Subproblem can be solved with an In-Place algorithm that has span $O(\log n \log \log n)$. {\color{blue} Theoretical guarantees for all inputs.}
 	\end{overprint}
 \end{frame}
 
@@ -511,9 +528,10 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 \begin{frame}[t]{A Key Challenge}
 How do we store the $U_i$'s if they are all random?	\\
 \vspace{0.5cm}
-If we stored the parts that made up each $U_i$ we would not be in-place.\\
+Storing which elements make up each $U_i$ takes too much space!\\
+
 \vspace{0.5cm}
-\textbf{Blocked Strided Algorithm $P_i$.}
+\textbf{Strided Algorithm $P_i$.}
 \begin{figure}
 	\includegraphics[width=\linewidth]{imgs/stridedAlgHighlighted.png}
 \end{figure}
@@ -608,22 +626,25 @@ If we stored the parts that made up each $U_i$ we would not be in-place.\\
 % \end{frame}
 
 
-\begin{frame}[t]{Open Questions}
-	By recursively applying the Smoothed-Striding algorithm we get an algorithm for
-	parallel partition that incurs $n(1+o(1))$ cache misses and has span
-	$O(b\log^2 n)$.\\
-	\vspace{0.25cm}
-	There are techniques for improving this span to $O(\log n\log\log n)$ while retaining the cache behavior.\\
-	\vspace{0.25cm}
-	But the standard algorithm has span $O(\log n)$.\\
+\begin{frame}[t]{An Open Question}
+	\vspace{0.5cm}
+	% By recursively applying the Smoothed-Striding algorithm we get an algorithm for
+	% parallel partition that incurs $n(1+o(1))$ cache misses and has span
+	% $O(b\log^2 n)$.\\
+	% \vspace{0.25cm}
+	% There are techniques for improving this span to $O(\log n\log\log n)$ while retaining the cache behavior.\\
+	% \vspace{0.25cm}
+	\textbf{Our algorithm:} span $T_\infty = O(\log n \log\log n)$\\
+	\vspace{0.5cm}
+	\textbf{Standard Algorithm:} span $T_\infty = O(\log n)$.\\
 	\vspace{1cm}
-	Can we construct an algorithm that achieves optimal cache behavior and span $O(\log n)$?
+	Can we get optimal cache behavior and span $O(\log n)$?
 \end{frame}
 
 \begin{frame}[t]{Acknowledgments}
 I would like to thank
 \begin{itemize}
-	\item {The MIT PRIMES program}
+	\item {MIT PRIMES}
 	\item {William Kuszmaul, my PRIMES mentor}
 	\item {My parents}
 \end{itemize}
