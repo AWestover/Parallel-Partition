@@ -1021,8 +1021,12 @@ optimized implementations of the following 5 partition algorithms:
   memory overhead. Nonetheless the space consumption is several orders
   of magnitude smaller than that of the Standard Linear-Space
   algorithm.
-\item \defn{Strided Algorithm:} The (Blocked) Strided algorithm,
-  which trades theoretical guarantees for practical performance.
+\item \defn{Strided Algorithm:} The (Blocked) Strided algorithm, which
+  trades theoretical guarantees for practical performance. Note that,
+  in our experiments, we make no effort to generate worst-case inputs
+  for the Strided algorithm (in fact, a random array is one of the few
+  inputs on which the Strided Algorithm does have theoretical
+  guarantees!).
 \item \defn{Smoothed Striding Algorithm:} The algorithm developed in
   this paper, which adds randomization to the Blocked Strided
   algorithm's internal structure in order to achieve theoretical
