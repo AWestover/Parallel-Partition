@@ -26,7 +26,7 @@ function setAndSaveA(new_slide){
 
 function setA(new_slide){
 	which_slide = new_slide;
-	if(which_slide == 1 || which_slide == 2){
+	if(which_slide == 1){
 		// we don't want a new A, but we want A to be messed up, so do some random swaps!
 		for(let pi = 0; pi < g; pi++){
 			for(let i = pi; i < n; i+=g){
@@ -40,44 +40,7 @@ function setA(new_slide){
 			}
 		}
 	}
-	else if(which_slide == 3){
-		let low = pidx;
-		let high = (s-1)*g+pidx;
-		while(low < high){
-			while(A[low] <= pivotValue && low < high){
-				low+=g;
-			}
-			while(A[high] > pivotValue && low < high){
-				high -= g;
-			}
-			let tmp = A[low];
-			A[low] = A[high];
-			A[high] = tmp;
-		}
-		if(A[low] <= pivotValue){
-			low += g;
-		}
-	}
-	else if(which_slide == 3.5){
-		let low = pidx;
-		let high = (s-1)*g+pidx;
-		while(low < high){
-			while(A[low] <= pivotValue && low < high){
-				low+=g;
-			}
-			while(A[high] > pivotValue && low < high){
-				high -= g;
-			}
-			let tmp = A[low];
-			A[low] = A[high];
-			A[high] = tmp;
-		}
-		if(A[low] <= pivotValue){
-			low += g;
-		}
-		specificPvmin = low;
-	}
-	else if(which_slide == 4){
+	if(which_slide == 3){
 		vs = [];
 		for(let pi = 0; pi < g; pi++){
 			let low = pi;
@@ -98,34 +61,15 @@ function setA(new_slide){
 			}
 			vs.push(low);
 		}
+		specificPvmin = vs[pidx];
 	}
-	else if(which_slide == 4.5){
-		vs = [];
-		for(let pi = 0; pi < g; pi++){
-			let low = pi;
-			let high = (s-1)*g+pi;
-			while(low < high){
-				while(A[low] <= pivotValue && low < high){
-					low+=g;
-				}
-				while(A[high] > pivotValue && low < high){
-					high -= g;
-				}
-				let tmp = A[low];
-				A[low]=A[high];
-				A[high]=tmp;
-			}
-			if(A[low] <= pivotValue){
-				low += g;
-			}
-			vs.push(low);
-		}
+	if(which_slide == 4.5){
 		sort(vs);
 		let vmin = vs[0];
 		let vmax = vs[vs.length-1];
 		vs = [vmin, vmax];
 	}
-	else if(which_slide == 5){
+	if(which_slide == 5){
 		let low = 0;
 		let high = n-1;
 		while(low < high){
@@ -186,3 +130,4 @@ function draw(){
 	stroke(0,0,0); //black
 }
 console.log("Note: running 'save(fileName)' will save the canvas as an image");
+

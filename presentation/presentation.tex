@@ -1,11 +1,8 @@
-%%%% do we add discussion of Bill's algorithm for Yau? if so how much? - ex a graph aand brief description of how the in-palceness is achieved?
 %% question .... summary
 %% :hard to guarantee that it will scale well
 %% down down
 %% Strdied Algorithm VS Smoothed striding algorith slide practice
-
-%% UCLA: maybe add that rainbow slide, add pictures for questions after the acknowledgements
-
+%% UCLA: maybe add that rainbow slide (better gradient though), add pictures for questions after the acknowledgements
 %% pivot value introduction
 
 \documentclass[xcolor=x11names, svgnames, rgb]{beamer}
@@ -172,15 +169,15 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 	\begin{column}{.45\textwidth}
 		Important extreme cases:\\
 		\vspace{0.3cm}
-		\defn{Work:} $T_1$, 
+		\defn{Work:} $T_1$
 		\begin{itemize}
 			\item time to run in serial
 			\item "sum of all work"
 		\end{itemize}
 		\vspace{0.3cm}
-		\defn{Span:} $T_\infty$,
+		\defn{Span:} $T_\infty$
 		\begin{itemize}
-			\item time to run on infinitely many processors,\\ 
+			\item time to run on infinitely many processors\\ 
 			\item "height of the graph"
 		\end{itemize}	
 	\end{column}
@@ -219,27 +216,10 @@ Use prefix sums to partition array                & $O(1)$
 \end{tabular}
 \end{table}
 \vspace{10 mm}
-Total work: $O(n)$\\
-Total span: $O(\log n)$
+Total work: $T_1 = O(n)$\\
+Total span: $T_\infty = O(\log n)$
 
 \end{frame}
-
-% \begin{frame}[t]{The Standard Parallel Partition Algorithm {\color{red} Add for Yau, cut for PRIMES?}}
-%   \begin{figure}
-%     \includegraphics[width=\linewidth]{imgs/standardAlg/standardAlg1.eps}
-%   \end{figure}
-% \end{frame}
-
-% \begin{frame}[t]{The Standard Parallel Partition Algorithm {\color{red} Add for Yau, cut for PRIMES?}}
-%   \begin{columns}[T] % align columns
-%   \begin{column}{.5\textwidth}
-%     \includegraphics[width=\linewidth]{imgs/standardAlg/standardAlg2.eps}
-%   \end{column}
-%   \begin{column}{.5\textwidth}
-%     \includegraphics[width=\linewidth]{imgs/standardAlg/standardAlg3.eps}
-%   \end{column}
-%   \end{columns}
-% \end{frame}
 
 % \begin{frame}[t]{An In-Place verson of the Standard Algorithm {\color{red} add for Yau, cut for PRIMES?}}
 %   In recent work Kuszmaul developed an in-place variant of the standard algorithm.\\
@@ -251,30 +231,34 @@ Total span: $O(\log n)$
 % \end{frame}
 
 \begin{frame}[t]{The Problem}
-	\onslide<1->{Why is the Standard Algorithm is slow in practice?}
+	Standard Algorithm is slow in practice
 	\begin{columns}[T] % align columns
 	\begin{column}{.65\textwidth}
 	\begin{itemize}
-		\item<2-> Uses extra memory % not in place
-		\item<3-> Makes multiple passes over array
+		\item Uses extra memory % not in place
+		\item Makes multiple passes over array
 	\end{itemize}
 	\end{column}
 	\begin{column}{.35\textwidth}
-	\onslide<4->{\hspace{-1cm}$\Biggr\}\text{ "bad cache behavior"}$}
+	\hspace{-1cm}$\Biggr\}\text{ "bad cache behavior"}$
 	\end{column}
 	\end{columns}
 	\vspace{0.4 cm}
 
-	\onslide<5->{But fastest algorithms in practice lack theoretical guarantees}
+ Fastest algorithms in practice lack theoretical guarantees
 	\begin{itemize}
-		\item<6-> Lock-based and atomic-variable based algorithms\\ \citefont{[Michael Axtmann, Sascha Witt, Daniel Ferizovic, and Peter Sanders, 2017; Philip Heidelberger, Alan Norton, and John T. Robinson, 1990; Philippas Tsigas and Yi Zhang, 2003]}
-		\item<7-> The Strided Algorithm\\ \citefont{[Francis and Pannan, 92; Frias and Petit, 08]}\\ 
-		\onslide<8->{No locks or atomic-variables, but no bound on span}
+		\item Lock-based and atomic-variable based algorithms\\ \citefont{[Michael Axtmann, Sascha Witt, Daniel Ferizovic, and Peter Sanders, 2017; Philip Heidelberger, Alan Norton, and John T. Robinson, 1990; Philippas Tsigas and Yi Zhang, 2003]}
+		\item The Strided Algorithm\\ \citefont{[Francis and Pannan, 92; Frias and Petit, 08]}\\ 
+		No locks or atomic-variables, but no bound on span
 	\end{itemize}
-	\onslide<9-> {
 	\vspace{0.2cm}
-	\textbf{Our Question:}
-Can we create an algorithm with theoretical guarantees that is fast in practice?}
+%   \textbf{Our Question:}
+% Can we create an algorithm with theoretical guarantees that is fast in practice?
+\end{frame}
+
+\begin{frame}[t]{Our Question}
+	\vspace{1cm}
+	{\Large Can we create an algorithm with \emph{theoretical guarantees} that is \emph{fast in practice}?}
 \end{frame}
 
 % \begin{frame}[t]{Cache Efficiency}
@@ -286,15 +270,19 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 %   Poor cache behavior will harm an algorithms performance in practice.
 % \end{frame}
 
-\begin{frame}[t]{Our Result: The Smoothed-Striding Algorithm}
+\begin{frame}[t]{Our Result}
+	\vspace{0.15cm}
+	{\Large The Smoothed-Striding Algorithm\\}
 	\vspace{0.5cm}
-	The Smoothed-Striding algorithm:
+	Key Features:
 	\begin{itemize}
-		\item has linear work and polylogarithmic span \\
-			{\color{blue} (like the Standard Algorithm)}
-		\item is fast in practice \\
-			{\color{blue} (like the Strided Algorithm)}
-		\item 	has theoretically optimal cache behavior \\
+		\item linear work and polylogarithmic span \\
+			{\color{blue} (like the Standard Algorithm)\\}
+		\vspace{0.15cm}
+		\item fast in practice \\
+			{\color{blue} (like the Strided Algorithm)\\}
+	\vspace{0.15cm}
+		\item theoretically optimal cache behavior \\
 			{\color{blue} (unlike any past algorithm)}
 	\end{itemize}
 \end{frame}
@@ -307,9 +295,10 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 %   \end{figure}
 % \end{frame}
 
-\begin{frame}[t]{Strided Versus Smoothed Strided Algorithm}
+\begin{frame}[t]{Strided Versus Smoothed-Striding Algorithm}
 	\begin{columns}[T] % align columns
 	\begin{column}{.45\textwidth}
+		\onslide<1->{
 		\textbf{Strided Algorithm}\\\citefont{[Francis and Pannan, 92; Frias and Petit, 08]}\\
 		\vspace{0.25cm}
 		\begin{itemize}
@@ -317,9 +306,11 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 			\item Worst case span is $T_\infty \approx n$\\\hfill\\\hfill
 			\item On random inputs span is $T_\infty = \tilde{O}(n^{2/3})$
 		\end{itemize}
+	}
 	\end{column}
 	\hfill
 	\begin{column}{.55\textwidth}
+		\onslide<2->{
 		\textbf{Smoothed-Striding Algorithm}\\\citefont{}\\
 		\vspace{0.25cm}
 		\begin{itemize}
@@ -327,11 +318,12 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 			\item Span is \\$T_\infty = O(\log n \log\log n)$\\ with high probability in $n$\\\hfill
 			\item Uses randomization \emph{inside} the algorithm % both about the recursion step and the no worst case inputs thing
 		\end{itemize}
+	}
 	\end{column}
 	\end{columns}
 \end{frame}
 
-\begin{frame}[t]{Speedup over Serial Partition: Smoothed-Striding Algorithm's performance}
+\begin{frame}[t]{Smoothed-Striding Algorithm's performance}
 	\begin{figure}
 		\begin{center}
 			\includegraphics[width=0.9\linewidth]{imgs/compiledGraph.eps}
@@ -362,17 +354,6 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 % \end{frame}
 
 
-% \begin{frame}[t]{The Serial Partition Algorithm}
-% \begin{figure}
-%     \begin{overprint}
-%       \onslide<1>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition1.eps}
-%     \onslide<2>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition2.eps}
-%     \onslide<3>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition3.eps}
-%     \onslide<4->\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition4.eps}
-%     \end{overprint}
-%   \end{figure}	
-% \end{frame}
-
 \begin{frame}[t]{}
 	\vfill
 	\begin{center}
@@ -387,34 +368,32 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 \begin{frame}[t]{}%{Strided Algorithm Description}
 	\vspace{0.25cm}
 	\begin{overprint}
-	\onslide<1>Logically partition the array into chunks of adjacent elements:
-	\onslide<2>Form groups $P_i$ that contain the $i$-th element from each chunk:
-	\onslide<3>Perform serial partitions on each $P_i$ in parallel over the $P_i$'s:
-	\onslide<4>Define $v_i=$ index of first element greater than the pivot in $P_i$. 
-	\onslide<5>Identify leftmost and rightmost $v_i$.  
+	\onslide<1>Logically partition the array into chunks of adjacent elements
+	\onslide<2>Form groups $P_i$ that contain the $i$-th element from each chunk
+	\onslide<3>Perform serial partitions on each $P_i$ in parallel over the $P_i$'s
+	\onslide<4>Define $v_i=$ index of first element greater than the pivot in $P_i$
+	\onslide<5>Identify leftmost and rightmost $v_i$
 	\onslide<6> \textbf{Final step:} Recursively partition the subarray
 	\onslide<7> \st{\textbf{Final step:} Recursively partition the subarray}  
 	\onslide<8> \st{\textbf{Final step:} Recursively partition the subarray}  
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
-	\onslide<1>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_1.eps}
-	\onslide<2>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_2.eps}
-	\onslide<3>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_3.eps}
-	\onslide<4>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_35.eps}
-	\onslide<5>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_4.eps}
-	\onslide<6>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_45.eps}
-	\onslide<7>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_45.eps}
-	\onslide<8>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_45.eps}
-	% \onslide<9>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/stridedAlgSim_5.eps}
+	\onslide<1>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/sim1.eps}
+	\onslide<2>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/sim2.eps}
+	\onslide<3>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/sim3.eps}
+	\onslide<4>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/sim35.eps}
+	\onslide<5>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/sim4.eps}
+	\onslide<6>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/sim45.eps}
+	\onslide<7>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/sim45.eps}
+	\onslide<8>\includegraphics[width=\linewidth]{imgs/stridedAlgSim/sim45.eps}
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
 	\onslide<3>This step is highly parallel.
 	% \onslide<4>Note that all elements below the minimum splitting index are less than the pivot and all elements greater than the maximum splitting index are greater than the pivot.
 \onslide<7> \begin{itemize} \item Recursion is impossible!  \item \textbf{Final Step: }Partition the subarray \emph{in serial}.  \end{itemize} \vspace{1cm} Subproblem Span $T_\infty \approx v_{\max} - v_{\min}$
-\onslide<8> \begin{itemize} \item Recursion is impossible!  \item \textbf{Final Step: }Partition the subarray \emph{in serial}.  \end{itemize} \vspace{1cm} Subproblem Span $T_\infty \approx v_{\max} - v_{\min}$ {\color{blue} $\longleftarrow \,\, n $ in worst case.}
-	% \onslide<9> Note that this step has no parallelism. In general this results in span $O(n)$. However, if the number of elements less than the pivot in each $P_i$ is similar, then size of the subarray to be partitioned can be very small.
+\onslide<8> \begin{itemize} \item Recursion is impossible!  \item \textbf{Final Step: }Partition the subarray \emph{in serial}.  \end{itemize} \vspace{1cm} Subproblem Span $T_\infty \approx v_{\max} - v_{\min}$ {\color{blue} $\longleftarrow \,\, n $ in worst case.} % but Intuitively v_max - v_min should be small
 	\end{overprint}
 \end{frame}
 
@@ -432,23 +411,23 @@ Can we create an algorithm with theoretical guarantees that is fast in practice?
 \begin{frame}[t]{}%{Smoothed Striding Algorithm Description}
 	\vspace{0.25cm}
 	\begin{overprint}
-	\onslide<1>Logically partition the array into chunks of adjacent elements:
-	\onslide<2>\textbf{Key difference:} Form groups $U_i$ that contain a random element from each chunk (rather than containing the $i$-th element from each each chunk every time as the Strided Algorithm's $P_i$'s do)
-	\onslide<3>Perform serial partitions on each $U_i$ in parallel over the $U_i$'s:
-	\onslide<4>Define $v_i = $ index of first element greater than the pivot in $U_i$. 
-	\onslide<5>Identify leftmost and rightmost $v_i$.
+	\onslide<1>Logically partition the array into chunks of adjacent elements
+	\onslide<2>\textbf{Key difference:} Form groups $U_i$ that contain a random element from each chunk %(rather than containing the $i$-th element from each chunk like the Strided Algorithm's $P_i$'s) 
+	\onslide<3>Perform serial partitions on each $U_i$ in parallel over the $U_i$'s
+	\onslide<4>Define $v_i = $ index of first element greater than the pivot in $U_i$
+	\onslide<5>Identify leftmost and rightmost $v_i$
 	\onslide<6>\textbf{Final step:} Recursively partition the subarray
 	\onslide<7>\textbf{Final step:} Recursively partition the subarray
 	\end{overprint}
 	\vspace{0.25cm}
 	\begin{overprint}
-	\onslide<1>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_1.eps}
-	\onslide<2>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_2.eps}
-	\onslide<3>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_3.eps}
-	\onslide<4>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_35.eps}
-	\onslide<5>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_4.eps}
-	\onslide<6>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_45.eps}
-	\onslide<7>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_45.eps}
+	\onslide<1>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim1.eps}
+	\onslide<2>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim2.eps}
+	\onslide<3>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim3.eps}
+	\onslide<4>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim35.eps}
+	\onslide<5>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim4.eps}
+	\onslide<6>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim45.eps}
+	\onslide<7>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim45.eps}
 	% \onslide<8>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_45.eps}
 	% \onslide<9>\includegraphics[width=\linewidth]{imgs/smoothedAlgSim/smoothedAlgSim_5.eps}
 	\end{overprint}
@@ -496,16 +475,6 @@ Storing which elements make up each $U_i$ takes too much space!\\
 \end{figure}
 \end{frame}
 
-% \begin{frame}[t]{How to Store the groups}
-%   The solution is to make the groups dependent on one another.\\
-%   Let $g$ be the size of a chunk.
-%   Then we only need to store a single group and then the elements of the other groups are determined by this group.\\
-%   Specifically, let $X$ be an array with values chosen uniformly from $\{1,2,\ldots,g\}$. Then the $i$-th element of $U_j$ has index 
-%   $$ 1 + ((X[i]+j)\mod g)$$
-%   \begin{figure}
-%     \includegraphics[width=\linewidth]{imgs/rainbow.png}
-%   \end{figure}	
-% \end{frame}
 
 % \begin{frame}[t]{Smoothed Striding Algorithm Description}
 %   Let $X[1],\ldots, X[s]$ be chosen uniformly at random from $\{1,\ldots, g\}$. Let $U_i$ be the union of the $(X[j]+i)\mod g$-th cache-line from each chunk $C_j$.
@@ -530,12 +499,59 @@ Storing which elements make up each $U_i$ takes too much space!\\
 \end{frame}
 
 \begin{frame}[t]{Acknowledgments}
-I would like to thank
 \begin{itemize}
 	\item {MIT PRIMES}
 	\item {William Kuszmaul, my PRIMES mentor}
 	\item {My parents}
 \end{itemize}
+\end{frame}
+
+
+\begin{frame}[t]{}
+	\vfill
+	\begin{center}
+		{\Huge Question Slides}
+	\end{center}
+	\vfill
+\end{frame}
+
+\begin{frame}[t]{How to Store the groups}
+	The solution is to make the groups dependent on one another.\\
+	Let $g$ be the size of a chunk.
+	Then we only need to store a single group and then the elements of the other groups are determined by this group.\\
+	Specifically, let $X$ be an array with values chosen uniformly from $\{1,2,\ldots,g\}$. Then the $i$-th element of $U_j$ has index 
+	$$ 1 + ((X[i]+j)\mod g)$$
+	\begin{figure}
+		\includegraphics[width=\linewidth]{imgs/blackrainbow.png}
+	\end{figure}	
+\end{frame}
+
+\begin{frame}[t]{The Serial Partition Algorithm}
+\begin{figure}
+		\begin{overprint}
+			\onslide<1>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition1.eps}
+		\onslide<2>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition2.eps}
+		\onslide<3>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition3.eps}
+		\onslide<4->\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition4.eps}
+		\end{overprint}
+	\end{figure}	
+\end{frame}
+
+\begin{frame}[t]{The Standard Parallel Partition Algorithm }
+	\begin{figure}
+		\includegraphics[width=\linewidth]{imgs/standardAlg/standardAlg1.eps}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[t]{The Standard Parallel Partition Algorithm}
+	\begin{columns}[T] % align columns
+	\begin{column}{.5\textwidth}
+		\includegraphics[width=\linewidth]{imgs/standardAlg/standardAlg2.eps}
+	\end{column}
+	\begin{column}{.5\textwidth}
+		\includegraphics[width=\linewidth]{imgs/standardAlg/standardAlg3.eps}
+	\end{column}
+	\end{columns}
 \end{frame}
 
 \end{document}

@@ -18,7 +18,7 @@ function initA(){
 		A = [];
 		X = [];
 		for (let i = 0; i < n; i++){
-			A.push(Math.random());
+			A.push(Math.random()*0.9+0.1);
 		}
 		for(let i = 0; i < s; i++){
 			X.push(Math.floor(Math.random()*g));
@@ -32,64 +32,12 @@ function setAndSaveA(new_slide){
 
 function setA(new_slide){
 	which_slide = new_slide;
-	if(which_slide == 1 || which_slide == 2){
-		// we don't want a new A, but we want A to be messed up, so do some random swaps!
-		for(let pi = 0; pi < g; pi++){
-			for(let i = 0; i < s; i++){
-				for(let j = 0; j < n; j++){
-					let ii = g*i+((X[i]+pi)%g);
-					let jj = g*j+((X[j]+pi)%g);
-					if(Math.random()<0.25){
-						let tmp = A[ii];
-						A[ii] = A[jj];
-						A[jj] = tmp;
-					}
-				}
-			}
+	if(which_slide == 1){
+		for (let i = 0; i < n; i++){
+			A[i] = Math.random()*0.9+0.1;
 		}
 	}
 	else if(which_slide == 3){
-		let low = 0;
-		let high = s-1;
-		while(low < high){
-			while(A[g*low + ((X[low]+pidx)%g)] <= pivotValue && low < high){
-				low++;
-			}
-			while(A[g*high + ((X[high]+pidx)%g)] > pivotValue && low < high){
-				high--;
-			}
-			let tmp = A[g*low + ((X[low]+pidx)%g)];
-			A[g*low + ((X[low]+pidx)%g)] = A[g*high + ((X[high]+pidx)%g)];
-			A[g*high + ((X[high]+pidx)%g)] = tmp;
-			//console.log("low: "+low + " high: " + high);
-		}
-		if(A[g*low + ((X[low]+pidx)%g)] <= pivotValue){
-			low ++;
-		}
-		let lowInA = g*low + ((X[low]+pidx)%g);
-	}
-	else if (which_slide == 3.5){
-		let low = 0;
-		let high = s-1;
-		while(low < high){
-			while(A[g*low + ((X[low]+pidx)%g)] <= pivotValue && low < high){
-				low++;
-			}
-			while(A[g*high + ((X[high]+pidx)%g)] > pivotValue && low < high){
-				high--;
-			}
-			let tmp = A[g*low + ((X[low]+pidx)%g)];
-			A[g*low + ((X[low]+pidx)%g)] = A[g*high + ((X[high]+pidx)%g)];
-			A[g*high + ((X[high]+pidx)%g)] = tmp;
-			//console.log("low: "+low + " high: " + high);
-		}
-		if(A[g*low + ((X[low]+pidx)%g)] <= pivotValue){
-			low ++;
-		}
-		let lowInA = g*low + ((X[low]+pidx)%g);
-		specificUvmin = lowInA;
-	}
-	else if(which_slide == 4){
 		vs = [];
 		for(let pi = 0; pi < g; pi++){
 			let low = 0;
@@ -112,34 +60,16 @@ function setA(new_slide){
 			vs.push(lowInA);
 		}
 	}
-	else if(which_slide == 4.5){
-		vs = [];
-		for(let pi = 0; pi < g; pi++){
-			let low = 0;
-			let high = s-1;
-			while(low < high){
-				while(A[g*low + ((X[low]+pi)%g)] <= pivotValue && low < high){
-					low++;
-				}
-				while(A[g*high + ((X[high]+pi)%g)] > pivotValue && low < high){
-					high--;
-				}
-				let tmp = A[g*low + ((X[low]+pi)%g)];
-				A[g*low + ((X[low]+pi)%g)] = A[g*high + ((X[high]+pi)%g)];
-				A[g*high + ((X[high]+pi)%g)] = tmp;
-			}
-			if(A[g*low + ((X[low]+pi)%g)] <= pivotValue){
-				low ++;
-			}
-			let lowInA = g*low + ((X[low]+pi)%g);
-			vs.push(lowInA);
-		}
+	if (which_slide == 3.5){
+		specificUvmin = vs[pidx];
+	}
+	if(which_slide == 4.5){
 		sort(vs);
 		let vmin = vs[0];
 		let vmax = vs[vs.length-1];
 		vs = [vmin, vmax];
 	}
-	else if(which_slide == 5){
+	if(which_slide == 5){
 		let low = 0;
 		let high = n-1;
 		while(low < high){

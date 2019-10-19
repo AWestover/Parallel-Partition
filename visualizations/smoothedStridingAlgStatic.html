@@ -3,10 +3,20 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<title>strided alg picture</title>
+		<title>smoothed-strided alg picture</title>
 		<script src="pkgs/p5/p5.min.js" charset="utf-8"></script>
 	</head>
 	<body>
 		<script src="smoothedStridingAlgStatic.js" charset="utf-8"></script>
+		<select id="which_slide" onchange="setAndSaveA(float(document.getElementById('which_slide').value));">
+			<option value="0">0</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="3.5">3.5</option>
+			<option value="4">4</option>
+			<option value="4.5">4.5</option>
+		</select>
 	</body>
 </html>
+
