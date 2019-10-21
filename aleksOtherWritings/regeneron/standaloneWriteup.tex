@@ -1269,18 +1269,14 @@ implementations, even by constant factors, is therefore of high
 practical importance. Until now, the only space-efficient algorithms
 for parallel partition have relied extensively on concurrency
 mechanisms or atomic operations, or lacked provable performance
-guarantees. If a parallel function is going to invoked within a large
+guarantees. If a parallel function is going to be invoked within a large
 variety of applications, then provable guarantees are highly
 desirable. Moreover, algorithms that avoid the use of concurrency
 mechanisms tend to scale more reliably (and with less dependency on
 the particulars of the underlying hardware).
 
-In this paper, we have shown that, somewhat surprisingly, one can
-adapt the classic parallel algorithm to completely eliminate the use
-of auxiliary memory and achieve provable optimal cache-behavior (up to lower
-order factors), while still using only exclusive read/write shared variables,
-and maintaining a polylogarithmic span. The
-Smoothed Striding Algorithm introduces randomization techniques to the
+In this paper, we presented a new algorithm for the parallel partition problem.
+The Smoothed Striding Algorithm introduces randomization techniques to the
 previous (blocked) Striding Algorithm of \cite{Frias08, FrancisPa92},
 which was known to perform well in practice but which has poor theoretical guarantees. 
 Our implementation of the
