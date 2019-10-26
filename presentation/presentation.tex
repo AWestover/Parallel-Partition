@@ -1,10 +1,3 @@
-%% question .... summary
-%% :hard to guarantee that it will scale well
-%% down down
-%% Strdied Algorithm VS Smoothed striding algorith slide practice
-%% UCLA: maybe add that rainbow slide (better gradient though), add pictures for questions after the acknowledgements
-%% pivot value introduction
-
 \documentclass[xcolor=x11names, svgnames, rgb]{beamer}
 
 \setbeamertemplate{navigation symbols}{}
@@ -475,6 +468,18 @@ Storing which elements make up each $U_i$ takes too much space!\\
 \end{figure}
 \end{frame}
 
+\begin{frame}[t]{How to Store the groups}
+	\textbf{Key Insight:} While each $U_i$ does need to contain a random element from each chunk, the $U_i$'s don't need to be \emph{independent}.
+
+	\vspace{0.5cm}
+	We store $U_1$, and all other groups are determined by a "circular shift" of $U_1$ (wraparound within each chunk).
+	% Specifically, let $X$ be an array with values chosen uniformly from $\{1,2,\ldots,g\}$. Then the $i$-th element of $U_j$ has index 
+	% $$ 1 + ((X[i]+j)\mod g)$$
+	\vspace{0.5cm}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{imgs/blackrainbowAlt.eps}
+	\end{figure}	
+\end{frame}
 
 % \begin{frame}[t]{Smoothed Striding Algorithm Description}
 %   Let $X[1],\ldots, X[s]$ be chosen uniformly at random from $\{1,\ldots, g\}$. Let $U_i$ be the union of the $(X[j]+i)\mod g$-th cache-line from each chunk $C_j$.
@@ -515,27 +520,69 @@ Storing which elements make up each $U_i$ takes too much space!\\
 	\vfill
 \end{frame}
 
-\begin{frame}[t]{How to Store the groups}
-	The solution is to make the groups dependent on one another.\\
-	Let $g$ be the size of a chunk.
-	Then we only need to store a single group and then the elements of the other groups are determined by this group.\\
-	Specifically, let $X$ be an array with values chosen uniformly from $\{1,2,\ldots,g\}$. Then the $i$-th element of $U_j$ has index 
-	$$ 1 + ((X[i]+j)\mod g)$$
-	\begin{figure}
-		\includegraphics[width=\linewidth]{imgs/blackrainbow.png}
-	\end{figure}	
+\begin{frame}[t]{Why are atomic variables and Locks "undesirable"?}
+	\vspace{0.5cm}
+Algorithms with locks and atomic variables can be very fast.\\
+\vspace{0.5cm}
+
+However,
+\begin{itemize}
+	\item They are often hardware specific \\
+		{\color{blue} (e.g. 128-bit fetch-and-add)}
+	\item Their scaling is unpredictable because threads have to queue when competing for access to the same variable.
+\end{itemize}
+
 \end{frame}
 
-\begin{frame}[t]{The Serial Partition Algorithm}
-\begin{figure}
-		\begin{overprint}
-			\onslide<1>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition1.eps}
-		\onslide<2>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition2.eps}
-		\onslide<3>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition3.eps}
-		\onslide<4->\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition4.eps}
-		\end{overprint}
-	\end{figure}	
+\begin{frame}[t]{Why are Atomic Variables and Locks "Undesirable"}
+\vspace{0.5cm}
+An example that illustrates why their scaling is unpredictable:\\
+Consider the problem of summing $n$ integers.\\
+\vspace{0.5cm}
+
+\begin{itemize}
+	\item With our model of parallelism a simple divide and conquer strategy achieves the optimal span $O(\log n)$. 
+	\item With atomic-fetch-and-add, span $O(1)$ seems achievable by having each of $n$ processors fetch-and-add an element to the sum, but this really takes time $O(n)$ because only a single thread can have access to the sum variable at a time.
+\end{itemize}
+% This problem of threads queueing and waiting for data access can happen unpredictably with locks and atomic variables.
+% Also, if there is an atomic variable whose permissions have to be sent between processors, then this communication will harm scaling.
+% If an atomic variable is in one of your socket's caches then you have to invalidate the entry in one cache and send it to the other.
 \end{frame}
+
+
+\begin{frame}[t]{Chernoff Bound}
+	\vspace{0.5cm}
+	\emph{Chernoff Bound}: "If you flip $\text{polylog}(n)$ fair coins then, with high
+	probability in $n$, the number of heads will be tightly concentrated around
+	$\frac{1}{2}\polylog n$".\\
+
+	\vspace{0.5cm}
+	More formally:
+	The probability of a random variable $X$ deviating from its mean $\mu$ by more than a constant multiple $\delta$ of $\mu$ is exponentially small in $\delta^2 \mu$. That is, 
+	$$P(|X - \mu | \le \delta \mu ) \ge 1- 2\cdot e^{-\delta^2 \mu /2} $$
+
+\end{frame}
+
+
+\begin{frame}[t]{Big Picture of the Analysis}
+	Let $\mu$ be the faction of elements of the array that are less than the pivot, and $\mu_i$ be the fraction of elements of $U_i$ that are less than the pivot.
+	\begin{itemize}
+		\item Each $U_i$ has a random element from each chunk of the array, so each
+			element of each $U_i$ is randomly either greater than or less than the
+			pivot, with probabilities $1-\mu, \mu$.
+		\item $|U_i| = \polylog n$, so a Chernoff Bound guarantees that all $U_i$'s
+			will have $\mu_i$'s similar to $\E[\mu_i] = \mu$ with high probability in $n$.
+		\item The concentration of $\mu_i$'s induces a concentration of $v_i$'s. 
+		\item This guarantees that $v_{\max} - v_{\min}$ is small. 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{With High Probability in $n$}
+With probability 	
+	$$1- \frac{1}{n^c}$$
+	for $c$ of our choice.
+\end{frame}
+
 
 \begin{frame}[t]{The Standard Parallel Partition Algorithm }
 	\begin{figure}
@@ -552,6 +599,17 @@ Storing which elements make up each $U_i$ takes too much space!\\
 		\includegraphics[width=\linewidth]{imgs/standardAlg/standardAlg3.eps}
 	\end{column}
 	\end{columns}
+\end{frame}
+
+\begin{frame}[t]{The Serial Partition Algorithm}
+\begin{figure}
+		\begin{overprint}
+			\onslide<1>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition1.eps}
+		\onslide<2>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition2.eps}
+		\onslide<3>\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition3.eps}
+		\onslide<4->\includegraphics[width=\linewidth]{imgs/serialPartition/serialPartition4.eps}
+		\end{overprint}
+	\end{figure}	
 \end{frame}
 
 \end{document}
