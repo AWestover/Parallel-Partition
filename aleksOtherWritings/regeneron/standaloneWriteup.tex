@@ -239,25 +239,70 @@ algorithm, reads may be concurrent, but writes may not. CREW stands for
 \emph{concurrent-read exclusive-write}.}
 
 \paragraph{Results}
-We will highlight past work demonstrating that parallel partition can be
-implemented in place. However, this in-place implementation remains
-bottlenecked by memory bandwidth, due to the fact that multiple passes over the
-input array are required. 
+We consider the problem of designing a theoretically efficient
+parallel-partition algorithm that also performs well in practice. All
+of the algorithms considered in this paper use only exclusive
+read/write shared variables, and can be implemented using
+parallel-for-loops without any additional concurrency considerations.
 
-The memory-bandwidth bottleneck has led past researchers \cite{FrancisPa92,
-Frias08} to introduce the so-called \defn{Strided Algorithm}, which has near
-optimal cache behavior in practice, but which exhibits theoretical guarantees
-only on certain inputs such as random input arrays.
+We give a simple parallel-partition algorithm that simultaneously
+achieves good theoretical guarantees and near state-of-the-art
+empirical performance. In addition to incurring linear work and
+polylogarithmic span, the algorithm exhibits provably optimal cache
+behavior up to low-order terms. In particular, if the input consists
+of $m$ cache lines, then the algorithm incurs at most $m(1 + o(1))$ cache misses,
+with high probability in $m$.
 
-Our main result is an algorithm that we call the \defn{Smoothed Striding
-Algorithm}. By randomly perturbing the internal structure of the Strided
-Algorithm, and adding a recursion step that was previously not possible, we
-arrive at a new algorithm with provably good span and cache behavior. The
-Smoothed Striding Algorithm is in-place, has polylogarithmic span, and exhibits
-provably optimal cache behavior up to small-order factors. In practice, the
-Smoothed Striding Algorithm performs within 15\% of the Strided Algorithm on a
+Concurrent work to ours has also developed a suite of techniques for
+transforming the standard linear-space parallel partition algorithm
+into an in-place algorithm \cite{Kuszmaul19}. The new algorithm, which
+we call Kuszmaul's algorithm \cite{Kuszmaul19}, is able to achieve a
+speedup over the linear-space algorithm due to its increased cache
+efficiency. Kuszmaul's algorithm does not exhibit optimal cache
+behavior, however, and as we show in our experimental evaluation, the
+algorithm remains bottlenecked by memory throughput. In contrast, the
+cache-optimality of our algorithm eliminates the memory-throughput
+bottleneck, allowing for nearly perfect scaling on many processors.
+
+The memory-bandwidth bottleneck has led past researchers
+\cite{FrancisPa92, Frias08} to introduce the so-called \defn{Strided
+  Algorithm}, which has near optimal cache behavior in practice, but
+which exhibits theoretical guarantees only on certain random input
+arrays. The Strided Algorithm demonstrates the empirical importance of
+cache-behavior in the parallel-partition problem.
+
+Our algorithm, which we call the \defn{Smoothed Striding Algorithm} is
+designed to have similar empirical performance to the Strided
+Algorithm, while achieving both theoretical guarantees on work/span
+and on cache-optimality. This is achieved by randomly perturbing the
+internal structure of the Strided Algorithm, and adding a recursion
+step that was previously not possible. The Smoothed Striding Algorithm
+is in-place, has polylogarithmic span, and exhibits provably optimal
+cache behavior up to small-order factors. In practice, the Smoothed
+Striding Algorithm performs within 15\% of the Strided Algorithm on a
 large number of threads.
 
+
+
+
+%% We will highlight past work demonstrating that parallel partition can be
+%% implemented in place. However, this in-place implementation remains
+%% bottlenecked by memory bandwidth, due to the fact that multiple passes over the
+%% input array are required. 
+
+%% The memory-bandwidth bottleneck has led past researchers \cite{FrancisPa92,
+%% Frias08} to introduce the so-called \defn{Strided Algorithm}, which has near
+%% optimal cache behavior in practice, but which exhibits theoretical guarantees
+%% only on certain inputs such as random input arrays.
+
+%% Our main result is an algorithm that we call the \defn{Smoothed Striding
+%% Algorithm}. By randomly perturbing the internal structure of the Strided
+%% Algorithm, and adding a recursion step that was previously not possible, we
+%% arrive at a new algorithm with provably good span and cache behavior. The
+%% Smoothed Striding Algorithm is in-place, has polylogarithmic span, and exhibits
+%% provably optimal cache behavior up to small-order factors. In practice, the
+%% Smoothed Striding Algorithm performs within 15\% of the Strided Algorithm on a
+%% large number of threads.
 
 
 \section{Preliminaries}\label{secprelim}
@@ -714,17 +759,20 @@ Formally, the Partial Partition Step performs the following procedure:
 \end{itemize}
 
 The second step of the Smoothed Striding Algorithm is to complete the
-partitioning of $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$. This can be
-done in one of two ways: The \defn{Recursive Smoothed Striding Algorithm}
-partitions $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ recursively using
-the same algorithm (and resorts to a serial base case when the subproblem is
-small enough that $g \le O(1)$); the \defn{Hybrid Smoothed Striding Algorithm}
-partitions $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ using Kuszmaul's
-in-place algorithm with span $O(\log n \log \log n)$. In general, the Hybrid
-algorithm yields better theoretical guarantees on span than the recursive
-version; on the other hand, the recursive version has the advantage that is
-simple to implement as fully in place, and still achieves polylogarithmic span.
-We analyze both algorithms in this section.
+partitioning of $A[v_{\text{min}} + 1], \ldots,
+A[v_{\text{max}}]$. This can be done in one of two ways: The
+\defn{Recursive Smoothed Striding Algorithm} partitions
+$A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ recursively using
+the same algorithm (and resorts to a serial base case when the
+subproblem is small enough that $g \le O(1)$); the \defn{Hybrid
+  Smoothed Striding Algorithm} partitions $A[v_{\text{min}} + 1],
+\ldots, A[v_{\text{max}}]$ using Kuszmaul's in-place algorithm with
+span $O(\log n \log \log n)$ \cite{Kuszmaul19}. In general, the Hybrid
+algorithm yields better theoretical guarantees on span than the
+recursive version; on the other hand, the recursive version has the
+advantage that is simple to implement as fully in place, and still
+achieves polylogarithmic span.  We analyze both algorithms in this
+section.
 
 
 
