@@ -97,7 +97,6 @@ int64_t serialPartition(int64_t* A, int64_t n, int64_t pivotVal) {
     return low;
 }
 
-// TODO: Define more carefully what the inputs and outputs are for this function. Same for other functions.
 // this is our implementation of a parallel for loops with spawning recursive subproblems
 // it outputs vmin, vmax
 /* 
