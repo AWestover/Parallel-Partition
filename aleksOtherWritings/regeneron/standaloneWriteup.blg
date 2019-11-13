@@ -1,4 +1,4 @@
-This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2019)
 Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: standaloneWriteup.aux
 The style file: plain.bst
@@ -6,34 +6,34 @@ Database file #1: paper.bib
 Warning--can't use both volume and number fields in BlellochFi12
 You've used 30 entries,
             2118 wiz_defined-function locations,
-            710 strings with 9026 characters,
-and the built_in function-call counts, 11069 in all, are:
-= -- 1146
-> -- 458
+            710 strings with 9027 characters,
+and the built_in function-call counts, 11105 in all, are:
+= -- 1149
+> -- 464
 < -- 11
-+ -- 188
-- -- 150
-* -- 754
-:= -- 1759
++ -- 190
+- -- 152
+* -- 758
+:= -- 1765
 add.period$ -- 99
 call.type$ -- 30
-change.case$ -- 164
+change.case$ -- 165
 chr.to.int$ -- 0
 cite$ -- 31
 duplicate$ -- 439
 empty$ -- 886
-format.name$ -- 150
-if$ -- 2378
+format.name$ -- 152
+if$ -- 2385
 int.to.chr$ -- 0
 int.to.str$ -- 30
 missing$ -- 30
 newline$ -- 152
 num.names$ -- 60
-pop$ -- 173
+pop$ -- 174
 preamble$ -- 1
-purify$ -- 135
+purify$ -- 136
 quote$ -- 0
-skip$ -- 323
+skip$ -- 324
 stack$ -- 0
 substring$ -- 781
 swap$ -- 125

@@ -5,7 +5,7 @@
 
 \documentclass[11pt]{article}
 \usepackage[left=1in,right=1in,top=1in,bottom=1in]{geometry}
-\usepackage[moderate]{savetrees} % I think this messes with the linespread thing...
+% \usepackage[moderate]{savetrees} % I think this messes with the linespread thing...
 \linespread{1.25} % THIS MULTIPLIES the skip factor, which defaults to 1.2 in LaTex, by 1.25, thus making the line spacing 1.5
 
 \newcommand{\note}[1]{\textcolor{red}{#1}}
@@ -47,7 +47,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \newcommand{\poly}{\operatorname{poly}}
 \newcommand{\polylog}{\operatorname{polylog}}
 \newcommand{\github}{\url{github.com/awestover/Parallel-Partition}}
-\newcommand{\defn}[1]{{\textit{\textbf{\boldmath #1}}} }
+\newcommand{\defn}[1]{{\textit{\textbf{\boldmath #1}}}}
 \renewcommand{\paragraph}[1]{\vspace{0.09in}\noindent{\bf \boldmath #1.}} 
 \usepackage{amsmath}
 \def\E{\operatorname{\mathbb{E}}}
@@ -81,6 +81,8 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \usepackage{cite}
 \usepackage{natbib}
 
+\usepackage{setspace}
+
 
 \begin{document}
 \title{Cache-Efficient Parallel-Partition Algorithms \\using Exclusive-Read-and-Write Memory}
@@ -90,7 +92,9 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 % \email{kuszmaul@mit.edu}
 
 
-\author{Alek Westover}
+% \author{Alek Westover}
+\author{}
+\date{\vspace{-1cm}\today}
 % \authornote{Supported by MIT PRIMES.}
 % \email{alek.westover@gmail.com}
 
@@ -145,7 +149,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 	Petit is in-place and under certain conditions performs little more than a
 	single pass over the array. Because of this, for certain inputs the Blocked
 	Strided Algorithm incurs very few cache misses and thus performs well.
-	However in general this algorithm has no theoretical guarantees on span and
+	However, in general this algorithm has no theoretical guarantees on span and
 	cache-behavior.
 
 	We present an in-place EREW algorithm with polylogarithmic span and provably
@@ -197,7 +201,7 @@ substantially easier \cite{BlellochFi12}.
 
 This parallel-partition algorithm suffers from using a large amount of
 auxiliary memory, however. Whereas the serial algorithm is typically
-implemented in place, the parallel algorithm relies on the use of two
+implemented in place, the parallel algorithm relies on the use of multiple
 auxiliary arrays of size $n$. To the best of our knowledge, the only
 known linear-work and $\operatorname{polylog}(n)$-span algorithms for
 parallel partition that are in-place require the use of atomic
@@ -223,8 +227,8 @@ that wishes to achieve state-of-the art performance on a large
 multi-processor machine must be (at least close to) in place.
 
 Currently the only practical in-place parallel sorting algorithms
-either rely heavily on atomic operations or other concurrency
-mechanisms \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03}, or eschew
+either rely heavily on concurrency mechanisms such as atomic operations
+\cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03}, or eschew
 theoretical guarantees \cite{FrancisPa92}. Parallel merge sort
 \cite{Hagerup89} was made in-place by Katajainen \cite{Katajainen93},
 but has proven too sophisticated for practical applications. Bitonic
@@ -354,7 +358,9 @@ typically induce an additional additive overhead of $O(\log R)$.
 The exclusive-read exclusive-write memory model is sometime referred
 to as the \defn{EREW model} (see, e.g., \cite{Hagerup89}).
 
-Note that threads are not in lockstep (i.e., they may progress at arbitrary different speeds), and thus the EREW model requires algorithms to be data-race free in order to avoid the possibility of non-exclusive data accesses.
+Note that threads are not in lockstep (i.e., they may progress at arbitrary
+different speeds), and thus the EREW model requires algorithms to be data-race
+free in order to avoid the possibility of non-exclusive data accesses.
 
 In an \defn{in-place} algorithm, each thread is given $O(\polylog(n))$
 memory upon creation that is deallocated when the thread dies. This
@@ -398,7 +404,9 @@ with the optimal off-line eviction strategy OPT (i.e. Furthest in the
 Future). Formally this is due to the following theorem by Sleator and
 Tarjan:
 \begin{theorem}[Resource Augmentation Theorem \cite{SleatorTa85}]
-  LRU operating on a cache of size $K\cdot M$ for some $K>1$ will incur at most $1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on a cache of size $M$, for the same series of memory accesses.
+	LRU operating on a cache of size $K\cdot M$ for some $K>1$ will incur at most
+	$1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on
+	a cache of size $M$, for the same series of memory accesses.
   \label{thm:augmentation}
 \end{theorem}
 
@@ -424,10 +432,13 @@ array $A$ so that the predecessors appear before the successors.
 
 
 \paragraph{The Serial Partition Algorithm}
-In our parallel algorithms for the partition problem we perform serial partitions on disjoint subarrays of the array.
-The serial partition algorithm runs fully in-place and incurs work  linear in the input size i.e. $O(N)$. 
-Also, crucially, the serial partition algorithm makes a single pass over the array, so it incurs only $\lceil n/b \rceil$ cache misses where $b$ is the size of a cache line.
-See Algorithm \ref{alg:serialPartition} for a pseudocode implementation of this algorithm. 
+In our parallel algorithms for the partition problem we perform serial
+partitions on disjoint subarrays of the array.  The serial partition algorithm
+runs fully in-place and incurs work linear in the input size i.e. $O(n)$.
+Also, crucially, the serial partition algorithm makes a single pass over the
+array, so it incurs only $\lceil n/b \rceil$ cache misses where $b$ is the size
+of a cache line.  
+%See Algorithm \ref{alg:serialPartition} for a pseudocode implementation of this algorithm. 
 
 % \begin{samepage}
 % \begin{enumerate}
@@ -440,56 +451,59 @@ See Algorithm \ref{alg:serialPartition} for a pseudocode implementation of this 
 % \end{enumerate}
 % \end{samepage}
 
-\begin{samepage}
-\begin{algorithm}
-	\caption{Serial Partition}
-	\label{alg:serialPartition}
-	\begin{algorithmic}
-		\State $\text{low} \gets 0$
-		\State $\text{high} \gets n-1$
-		\While{$\text{low} < \text{high}$} 
-			\While{$A[\text{low}] \leq \text{pivotValue}$}
-				\State $\text{low} \gets \text{low}+1$
-			\EndWhile
-			\While{$A[\text{high}] > \text{pivotValue}$}
-				\State $\text{high} \gets \text{high}-1$
-			\EndWhile
-			\State Swap $A[\text{low}]$ and $A[\text{high}]$
-		\EndWhile
-		\If{$A[\text{low}] \leq \text{pivotValue}$}
-			\State $\text{low} \gets \text{low}+1$
-		\EndIf
-	\end{algorithmic}	
-\end{algorithm}
-\end{samepage}
+% \begin{samepage}
+% \begin{algorithm}
+%   \caption{Serial Partition}
+%   \label{alg:serialPartition}
+%   \begin{algorithmic}
+%     \State $\text{low} \gets 0$
+%     \State $\text{high} \gets n-1$
+%     \While{$\text{low} < \text{high}$} 
+%       \While{$A[\text{low}] \leq \text{pivotValue}$}
+%         \State $\text{low} \gets \text{low}+1$
+%       \EndWhile
+%       \While{$A[\text{high}] > \text{pivotValue}$}
+%         \State $\text{high} \gets \text{high}-1$
+%       \EndWhile
+%       \State Swap $A[\text{low}]$ and $A[\text{high}]$
+%     \EndWhile
+%     \If{$A[\text{low}] \leq \text{pivotValue}$}
+%       \State $\text{low} \gets \text{low}+1$
+%     \EndIf
+%   \end{algorithmic}	
+% \end{algorithm}
+% \end{samepage}
 
-\paragraph{The (Standard) Linear-Space Parallel Partition} The linear-space implementation of parallel partition consists of two phases \cite{Blelloch96,AcarBl16}:
+\paragraph{The (Standard) Linear-Space Parallel Partition} The linear-space
+implementation of parallel partition consists of two phases
+\cite{Blelloch96,AcarBl16}:
 
-\noindent\emph{The Parallel-Prefix Phase: }In this phase, the algorithm
-constructs an array $B$ whose $i$-th element $B[i] = \sum_{j = 1}^i
-\dec(A[i])$ is the number of predecessors in the first $i$ elements of
-$A$. The transformation from $A$ to $B$ is called a \defn{parallel
-  prefix sum} and can be performed with $O(n)$ work and $O(\log n)$
-span using a simple recursive algorithm: (1) First construct an array
-$A'$ of size $n / 2$ with $A'[i] = A[2i - 1] + A[2i]$; (2)
-Recursively construct a parallel prefix sum $B'$ of $A'$; (3) Build
-$B$ by setting each $B[i] = B'[\lfloor i / 2 \rfloor] + A[i]$ for odd
-$i$ and $B[i] = A'[i / 2]$ for even $i$. 
+\noindent\emph{The Parallel-Prefix Phase: }In this phase, the algorithm first
+creates an array $D$ whose $i$-th element $D[i] = \dec(A[i])$. Then the
+algorithm constructs an array $S$ whose $i$-th element $S[i] = \sum_{j = 1}^i
+D[i]$ is the number of predecessors in the first $i$ elements of $A$. The
+transformation from $D$ to $S$ is called a \defn{parallel prefix sum} and can
+be performed with $O(n)$ work and $O(\log n)$ span using a simple recursive
+algorithm: 
+\begin{enumerate}
+	\item First construct an array $D'$ of size $n / 2$ with $D'[i] = D[2i - 1] + D[2i]$
+\item Recursively construct a parallel prefix sum $S'$ of $D'$
+\item Build $S$ by setting each $S[i] = S'[\lfloor i / 2 \rfloor] + A[i]$ for odd $i$ and $S[i] = S'[i / 2]$ for even $i$. 
+\end{enumerate}
 
-\noindent\emph{The Reordering Phase: }In this phase, the algorithm
-constructs an output-array $C$ by placing each predecessor $A[i] \in A$
-in position $B[i]$ of $C$. If there are $t$ predecessors in $A$, then
-the first $t$ elements of $C$ will now contain those $t$ predecessors
-in the same order that they appear in $A$. The algorithm then places
-each successor $A[i] \in A$ in position $t + i - B[i]$. Since $i - B[i]$
-is the number of successors in the first $i$ elements of $A$, this
-places the successors in $C$ in the same order that they appear in
-$A$. Finally, the algorithm copies $C$ into $A$, completing the
+\noindent\emph{The Reordering Phase: }In this phase, the algorithm constructs
+an output-array $C$ by placing each predecessor $A[i] \in A$ in position $S[i]$
+of $C$. If there are $t$ predecessors in $A$, then the first $t$ elements of
+$C$ will now contain those $t$ predecessors in the same order that they appear
+in $A$. The algorithm then places each successor $A[i] \in A$ in position $t +
+i - S[i]$. Since $i - S[i]$ is the number of successors in the first $i$
+elements of $A$, this places the successors in $C$ in the same order that they
+appear in $A$. Finally, the algorithm copies $C$ into $A$, completing the
 parallel partition.
 
 Both phases can be implemented with $O(n)$ work and $O(\log n)$
 span. Like its serial out-of-place counterpart, the algorithm is
-stable but not in place. The algorithm uses two auxiliary arrays of
+stable but not in place. The algorithm uses multiple auxiliary arrays of
 size $n$. Kiu, Knowles, and Davis \cite{LiuKn05} were able to reduce
 the extra space consumption to $n + p$ under the assumption that the
 number of processors $p$ is hard-coded; their algorithm breaks the
@@ -527,7 +541,6 @@ algorithm \cite{Kuszmaul19}.
 
 
 \section{A Cache Efficient In-Place Parallel Partition}\label{sec:smoothing}
-%%% get rid of all instances of \ref{secalg} (i.e. replace them with a reference to Kuszmaul's algorithm)
 In this section we introduce the \defn{Smoothed Striding Algorithm} for solving
 the parallel partition problem. The Smoothed Striding Algorithm exhibits
 provably optimal cache behavior (up to small-order factors), is fully in-place,
@@ -541,9 +554,9 @@ Strided Algorithm. The Strided Algorithm is designed to behave well on random
 arrays $A$, achieving span $\tilde{O}(n^{2/3})$ and exhibiting only $n/b +
 \tilde{O}(n^{2/3} / b)$  cache misses on such inputs. On worst-case inputs,
 however, the Strided Algorithm has span $\Omega(n)$ and incurs $n/b +
-\Omega(n/b)$ cache misses. Our algorithm, the Smoothed Striding Algorithm, will
-build on the Strided Algorithm by randomly perturbing the internal structure of
-the original algorithm; in doing so, we are able to provide provable guarantees
+\Omega(n/b)$ cache misses. Our algorithm, the Smoothed Striding Algorithm, builds
+on the Strided Algorithm by randomly perturbing the internal structure of
+the original algorithm; in doing so, we are able to provide provable performance guarantees
 on arbitrary inputs, and to add a recursion step that was previously
 impossible.
 
@@ -572,8 +585,8 @@ The original \defn{Strided Algorithm} consists of two steps:
   partitioned) $P_i$. Define $v_{\text{min}} = \min\{v_1, \ldots,
   v_{g}\}$ and define $v_{\text{max}} = \max\{v_1, \ldots, v_{g}\}$. Then the
   second step of the algorithm is to perform a serial partition on the
-	sub-array \\$A[v_{\text{min}}],\ldots, A[v_{\text{max}}-1]$. This completes the   
-    full partition.
+	sub-array $A[v_{\text{min}}+1],\ldots, A[v_{\text{max}}]$. This completes the   
+   partition of $A$.
 \end{itemize}
 
 Note that the Cleanup Step of the Strided Algorithm has no
@@ -582,7 +595,7 @@ v_{\text{min}})$.  In general, this results in an algorithm with
 linear-span (i.e., no parallelism guarantee).  When the number of
 predecessors in each of the $P_i$'s is close to equal, however, the
 quantity $v_{\text{max}} - v_{\text{min}}$ can be much smaller than
-$O(n)$.  For example, if $b = 1$, and if each element of $A$ is
+$\Theta(n)$.  For example, if $b = 1$, and if each element of $A$ is
 selected independently from some distribution, then one can use
 Chernoff bounds to prove that with high probability in $n$,
 $v_{\text{max}} - v_{\text{min}} \le O(\sqrt{n \cdot g \cdot \log
@@ -616,7 +629,7 @@ randomly selected cache line from each of $C_1, \ldots, C_{n /
   gb}$ (rather than containing the $i$-th cache line of each
 $C_j$). This ensures that the number of predecessors in each $U_i$ is
 a sum of independent random variables with values in $\{0, 1, \ldots,
-b\}$.
+n/g\}$.
 
 
 By Hoeffding's Inequality, with high probability in $n$, the number of
@@ -626,11 +639,11 @@ predecessors. It follows that, if we perform in-place partitions of
 each $U_i$ in parallel, and then define $v_i$ to be the position in
 $A$ of the final predecessor in (the already partitioned) $U_i$, then
 the difference between $v_{\text{min}} = \min_i v_i$ and
-$v_{\text{max}} = \max_i v_i$ will be small (even if the input array
-$A$ is worst-case!).
+$v_{\text{max}} = \max_i v_i$ will be small (regardless of the input array
+$A$!).
 
-Rather than partitioning $A[v_{\text{min}}],\ldots,
-A[v_{\text{max}}-1]$ in serial, the Smoothed Striding Algorithm simply
+Rather than partitioning $A[v_{\text{min}}+1],\ldots,
+A[v_{\text{max}}]$ in serial, the Smoothed Striding Algorithm simply
 recurses on the subarray. Such a recursion would not have been
 productive for the original Strided Algorithm because the strided
 partition $P_1', \ldots, P_g'$ used in the recursive subproblem would
@@ -660,7 +673,7 @@ incurs $n (1 + o(1))$ cache misses.
 The recursive structure of the Smoothed Striding Algorithm allows for the
 algorithm to achieve polylogarithmic span. As an alternative to recursing, one
 can also use Kuszmaul's in-place algorithm \cite{Kuszmaul19} in order to
-partition $A[v_{\text{min}}], \ldots, A[v_{\text{max}} - 1]$. This results
+partition $A[v_{\text{min}}+1], \ldots, A[v_{\text{max}}]$. This results
 in an improved span (since Kuszmaul's algorithm has span
 only $O(\log n \log \log n)$), while still incurring only $n (1 + o(1))$ cache
 misses (since Kuszmaul's cache-inefficient algorithm is only
@@ -706,28 +719,27 @@ is divisible by $gb$, and we define $s = \frac{n}{gb}$.\footnote{This
   successors (which consequently the algorithm needs not explicitly
   access).}
 
-The \defn{Partial Partition Step} if the algorithm partitions the
+In the \defn{Partial Partition Step} the algorithm partitions the
 cache lines of $A$ into $g$ sets $U_1, \ldots, U_{g}$ of size $s =
-\frac{n}{gb}$ and then performs a serial partition on each of those sets
-$U_i$ in parallel. To determine the sets $U_1, \ldots, U_{g}$, the
-algorithm uses as metadata, an array $X = X[1], \ldots, X[s]$,
+\frac{n}{gb}$ and then performs a serial partition on each 
+$U_i$ in parallel over the $U_i$'s. To determine the sets $U_1, \ldots, U_{g}$, the
+algorithm uses as metadata an array $X = X[1], \ldots, X[s]$,
 where each $X[i] \in \{1, \ldots, g\}$.
 
 Formally, the Partial Partition Step performs the following procedure:
 \begin{itemize}
 \item Set each of $X[1], \ldots, X[s]$ to be uniformly random and
-  independently selected elements of $\{1, 2, \ldots, g\}$. For
-  $i \in \{1, 2, \ldots, g\}$, and for each $j \in \{1, 2,
-  \ldots, s\}$, define
+  independently selected elements of $\{1, 2, \ldots, g\}$. For each
+  $i \in \{1, 2, \ldots, g\}$, $j \in \{1, 2, \ldots, s\}$, define
   $$G_i(j) = (X[j] + i \pmod g) + (j - 1)g + 1.$$ Using this
   terminology, we define each $U_i$ for $i \in \{1, \ldots, g\}$ to
   contain the $G_i(j)$-th cache line of $A$ for each $j \in \{1, 2,
   \ldots, s\}$. That is, $G_i(j)$ denotes the index of the $j$-th
-  cache line from array $A$ to be contained in $U_i$.
+  cache line from array $A$ contained in $U_i$.
 
   Note that, to compute the index of the $j$-th cache line in $U_i$,
   one needs only the value of $X[j]$. Thus the only metadata needed by
-  the algorithm to determine the $U_1, \ldots, U_g$ is the array
+  the algorithm to determine $U_1, \ldots, U_g$ is the array
   $X$. If $|X| = s = \frac{n}{gb} \le \operatorname{polylog}(n)$, then
   the algorithm is in place.
   
@@ -746,7 +758,7 @@ Formally, the Partial Partition Step performs the following procedure:
     divide-and-conquer can then simply collect the maximum and minimum
     $v_i$ for the $U_i$'s that are partitioned within that recursive
     call. This adds $O(\log n)$ to the total span of the Partial
-    Partition Step, which is does not affect the overall span
+    Partition Step, which does not affect the overall span
     asymptotically. %% In practice, this can also be implemented using
     %% CilkPlus Reducers (or OpenMP Reductions) \cite{FrigoLe09}, though
     %% empirically we have found explicitly implementing the
@@ -770,8 +782,8 @@ subproblem is small enough that $g \le O(1)$); the \defn{Hybrid
 span $O(\log n \log \log n)$ \cite{Kuszmaul19}. In general, the Hybrid
 algorithm yields better theoretical guarantees on span than the
 recursive version; on the other hand, the recursive version has the
-advantage that is simple to implement as fully in place, and still
-achieves polylogarithmic span.  We analyze both algorithms in this
+advantage that it is simple to implement as fully in-place, and still
+achieves polylogarithmic span. We analyze both algorithms in this
 section.
 
 
@@ -797,13 +809,13 @@ section.
 
 
 \begin{proof}
-Since $\sum_i |U_i| = n$, and since the partitioning of each $U_i$
+Since $\sum_i |U_i| = n$, and since the serial partitioning of each $U_i$
 takes time $O(|U_i|)$, the total work performed by the algorithm is
 $O(n)$.
 
 Assuming that array $X$ is pinned in cache (note, in particular, that
 $|X| = s \le \polylog(n)$, and so we are permitted to pin $X$ in
-cache), algorithm's cache misses consist of: $n/b$ misses from
+cache), the algorithm's cache misses consist of: $n/b$ misses from
 accessing each cache line of $A$; $s/b$ for instantiating the array $X$;
 and $O(1)$ for other instantiating costs. This sums
 to $$\frac{n+s}{b}+O(1).$$
@@ -852,11 +864,9 @@ probability at least $1 - \epsilon$, all of $\mu_1, \ldots, \mu_{g}$ are within 
 To complete the proof we will show that the occurrence of the event
 that all $y$ simultaneously satisfy $|\mu - \mu_y| < \delta$ implies
 that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
-
 %% Let $U_i(j)$ denote the index in $A$ of the $j$-th element in
 %% $U_i$.satisfies
 %% $$gj - bg + 1 \le U_i(j) \le gj + bg$$ for all $j$.
-
 %% It follows
 %% that $v_i = U_i(\mu_i \cdot |U_i|)$ is within $bg$ of $g
 %% \mu_j \cdot |U_i| = \mu_j n$. Therefore,
@@ -867,8 +877,6 @@ that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
 %%   v_{\text{max}} - v_{\text{min}} & \le 2n \left( \delta + \frac{n}{bg} \right)  = 2n \left( \delta + s \right) \\
 %%   & \le 2n \left(\delta + \frac{2\delta^2}{\ln (2n / (b\epsilon))}\right) < 4n\cdot\delta.
 %% \end{align*}
-
-
   Recall that $G_i(j)$ denotes the index within $A$ of the $j$ th cache-line contained in $U_i$. By the definition of $G_i(j)$, $$(j - 1)g + 1 \le G_i(j) \le jg.$$ Note that $A[v_i]$ will occur in the $\lceil s\mu_i \rceil$-th cache-line of $U_i$ because $U_i$ is composed of $s$ cache lines. Hence $$(\lceil s\mu_i \rceil - 1) g b + 1 \le v_i \le \lceil s\mu_i \rceil g b,$$
   which means that
   $$s\mu_i g b - gb - 1 \le v_i \le s\mu_i g b + gb.$$ Since $sgb =
@@ -887,7 +895,7 @@ We will use Proposition \ref{prop:generalResult} as a tool to analyze the Recurs
 
 Rather than parameterizing the Partial Partition step in each algorithm by $s$, Proposition \ref{prop:generalResult} suggests that it is more natural to parameterize by $\epsilon$ and $\delta$, which then determine $s$.
 
-We will assume that both the hybrid and the recursive algorithms use $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$). Moreover, the Recursive Smoothed Striding Algorithm continues to use the same value of $\epsilon$ within recursive subproblems (i.e., the $\epsilon$ is chosen based on the size of the first subproblem in the recursion), that way the entire algorithm succeeds with high probability in $n$.
+We will assume that both the hybrid and the recursive algorithms use $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$). Moreover, the Recursive Smoothed Striding Algorithm continues to use the same value of $\epsilon$ within recursive subproblems (i.e., the $\epsilon$ is chosen based on the size of the first subproblem in the recursion), so that the entire algorithm succeeds with high probability in $n$.
 
 For both algorithms, the choice of $\delta$ results in a tradeoff between cache misses and span. For the Recursive algorithm, we allow for $\delta$ to be chosen arbitrarily at the top level of recursion, and then fix $\delta  = \Theta(1)$ to be a sufficiently small constant at all levels of recursion after the first; this guarantees that we at least halve the size of the problem size between recursive iterations\footnote{In general, setting $\delta = 1/8$ will result in the problem size being halved. However, this relies on the assumption that $gb \mid n$, which is only without loss of generality by allowing for the size of subproblems to be sometimes artificially increased by a small amount (i.e., a factor of $1 + gb / n = 1 + 1/s$). One can handle this issue by decreasing $\delta$ to, say, $1/16$.}. Optimizing $\delta$ further (after the first level of recursion) would only affect the number of undesired cache misses by a constant factor.
 
@@ -984,7 +992,7 @@ A particularly natural parameter setting for the Recursive algorithm occurs at $
   after the first.
   
   
-  By Theorem \ref{prop:generalResult}, the top level of the algorithm
+  By Proposition \ref{prop:generalResult}, the top level of the algorithm
   has work $O(n)$, span $O\Big(b\frac{\log n}{\delta^2}\Big),$ and
   incurs $\frac{s+n}{b} + O(1)$ cache misses.  The recursion reduces
   the problem size by at least a factor of $4\delta$, with high
@@ -996,7 +1004,7 @@ A particularly natural parameter setting for the Recursive algorithm occurs at $
   constant). For each $i > 1$, it follows that the size of the problem at the $i$-th level of recursion is at most $O(n \delta / 2^i)$.
   
   The sum of the sizes of the problems after the first level of
-  recursion is therefore a geometric series summing to at most $O(n
+  recursion is therefore bounded above by a geometric series summing to at most $O(n
   \delta)$. This means that the total work of the algorithm is at most
   $O(n\delta) + O(n) \le O(n)$.
 
@@ -1036,7 +1044,7 @@ A particularly natural parameter setting for the Recursive algorithm occurs at $
 In this section, we implement the Smoothed-Striding algorithm and
 compare its performance to that of previously developed
 algorithms. The cache behavior of the Smoothed Striding algorithm
-allows for it to outperform all past EREW algorithms with provable
+allows it to outperform all past EREW algorithms with provable
 guarantees, and to perform competitively with the (Blocked) Strided
 algorithm (which does not exhibit provable guarantees). This is
 significant because, in addition to the Blocked Strided Argument
@@ -1053,14 +1061,14 @@ is randomly either larger or smaller than the pivot. We compare
 optimized implementations of the following 5 partition algorithms:
 \begin{itemize}
 \item \defn{Serial Algorithm:} A single-threaded in-place partition
-  algorithm. This algorithm serves as a baseline against we can
-  compare the parallel algorithms. We use the implementation from GNU
+  algorithm. This algorithm serves as a baseline to 
+  compare the parallel algorithms against. We use the implementation from GNU
   Libc quicksort, with minor adaptions to optimize it for the case of
   sorting 64-bit integers (i.e., inlining the comparison function,
   etc.).
 \item \defn{Standard Linear-Space Algorithm:} The standard
   parallel-prefix-sum based algorithm. This algorithm has
-  theoretically optimal span buts uses linear auxiliary space.
+  theoretically optimal span but uses linear auxiliary space.
 \item \defn{Kuszmaul's In-Place Algorithm:} Kuszmaul's in-place
   parallel-prefix-sum based algorithm. Although Kuszmaul's algorithm
   could, in principle, be implemented fully in-place, a more natural
@@ -1092,7 +1100,7 @@ Smoothed Striding Algorithm runs roughly twice as fast as Kuszmaul's
 In-Place Algorithm, and eight times as fast as the Standard
 Linear-Space Algorithm.
 
-Both the Smoothed Striding and Strided Algorithms scale close to
+Both the Smoothed Striding and Strided algorithms scale close to
 linearly in the number of threads. On 18 threads, the Smoothed
 Striding Algorithm achieves a $9.6 \times $ speedup over the
 Libc-based Serial Baseline, and the Strided Algorithm achieves an
@@ -1353,22 +1361,22 @@ concurrent-read-exclusive-write memory) is an important direction of
 future work.
 
 
-\section{Acknowledgements}
+% \section{Acknowledgements}
 
-This project was performed as part of the MIT PRIMES program at the
-Massachusetts Institute of Technology (MIT). The MIT PRIMES program
-selects talented high-school students in math and computer science
-(through a problem-based application that tests students' mathematics,
-programming, and problem-solving abilities) and gives them
-opportunities to work with MIT graduate students in Math and Computer
-Science on unsolved research projects. This project was performed by
-student Alek Westover with mentorship from MIT Computer Science PhD
-student William Kuszmaul.
+% This project was performed as part of the MIT PRIMES program at the
+% Massachusetts Institute of Technology (MIT). The MIT PRIMES program
+% selects talented high-school students in math and computer science
+% (through a problem-based application that tests students' mathematics,
+% programming, and problem-solving abilities) and gives them
+% opportunities to work with MIT graduate students in Math and Computer
+% Science on unsolved research projects. This project was performed by
+% student Alek Westover with mentorship from MIT Computer Science PhD
+% student William Kuszmaul.
 
-William Kuszmaul's prior work on developing an in-place parallel-partition algorithm was motivation for the student's project.
-Kuszmaul's in-place algorithm is primarily of theoretical interest, and its performance bottlenecks led to the direction of research of cache-efficient algorithms.
-The main contribution of the project is a cache-efficient in-place EREW parallel-partition algorithm with provable guarantees on span and cache-behavior, and with near-state-of-the-art real-world performance.
-  The theoretical ideas and analysis behind this algorithm, as well as the software implementation and experimentation of the algorithm are completely due to the student, Alek Westover. The writeup of the algorithm and its analysis were also performed by the student, with minor editing help by the mentor.
+% William Kuszmaul's prior work on developing an in-place parallel-partition algorithm was motivation for the student's project.
+% Kuszmaul's in-place algorithm is primarily of theoretical interest, and its performance bottlenecks led to the direction of research of cache-efficient algorithms.
+% The main contribution of the project is a cache-efficient in-place EREW parallel-partition algorithm with provable guarantees on span and cache-behavior, and with near-state-of-the-art real-world performance.
+%   The theoretical ideas and analysis behind this algorithm, as well as the software implementation and experimentation of the algorithm are completely due to the student, Alek Westover. The writeup of the algorithm and its analysis were also performed by the student, with minor editing help by the mentor.
 
 
 % The work for the project is split as follows:
@@ -1395,10 +1403,10 @@ The main contribution of the project is a cache-efficient in-place EREW parallel
 %   better practical performance.
 % \end{itemize}
 
-The authors would also like to thank Bradley C. Kuszmaul for several
-suggestions that helped simplify the non-cache-efficient in-place
-algorithm. The authors would further like to thank Reza Zadeh for
-introducing them to the parallel-partition problem.
+% The authors would also like to thank Bradley C. Kuszmaul for several
+% suggestions that helped simplify the non-cache-efficient in-place
+% algorithm. The authors would further like to thank Reza Zadeh for
+% introducing them to the parallel-partition problem.
 
 % This acknowledgements section was written by the mentor, William
 % Kuszmaul.
@@ -1409,7 +1417,7 @@ introducing them to the parallel-partition problem.
 
 % This research was supported in part by NSF Grants 1314547 and 1533644. 
 
-
+\begin{spacing}{1}
 \begin{figure*}
   \begin{center}
     \CILKtable 
@@ -1476,6 +1484,7 @@ introducing them to the parallel-partition problem.
   \end{center}
 \end{figure*}
 
+\end{spacing}
 \clearpage
 
 \bibliographystyle{plain}
