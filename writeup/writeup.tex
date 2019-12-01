@@ -932,12 +932,14 @@ practice.
 $n$, and let $g$ be a parameter. (One should think of $g$ as being
 relatively large, satisfying $\frac{n}{bg} \le
 \operatorname{polylog}(n)$.)  We assume for simplicity that that $n$
-is divisible by $gb$, and we define $s = \frac{n}{gb}$.\footnote{This
-  assumption can be made without loss of generality by treating $A$ as
+is divisible by $gb$, and we define $s = \frac{n}{gb}$.
+\footnote{ %% TODO XXX ALEK ALEK ALEK  added an alternate explanation
+  {\color{red} Let $r = n \bmod gb$. When $r \neq 0$ we run our algorithm on the array $A[1], A[2], \ldots, A[n-r]$. After doing so we must move the predecessors in the final $r$ elements of $A$ to be with the other predecessors in $A$. This is accomplished by swapping the extra predecessors with the first successors in $A$, or if the number of extra predecessors is too large, by swapping the successors with the final extra elements. }
+  {\color{red} This assumption can be made without loss of generality by treating $A$ as
   an array of size $n' = n + {(gb - n \pmod {gb})}$, and then treating
   the final $gb - n \pmod {gb}$ elements of the array as being
   successors (which consequently the algorithm needs not explicitly
-  access).}
+  access).}}
 
 In the \defn{Partial Partition Step} the algorithm partitions the
 cache lines of $A$ into $g$ sets $U_1, \ldots, U_{g}$ of size $s =

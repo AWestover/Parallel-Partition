@@ -46,7 +46,7 @@ A: ???????????/
 
 # minor
 
-- [ ]
+- [X]
 Q: footnote 5 
 A: increase clarity
 @: alek does, bill checks
