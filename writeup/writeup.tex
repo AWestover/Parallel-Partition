@@ -72,6 +72,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{todonotes}
+\usepackage{algorithm, algpseudocode}
 
 \newtheorem{thm}{Theorem}[section]
 \newtheorem{lem}[thm]{Lemma}
@@ -1744,7 +1745,6 @@ future work.
 
 This research was supported in part by NSF Grants 1314547 and 1533644. 
 
-
 \begin{figure*}
   \begin{center}
     \CILKtable 
@@ -1812,8 +1812,165 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
   \label{tablesort}
 \end{figure*}
 
+\begin{figure*}
+  \caption{The Smoothed Striding Algorithm {\color{red} MORE FORMAL VERSION (too formal probably)}}
+	\label{alg:parallelPartition}
+	\begin{algorithmic}[1]
+    \Procedure{Parallel Partition}{$A$, $n$, $g$, $b$}
+      \If{$g<2$}
+        \State serialPartition $A$
+      \Else
+        \For{$i \in \{1,2,\ldots,s\}$}
+          \State $X[i] \gets$ a random integer from $[1,g]$ 
+        \EndFor
+        \State // \emph{We implement the following parallel for-loop with recursive spawns}
+        \State // \emph{This facilitates computing $v_{min}$, $v_{max}$ without storing $v_y$'s}
+        \ForAll{$ y \in \{1,2,\ldots,g\}$ in parallel}
+          \State // \emph{Now we perform a serial partition on $U_y$}
 
-\newpage
+          \State // \emph{Initialize ALowIdx to be the index of the first element in $U_y$}
+          \State $\text{ALowIdx} \gets ((X[1]+y) \bmod g)\cdot b + 1$
+
+          \State // \emph{Initialize AHighIdx to be the index of the last element in $U_y$}
+          \State $\text{AHighIdx} \gets n - ((g-1) - ((X[s-1]+y) \bmod g))\cdot b$
+
+          \While{ALowIdx $<$ AHighIdx} 
+            \While{A[ALowIdx] $\leq$ pivotValue}
+              \State ALowIdx $\gets$ ALowIdx$+1$
+              \If{ALowIdx on block boundary}
+                \State // \emph{Perform a block increment}
+                \State $i \gets $ \# of block increments so far (including this one)
+                \State // \emph{Increase ALowIdx to start of block $i$ of $G_y$}
+                \State $\text{ALowIdx} \gets (((X[i] + y)\bmod g) + i\cdot g) \cdot b + 1$
+              \EndIf
+            \EndWhile
+            \While{A[high] $>$ pivotValue}
+              \State AHighIdx $\gets$ AHighIdx$-1$
+              \If{AHighIdx on block boundary}
+                \State // \emph{Perform a block decrement}
+                \State $i \gets $ \# of block decrements so far (including this one)
+                \State // \emph{Decrease AHighIdx to end of block $(s-1-i)$ of $G_y$}
+                \State $\text{AHighIdx} \gets (((X[s-1-i] + y)\bmod g) + (s-i)\cdot g) \cdot b$
+              \EndIf
+            \EndWhile
+
+            \State Swap $A[\text{ALowIdx}]$ and $A[\text{AHighIdx}]$
+          \EndWhile
+        \EndFor
+        \State Recurse on $A[v_{min}],\ldots,A[v_{max}-1]$
+      \EndIf
+    \EndProcedure
+	\end{algorithmic}	
+\end{figure*}
+
+\begin{figure*}
+  \caption{The Smoothed Striding Algorithm}
+	\label{alg:parallelPartition}
+	\begin{algorithmic}% [1] for line numbers
+    \Procedure{Parallel Partition}{$A$, $n$, $g$, $b$}
+      \If{$g<2$}
+        \State serial partition $A$
+      \Else
+        \For{$i \in \{1,2,\ldots,s\}$}
+          \State $X[i] \gets$ a random integer from $[1,g]$ 
+        \EndFor
+        \ForAll{$ y \in \{1,2,\ldots,g\}$ in parallel}
+          \State // \emph{Now we perform a serial partition on $U_y$}
+
+          \State ALowIdx $\gets$ index of the first element in $U_y$
+          \State AHighIdx $\gets$ index of the last element in $U_y$
+
+          \While{ALowIdx $<$ AHighIdx} 
+            \While{A[ALowIdx] $\leq$ pivotValue}
+              \State ALowIdx $\gets$ ALowIdx$+1$
+              \If{ALowIdx on block boundary}
+                \State // \emph{Perform a block increment}
+                \State $i \gets $ \# of block increments so far (including this one)
+                \State Increase ALowIdx to start of block $i$ of $G_y$
+              \EndIf
+            \EndWhile
+            \While{A[high] $>$ pivotValue}
+              \State AHighIdx $\gets$ AHighIdx$-1$
+              \If{AHighIdx on block boundary}
+                \State // \emph{Perform a block decrement}
+                \State $i \gets $ \# of block decrements so far (including this one)
+                \State Decrease AHighIdx to end of block $s-1-i$ of $G_y$
+              \EndIf
+            \EndWhile
+
+            \State Swap $A[\text{ALowIdx}]$ and $A[\text{AHighIdx}]$
+          \EndWhile
+        \EndFor
+        \State Recurse on $A[v_{min}],\ldots,A[v_{max}-1]$
+      \EndIf
+    \EndProcedure
+	\end{algorithmic}	
+\end{figure*}
+
+\begin{figure*}
+  \caption{Kuszmaul's Parallel Partition}
+	\label{alg:parallelPartition}
+  \begin{algorithmic} % add [1] to get line numbers (if you want)
+    \Procedure{MakeSuccessorHeavy}{$A$, $n$}
+      \ForAll{$i \in \{1,2,\ldots,\lfloor n/2 \rfloor\}$ in parallel}
+        \If{$A[i]$ is a predecessor and $A[n-i+1]$ is a successor}
+          \State Swap $A[i]$ and $A[n-i+1]$
+        \EndIf
+      \EndFor
+      \State Recurse on $A[1],A[2], \ldots, A[\lceil n/2 \rceil]$
+    \EndProcedure
+    \State
+
+    \Procedure{Reorder}{$A$, $n$}
+    \State $t \gets $ least integer such that $t\cdot b > n\cdot 4/5$
+    \State Recurse on $A[1], A[2], \ldots, A[t]$
+    \ForAll{$i \in \{t+1, t+2, \ldots, \lfloor n/b \rfloor\}$}
+      \State // \emph{recall we stored $v_i$ the number of predecessors in the block $X_i$ in the arangement of $X_i$'s adjacent elements.}
+      \State Extract $v_i$ from $X_i$ // \emph{Note: this is done in parallel}
+      \State Instantiate an array $Y_i$ with $|Y_i| = |X_i| \in \Theta(\log n)$, 
+      \State Where $Y_i[j] \gets 1$ if $X_i[j]$ is a predecessor, and $Y_i[j] \gets 0$ otherwise.
+      \State Perform a parallel prefix sum on $Y_i$, and add $v_i$ to each $Y_i[j]$
+      \ForAll{$j \in \{1,2,\ldots, b\}$}
+        \If{$X_i[j]$ is a predecessor}
+          \State Swap $X_i[j]$ and $A[Y_i[j]]$ // \emph{See analysis for proof that this doesn't result in any data-races}
+        \EndIf
+      \EndFor
+    \EndFor
+    
+    \EndProcedure
+    \State
+
+    \Procedure{ImplicitParallelPrefixSum}{A, n}
+      \State Pick $b \in \Theta(\log n)$ to be the "block size"
+      \State // \emph{We now think of $A$ as being composed of blocks, so $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$}
+      \ForAll{$i \in \{1,2,\ldots,\lfloor n/b \rfloor\}$ in parallel}
+        \State $v_i \gets 0$ // will store number of predecessors in $X_i$
+        \ForAll{$a \in X_i$ in serial}
+          \If{$a$ is a predecessor}
+            \State $v_i \gets v_i + 1$
+          \EndIf
+        \EndFor
+        \State // \emph{Now we encode the value $v_i$ in the block $X_i$}
+        \ForAll{$j \in \{1,2,\ldots, \lfloor b/2 \rfloor \}$ in parallel}
+        \If{$\mathbf{1}_{X_i[2j] < X_i[2j+1]} \not= $ the $j$-th binary digit of $v_i$}
+            \State Swap $X_i[2j]$ and $X_i[2j+1]$
+          \EndIf
+        \EndFor
+      \EndFor
+    \EndProcedure
+    \State
+
+    \Procedure{Parallel Partition}{$A$, $n$}
+      \State // \emph{WLOG: number of successors > number of predecessors in $A$}
+      \State MakeSuccessorHeavy($A$, $n$) // \emph{prepreocessing phase}
+      \State ImplicitParallelPrefixSum($A$, $n$) // \emph{Implicit Parallel Prefix Sum}
+      \State Reorder($A$, $n$) // \emph{In-Place Reordering Phase}
+    \EndProcedure
+	\end{algorithmic}	
+\end{figure*}
+
+\clearpage
+
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{paper}
 

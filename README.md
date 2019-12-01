@@ -26,7 +26,7 @@ Q: How phases in first alg fit together
 A: lemma-based format for what invariants are at the end of each phase
 @: BIG TODO for Bill
 
-- [ ]
+- [X]
 Q: pseudocode
 A: add it to an appendix
 @: alek
