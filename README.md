@@ -66,7 +66,7 @@ Q: 1 based arrays as convention
 A: clarify
 @: Alek
 
-- [ ]
+- [X]
 Q: Regeneron Minor Edits
 A: add
 @: Alek
