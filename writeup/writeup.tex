@@ -1821,8 +1821,8 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
 	\begin{algorithmic}% [1] for line numbers
     \State \textbf{Recall:} 
     \State $A$ is the array to be partitioned, of length $n$. 
-    \State We break $A$ into chunks each consisting of $g$ cachlines of size $b$.
-    \State We create $g$ groups $U_1,\ldots, U_g$ that each contain a single cache line from each chunk
+    \State We break $A$ into chunks, each consisting of $g$ cache lines of size $b$.
+    \State We create $g$ groups $U_1,\ldots, U_g$ that each contain a single cache line from each chunk,
     \State $U_i$'s $j$-th cache line is the $(X[j]+i \bmod g + 1)$-th cache line in the $j$-th chunk of $A$.
     \State
 
@@ -1842,35 +1842,34 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
 
         % \State // \emph{We implement the following parallel for-loop with recursive spawns}
         % \State // \emph{This facilitates computing $v_{min}$, $v_{max}$ without storing $v_y$'s}
-        \ForAll{$ i \in \{1,2,\ldots,g\}$ in parallel}
-          \Comment Now we perform a serial partition on $U_i$
+        \ForAll{$ i \in \{1,2,\ldots,g\}$ in parallel} \Comment We perform a serial partition on all $U_i$'s in parallel
 
-          \State ALowIdx $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$1$)
-          \Comment ALowIdx $\gets$ index of the first element in $U_i$
-          \State AHighIdx $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$g-1$) + $b-1$
-          \Comment AHighIdx $\gets$ index of the last element in $U_i$
+          \State low $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$1$)
+          \Comment low $\gets$ index of the first element in $U_i$
+          \State high $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$n/(gb)$) + $b-1$
+          \Comment high $\gets$ index of the last element in $U_i$
 
-          \While{ALowIdx $<$ AHighIdx} 
-            \While{A[ALowIdx] $\leq$ pivotValue}
-              \State ALowIdx $\gets$ ALowIdx$+1$
-              \If{ALowIdx on block boundary}
-                \Comment Perform a block increment
+          \While{low $<$ high} 
+            \While{A[low] $\leq$ pivotValue}
+              \State low $\gets$ low$+1$
+              \If{low $\bmod b \equiv 0$ } 
+                \Comment Perform a block increment once low reaches the end of a block
                 \State $k \gets $ number of block increments so far (including this one)
-                \State ALowIdx $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$k$)
-                \Comment Increase ALowIdx to start of block $k$ of $G_i$
+                \State low $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$k$)
+                \Comment Increase low to start of block $k$ of $G_i$
               \EndIf
             \EndWhile
             \While{A[high] $>$ pivotValue}
-              \State AHighIdx $\gets$ AHighIdx$-1$
-              \If{AHighIdx on block boundary}
-                \Comment Perform a block decrement
+              \State high $\gets$ high$-1$
+              \If{high $\bmod b \equiv 1$} 
+                \Comment Perform a block decrement once high reaches the beginning of a block
                 \State $k \gets $ number of block decrements so far (including this one)
-                \State $k' \gets n/(gb) - k - 1$
-                \State AHighIdx $\gets$ GetBlockStartIndex($X$, $g$,$b$,$i$,$k'$)
-                \Comment Decrease AHighIdx to end of block $k'$ of $G_i$
+                \State $k' \gets n/(gb) - k$
+                \State high $\gets$ GetBlockStartIndex($X$, $g$,$b$,$i$,$k'$)
+                \Comment Decrease high to end of block $k'$ of $G_i$
               \EndIf
             \EndWhile
-            \State Swap $A[\text{ALowIdx}]$ and $A[\text{AHighIdx}]$
+            \State Swap $A[\text{low}]$ and $A[\text{high}]$
           \EndWhile
         \EndFor
         \State Recurse on $A[v_{min}],\ldots,A[v_{max}-1]$
@@ -1883,15 +1882,6 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
   \caption{Kuszmaul's Parallel Partition Helper Functions}
 	\label{alg:parallelPartition}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
-    \Procedure{Dec}{$a$} % decider function
-      \If{$a$ is predecessor}
-        \State\Return 1
-      \Else 
-        \State\Return 0
-      \EndIf
-    \EndProcedure
-    \State
-
     \Procedure{WriteToBlock}{$A$, $b$, $i$, $v$} \Comment Write value $v$ to the $i$-th block $X_i$ of $A$, where $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
       \ForAll{$j \in \{1,2,\ldots, \lfloor b/2 \rfloor \}$ in parallel}
       \If{$\mathds{1}_{X_i[2j] < X_i[2j+1]} \not= $ (the $j$-th binary digit of $v$)}
@@ -1921,9 +1911,9 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
           \State Swap $A[i]$ and $A[n-i+1]$
         \EndIf
       \EndFor
-      \State Recurse on $A[1],A[2], \ldots, A[\lceil n/2 \rceil]$
+      \State MakeSuccessorHeavy($A$, $\lceil n/2 \rceil$)
+      \Comment Recurse on $A[1],A[2], \ldots, A[\lceil n/2 \rceil]$
     \EndProcedure
-
 	\end{algorithmic}	
 \end{figure*}
 
@@ -1932,31 +1922,32 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
 	\label{alg:parallelPartition}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \Require Each prefix of $A$ is ``successor heavy''
-    \Ensure $A$ is permuted such that the blocks $X_i$ of $A$ store the prefix sums of the binary array containing a 1 for every predecessor in $A$ and a 0 else
+    \Ensure Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
     \Procedure{ImplicitParallelPrefixSum}{A, n}
       \State Pick $b \in \Theta(\log n)$ to be the "block size"
       \Comment \emph{We now think of $A$ as being composed of blocks, with $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$}
       \ForAll{$i \in \{1,2,\ldots,\lfloor n/b \rfloor\}$ in parallel}
-        \State $v_i \gets 0$ \Comment{ will store number of predecessors in $X_i$ } }
+        \State $v_i \gets 0$ \Comment{$v_i$ will store number of predecessors in $X_i$ } }
         \ForAll{$a \in X_i$ in serial}
           \If{$a$ is a predecessor}
             \State $v_i \gets v_i + 1$
           \EndIf
         \EndFor
         \State WriteToBlock($A$, $b$, $i$, $v_i$)
-        \Comment // \emph{Now we encode the value $v_i$ in the block $X_i$}
+        \Comment Now we encode the value $v_i$ in the block $X_i$
       \EndFor
       \State Perform a parallel prefix sum on the values $v_i$ stored in the $X_i$'s
    \EndProcedure
     \State
 
-    \Require $A$ is permuted such that the blocks $X_i$ of $A$ store the prefix sums of the binary array containing a 1 for every predecessor in $A$ and a 0 else
+    \Require Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
     \Ensure $A$ is partitioned
     \Procedure{Reorder}{$A$, $n$}
       \State $t \gets $ least integer such that $t\cdot b > n\cdot 4/5$
-      \State Recurse on $A[1], A[2], \ldots, A[t]$
+      \State Reorder($A$, $t$)
+      \Comment Recurse on $A[1], A[2], \ldots, A[t]$
       \ForAll{$i \in \{t+1, t+2, \ldots, \lfloor n/b \rfloor\}$}
-      \State $v_i \gets$ ReadFromBlock($A$, $b\cdot i+1$, $b\cdot(i+1)$) \Comment Recall that $v_i$ is the number of predecessors prior to block $X_i$
+      \State $v_i \gets$ ReadFromBlock($A$, $b\cdot i+1$, $b\cdot(i+1)$) 
         \State Instantiate an array $Y_i$ with $|Y_i| = |X_i| \in \Theta(\log n)$, 
         \State In parallel, set $Y_i[j] \gets 1$ if $X_i[j]$ is a predecessor, and $Y_i[j] \gets 0$ otherwise.
         \State Perform a parallel prefix sum on $Y_i$, and add $v_i$ to each $Y_i[j]$
@@ -1969,7 +1960,7 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
     \EndProcedure
     \State
 
-    \Procedure{Parallel Partition}{$A$, $n$}
+    \Procedure{KuszmaulParallelPartition}{$A$, $n$}
       \State $k \gets$ count number of successors in $A$ in parallel
       \If{$k < n/2$}
         \State Swap the role of successors and predecessors in the algorithm (i.e. change the decider function)
