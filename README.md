@@ -21,7 +21,7 @@ A:
   * clarify that low-space is not in-place
 @: Alek (?)
 
-- [ ]
+- [X]
 Q: How phases in first alg fit together
 A: lemma-based format for what invariants are at the end of each phase
 @: BIG TODO for Bill
