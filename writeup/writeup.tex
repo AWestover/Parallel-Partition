@@ -748,16 +748,28 @@ $\operatorname{polylog}{n}$ cache lines.  A cache miss occurs on a
 processor when the line being accessed is not currently in cache, in
 which case some other line is evicted from cache to make room for the
 new entry.  Each cache is managed with a LRU (Least Recently Used)
-eviction policy; when child threads are created, they inherit their
-cache contents from their parent.
+eviction policy.
 
-We will also assume that the algorithm can choose for certain small
-arrays to be pinned in cache (i.e. their entries are never evicted
-from cache).  This assumption is without loss of generality in the
-sense that LRU eviction is competitive (up to resource augmentation)
-with the optimal off-line eviction strategy OPT (i.e. Furthest in the
-Future). Formally this is due to the following theorem by Sleator and
-Tarjan:
+We assume that threads are scheduled using work stealing \cite{??},
+and that the work-stealing itself has no cache-miss overhead. Note
+that caches belong to processors, not threads, meaning that when a
+processor takes a new thread (i.e., performs work stealing), the
+processor's cache contents are a function of what the processor was
+previously executing. In order to keep our analysis of cache misses
+independent of the number of processors, we will ignore the cost of
+warming up each processor's cache. In particular, if there are
+$\polylog n$ global variables that each processor must access many
+times, we do not consider the initial $p \cdot \polylog n$ cost of
+loading those global variables into the caches (where $p$ is the
+number of processors). In practice, $p \ll n$ on large inputs, making
+the cost of warming up caches negligible.
+
+Although each cache is managed with LRU eviction, we may assume
+for the sake of analysis that each cache is managed by the optimal
+off-line eviction strategy OPT (i.e. Furthest in the Future). This is
+because, up to resource augmentation, LRU eviction is $(1 + 1/\polylog
+n)$-competitive with OPT. Formally this is due to the following
+theorem by Sleator and Tarjan:
 \begin{theorem}[Resource Augmentation Theorem \cite{SleatorTa85}]
   LRU operating on a cache of size $K\cdot M$ for some $K>1$ will incur at most
   $1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on
@@ -769,12 +781,16 @@ Recall that each processor has a cache of size $\log^c n$ for $c$ a
 constant of our choice.  Up to changes in $c$ LRU incurs no more than
 a $1+\frac{1}{\operatorname{polylog}{n}}$ factor more cache misses
 than OPT incurs. Thus, up to a $1 + \frac{1}{\polylog(n)}$
-multiplicative change in cache misses, and a $\polylog(n)$ change in
+multiplicative change in cache misses, and a $\polylog(n)$ factor change in
 cache size, we may assume without loss of generality that cache
-eviction is performed by OPT. Such an assumption will not be necessary
-for our algorithm analyses, however; instead it will suffice to assume
-that certain small arrays are pinned in cache and that other evictions
-are performed via LRU.
+eviction is performed by OPT.
+
+Because each processor's cache is managed by OPT (without loss of
+generality), we can assume that each processor \defn{pins} certain
+small arrays to cache (i.e., the elements of those arrays are never
+evicted). In fact, this is the only property of OPT we will use; that
+is, our analyses will treat non-pinned contents of the cache as being
+managed via LRU.
 
 \paragraph{The Strided Algorithm \cite{FrancisPa92}}
 The Smoothed Striding Algorithm borrows several structural ideas from a previous algorithm of Francis and Pannan \cite{FrancisPa92}, which we call the Strided Algorithm. The Strided Algorithm is designed to behave well on random arrays $A$, achieving span $\tilde{O}(n^{2/3})$ and exhibiting only $n/b + \tilde{O}(n^{2/3} / b)$  cache misses on such inputs. On worst-case inputs, however, the Strided Algorithm has span $\Omega(n)$ and incurs $n/b + \Omega(n/b)$ cache misses. Our algorithm, the Smoothed Striding Algorithm, builds on the Strided Algorithm by randomly perturbing the internal structure of the original algorithm; in doing so, we are able to provide provable performance guarantees on arbitrary inputs, and to add a recursion step that was previously impossible.
@@ -1034,13 +1050,18 @@ Since $\sum_i |U_i| = n$, and since the serial partitioning of each $U_i$
 takes time $O(|U_i|)$, the total work performed by the algorithm is
 $O(n)$.
 
-Assuming that array $X$ is pinned in cache (note, in particular, that
-$|X| = s \le \polylog(n)$, and so we are permitted to pin $X$ in
-cache), the algorithm's cache misses consist of: $n/b$ misses from
-accessing each cache line of $A$; $s/b$ for instantiating the array $X$;
-and $O(1)$ for other instantiating costs. This sums
+To analyze cache misses, we assume without loss of generality that
+array $X$ is pinned in each processor's cache (note, in particular,
+that $|X| = s \le \polylog(n)$, and so $X$ fits in cache). Thus we can
+ignore the cost of accesses to $X$. Note that each $U_i$ consists of
+$s = \polylog n$ cache lines, meaning that each $U_i$ fits entirely in
+cache. Thus the number of cache misses needed for a thread to
+partition a given $U_i$ is just $s$. Since there are $g =
+\frac{n}{sb}$ $U_i$s, the total number of cache misses needed to
+partition each $U_i$ is $g s = \frac{n}{b}$. Besides these, there are
+$s/b$ cache misses for instantiating the array $X$; and $O(1)$ cache
+misses for other instantiating costs. This sums
 to $$\frac{n+s}{b}+O(1).$$
-Note, in particular, that when each cache line in $A$ is accessed, that line continues to be among the $O(1)$ most recently accessed cache lines until the final time that it is accessed, and thus does not get evicted from cache.
 
 The span of the algorithm is $O(n/g + s) = O(b\cdot s)$, since the
 each $U_i$ is of size $O(n / g)$, and because the initialization of
@@ -1927,7 +1948,7 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
       \State Pick $b \in \Theta(\log n)$ to be the "block size"
       \Comment \emph{We now think of $A$ as being composed of blocks, with $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$}
       \ForAll{$i \in \{1,2,\ldots,\lfloor n/b \rfloor\}$ in parallel}
-        \State $v_i \gets 0$ \Comment{$v_i$ will store number of predecessors in $X_i$ } }
+        \State $v_i \gets 0$ \Comment{$v_i$ will store number of predecessors in $X_i$ } 
         \ForAll{$a \in X_i$ in serial}
           \If{$a$ is a predecessor}
             \State $v_i \gets v_i + 1$
