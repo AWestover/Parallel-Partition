@@ -1853,7 +1853,7 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
     \EndProcedure
     \State
 
-    \Procedure{Parallel Partition}{$A$, $n$, $g$, $b$}
+    \Procedure{ParallelPartition}{$A$, $n$, $g$, $b$}
       \If{$g<2$}
         \State serial partition $A$
       \Else
@@ -1900,7 +1900,7 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
 \end{figure*}
 
 \begin{figure*}
-  \caption{Kuszmaul's Parallel Partition Helper Functions}
+  \caption{Section \ref{secalg}'s Prefix-Sum Based Parallel Partition Pseudocode: Helper Functions}
 	\label{alg:parallelPartition}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \Procedure{WriteToBlock}{$A$, $b$, $i$, $v$} \Comment Write value $v$ to the $i$-th block $X_i$ of $A$, where $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
@@ -1939,7 +1939,7 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
 \end{figure*}
 
 \begin{figure*}
-  \caption{Kuszmaul's Parallel Partition Main Functions}
+  \caption{Section \ref{secalg}'s Prefix-Sum Based Parallel Partition Pseudocode: Main Functions}
 	\label{alg:parallelPartition}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \Require Each prefix of $A$ is ``successor heavy''
@@ -1981,7 +1981,7 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
     \EndProcedure
     \State
 
-    \Procedure{KuszmaulParallelPartition}{$A$, $n$}
+    \Procedure{ParallelPartition}{$A$, $n$}
       \State $k \gets$ count number of successors in $A$ in parallel
       \If{$k < n/2$}
         \State Swap the role of successors and predecessors in the algorithm (i.e. change the decider function)
@@ -1997,6 +1997,7 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
 \end{figure*}
 
 
+\clearpage
 \clearpage
 
 \bibliographystyle{ACM-Reference-Format}
