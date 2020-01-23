@@ -1886,7 +1886,7 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
                 \Comment Perform a block decrement once high reaches the beginning of a block
                 \State $k \gets $ number of block decrements so far (including this one)
                 \State $k' \gets n/(gb) - k$
-                \State high $\gets$ GetBlockStartIndex($X$, $g$,$b$,$i$,$k'$)
+                \State high $\gets$ GetBlockStartIndex($X$, $g$,$b$,$i$,$k'$) $+b-1$
                 \Comment Decrease high to end of block $k'$ of $G_i$
               \EndIf
             \EndWhile
@@ -2003,11 +2003,6 @@ This research was supported in part by NSF Grants 1314547 and 1533644.
 \bibliography{paper}
 
 \end{document}
-
-
-%% extract and write function
-%% need to parallel prefix sum the vis
-%% DO THE "INPUT PROPERTIES, OUTPUT PROPERTIES"
 
 %%% PRIVATE CACHES
 %%% work stealing

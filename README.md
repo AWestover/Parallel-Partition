@@ -31,7 +31,7 @@ Q: pseudocode
 A: add it to an appendix
 @: alek
 
-- [ ]
+- [X]
 Q: Cache Confusions
 A:
   1) U_i is polylog size and can be partitioned _in cache_
@@ -73,7 +73,7 @@ A: add
 
 # reviewer 4
 
-- [ ]
+- [X]
 Q: Pinning isn't a real functionality (confused by analysis vs alg barrier)
 A: Need sentence: Not actually assuming pinning, Just using the possibility of OPT doing it in the analysis
 @: Bill
@@ -85,6 +85,10 @@ A: polylog cache *per* processor  [[add in prelims]]
 
 - [ ]
 Q: More minor critiques
+
+- []
+Q: Citation for work stealing
+
 
 
 
