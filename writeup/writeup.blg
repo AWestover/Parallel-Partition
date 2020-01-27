@@ -5,12 +5,30 @@ The style file: ACM-Reference-Format.bst
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Database file #1: paper.bib
-Warning--I didn't find a database entry for "??"
 Reallocated singl_function (elt_size=4) to 100 items from 50.
+Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
+while executing---line 2725 of file ACM-Reference-Format.bst
+Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
+while executing---line 2725 of file ACM-Reference-Format.bst
+Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
+while executing---line 2725 of file ACM-Reference-Format.bst
 Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
 Reallocated global_strs (elt_size=20001) to 20 items from 10.
 Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
+while executing---line 2786 of file ACM-Reference-Format.bst
+Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
+while executing---line 2786 of file ACM-Reference-Format.bst
 Reallocated singl_function (elt_size=4) to 100 items from 50.
+Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
+while executing---line 2884 of file ACM-Reference-Format.bst
+Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
+while executing---line 2884 of file ACM-Reference-Format.bst
+Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
+while executing---line 2884 of file ACM-Reference-Format.bst
+Warning--no journal in AcarBl00
+Warning--no number and no volume in AcarBl00
+Warning--page numbers missing in both pages and numpages fields in AcarBl00
 Warning--empty publisher in Anderson90
 Warning--empty address in Anderson90
 Warning--no number and no volume in AxtmannWi17
@@ -36,45 +54,45 @@ Warning--empty publisher in ShunGu15
 Warning--empty address in ShunGu15
 Warning--empty publisher in TsigasZh03
 Warning--empty address in TsigasZh03
-You've used 29 entries,
+You've used 30 entries,
             5719 wiz_defined-function locations,
-            1496 strings with 19327 characters,
-and the built_in function-call counts, 35160 in all, are:
-= -- 4642
-> -- 1156
+            1502 strings with 19412 characters,
+and the built_in function-call counts, 36060 in all, are:
+= -- 4726
+> -- 1194
 < -- 0
-+ -- 393
-- -- 424
-* -- 2365
-:= -- 3504
-add.period$ -- 147
-call.type$ -- 29
-change.case$ -- 190
-chr.to.int$ -- 29
-cite$ -- 54
-duplicate$ -- 3110
-empty$ -- 2179
-format.name$ -- 516
-if$ -- 8602
++ -- 408
+- -- 440
+* -- 2431
+:= -- 3611
+add.period$ -- 152
+call.type$ -- 30
+change.case$ -- 196
+chr.to.int$ -- 30
+cite$ -- 58
+duplicate$ -- 3192
+empty$ -- 2239
+format.name$ -- 536
+if$ -- 8795
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 116
-newline$ -- 263
-num.names$ -- 232
-pop$ -- 1115
+missing$ -- 120
+newline$ -- 271
+num.names$ -- 240
+pop$ -- 1151
 preamble$ -- 1
-purify$ -- 451
+purify$ -- 466
 quote$ -- 0
-skip$ -- 1104
+skip$ -- 1130
 stack$ -- 0
-substring$ -- 2756
-swap$ -- 341
+substring$ -- 2814
+swap$ -- 345
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 617
-warning$ -- 25
-while$ -- 265
+type$ -- 633
+warning$ -- 28
+while$ -- 273
 width$ -- 0
-write$ -- 531
-(There were 26 warnings)
+write$ -- 547
+(There were 8 error messages)
