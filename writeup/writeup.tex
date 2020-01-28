@@ -118,27 +118,28 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \textbf{Abstract}
 \end{center}
 
-We present an in-place algorithm for the parallel partition problem that has
-work $O(n)$ and span $O(\log n \cdot \log \log n)$. The algorithm uses only
-exclusive read/write shared variables, and can be implemented using
-parallel-for-loops without any additional concurrency considerations (i.e., the
-algorithm is EREW). As an immediate consequence, we also get an in-place
-quicksort algorithm with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
+We present an in-place algorithm for the parallel partition problem
+that has work $O(n)$ and span $O(\log n \cdot \log \log n)$. The
+algorithm uses only exclusive read/write shared variables, and can be
+implemented using parallel-for-loops without any additional
+concurrency considerations (i.e., the algorithm is EREW). As an
+immediate consequence, we also get an in-place quicksort algorithm
+with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
 
-Using our algorithmic techniques, we implement an (almost) in-place parallel
-partition. In addition to achieving much better memory utilization, the
-algorithm leverages its improved cache behavior to achieve a speedup over its
-out-of-place counterpart. Both algorithms remain bottlenecked by memory
-bandwidth, however, due to the fact that they require multiple passes over the
+A low-space implmentation of the algorithm leverages its improved
+cache behavior to achieve a speedup over its fully out-of-place
+counterpart. Both algorithms remain bottlenecked by memory bandwidth,
+however, due to the fact that they require multiple passes over the
 input array.
 
-Our second contribution is an in-place EREW algorithm with polylogarithmic span
-and provably optimal cache behavior, up to small-order factors.  The resulting
-algorithm achieves near-ideal scaling in practice by avoiding the
-memory-bandwidth bottleneck. The algorithm's performance is comparable to that of
-the Blocked Strided Algorithm of Francis, Pannan, Frias, and Petit, which is
-the previous state-of-the art for parallel EREW sorting algorithms, but which
-lacks theoretical guarantees on its span and cache behavior.
+Our second contribution is an in-place EREW algorithm with
+polylogarithmic span and provably optimal cache behavior, up to
+small-order factors.  The resulting algorithm achieves near-ideal
+scaling in practice by avoiding the memory-bandwidth bottleneck. The
+algorithm's performance is comparable to that of the Blocked Strided
+Algorithm of Francis, Pannan, Frias, and Petit, which is the previous
+state-of-the art for parallel EREW sorting algorithms, but which lacks
+theoretical guarantees on its span and cache behavior.
  
 \end{titlepage}
 
@@ -250,7 +251,7 @@ multi-processor machine must be (at least close to) in place.
 
 Currently the only practical in-place parallel sorting algorithms either rely
 heavily on concurrency mechanisms such as atomic operations mechanisms
-\cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03}, or eschew
+\cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03}, or abstain from
 theoretical guarantees \cite{FrancisPa92}. Parallel merge sort
 \cite{Hagerup89} was made in-place by Katajainen \cite{Katajainen93},
 but has proven too sophisticated for practical applications. Bitonic
@@ -307,14 +308,14 @@ large number of threads.
 
 \section{Preliminaries}\label{secprelim}
 
-We begin by describing the the parallelism and memory model used in
+We begin by describing the parallelism and memory model used in
 the paper, and by presenting background on parallel partition.
 
 \paragraph{Workflow Model} We consider a simple language-based model of parallelism in which algorithms achieve parallelism through the use of \defn{parallel-for-loops} (see, e.g.,
 \cite{Blelloch96,AcarBl16,CLRS}); function calls within the inner loop
 then allow for more complicated parallel structures (e.g., recursion). Our algorithms can also be implemented in the less restrictive PRAM model \cite{Blelloch96, AcarBl16}.
 
-Formally, a parallel-for-loop is given a range $R \in \mathbb{N}$, a
+Formally, a parallel-for-loop is given a range size $R \in \mathbb{N}$, a
 constant number of arguments $\arg_1, \arg_2, \ldots, \arg_c$, and a
 body of code. For each $i \in \{1, \ldots, R\}$, the loop launches a
 thread that is given loop-counter $i$ and local copies of the
@@ -344,9 +345,12 @@ the guarantee offered by Brent's Theorem within a constant factor
 \cite{BlumofeJo96,BlumofeLe99}, with the added caveat that parallel-for-loops typically induce an additional additive overhead of $O(\log
 R)$. 
 
-\paragraph{Memory Model} Memory is \defn{exclusive-read} and \defn{exclusive-write}. That is, no two threads are ever permitted to attempt to read or write to the same variable concurrently. 
-The exclusive-read exclusive-write memory model is sometime referred
-to as the \defn{EREW model} (see, e.g., \cite{Hagerup89}).
+\paragraph{Memory Model}
+Memory is \defn{exclusive-read} and \defn{exclusive-write}. That is,
+no two threads are ever permitted to attempt to read or write to the
+same variable concurrently.  The exclusive-read exclusive-write memory
+model is sometime referred to as the \defn{EREW model} (see, e.g.,
+\cite{Hagerup89}). 
 
 Note that threads are not in lockstep (i.e., they may progress at arbitrary
 different speeds), and thus the EREW model requires algorithms to be data-race
@@ -357,7 +361,27 @@ memory upon creation that is deallocated when the thread dies. This
 memory can be shared with the thread's children. However, the depth of
 the parent-child tree is not permitted to exceed $O(\polylog n)$.
 
-Whereas the EREW memory model prohibits concurrent accesses to memory, on the other side of the spectrum are CRCW (concurrent-read-concurrent-write) models, which allow for both reads and writes to be performed concurrently (and in some variants even allow for atomic operations) \cite{Blelloch96,AcarBl16,MatiasVi95}. One approach to designing efficient EREW algorithms is to simulate efficient CRCW algorithms in the EREW model \cite{MatiasVi95}. The known simulation techniques require substantial space overhead, however, preventing the design of in-place algorithms \cite{MatiasVi95}.\footnote{The known simulation techniques also increase the total work in the original algorithm, although this can be acceptable if only a small number of atomic operations need to be simulated.}
+Whereas the EREW memory model prohibits concurrent accesses to memory,
+on the other side of the spectrum are CRCW
+(concurrent-read-concurrent-write) models, which allow for both reads
+and writes to be performed concurrently (and in some variants even
+allow for atomic operations)
+\cite{Blelloch96,AcarBl16,MatiasVi95}. One approach to designing
+efficient EREW algorithms is to simulate efficient CRCW algorithms in
+the EREW model \cite{MatiasVi95}. The known simulation techniques
+require substantial space overhead, however, preventing the design of
+in-place algorithms \cite{MatiasVi95}.\footnote{The known simulation
+  techniques also increase the total work in the original algorithm,
+  although this can be acceptable if only a small number of atomic
+  operations need to be simulated.}
+
+In addition to being the first in-place and polylogarithmic-span EREW
+algorithms for the parallel-partition problem, our algorithms are also
+the first such CREW algorithms. In a \defn{CREW} algorithm, reads may
+be concurrent, but writes may not -- CREW stands for
+\emph{concurrent-read exclusive-write}. In practice, the important
+property of our algorithms is that they avoid concurrent writes (which
+can lead to non-determinacy and cache ping-pong effects).
 
 %% HERE: Is where we can talk about the more powerful alternative to EREW, and there relationship, and why we can't just simulate CRCW (or, more importantly, ERCW). Make it clear that the Exclusive Read part is not actually very important -- it's the exclusive write part that's hard.
 
@@ -367,13 +391,15 @@ Whereas the EREW memory model prohibits concurrent accesses to memory, on the ot
   %% where $p$ is an upper-bound on the number of worker threads.}
 
 \paragraph{The Parallel Partition Problem}
-The parallel partition problem takes an input array $A$ of size $n$,
-and a \defn{decider function} $\dec$ that determines for each element
-$A[i] \in A$ whether or not $A[i]$ is a \defn{predecessor} or a
+The parallel partition problem takes an input array
+$A = (A[1], A[2], \ldots, A[n])$ of size $n$, and a \defn{decider
+  function} $\dec$ that determines for each element $A[i] \in A$
+whether or not $A[i]$ is a \defn{predecessor} or a
 \defn{successor}. That is, $\dec(A[i]) = 1$ if $A[i]$ is a
 predecessor, and $\dec(A[i]) = 0$ if $A[i]$ is a successor. The
 behavior of the parallel partition is to reorder the elements in the
-array $A$ so that the predecessors appear before the successors.
+array $A$ so that the predecessors appear before the successors. Note
+that, in this paper, we will always treat arrays as 1-indexed.
 
 
 \paragraph{The (Standard) Linear-Space Parallel Partition} The linear-space
@@ -409,7 +435,7 @@ size $n$. Kiu, Knowles, and Davis \cite{LiuKn05} were able to reduce
 the extra space consumption to $n + p$ under the assumption that the
 number of processors $p$ is hard-coded; their algorithm breaks the
 array $A$ into $p$ parts and assigns one part to each thread. Reducing
-the space below $o(n)$ has remained open until now, even when the
+the extra space below $o(n)$ has remained open until now, even when the
 number of threads is fixed.
 
 
@@ -423,7 +449,9 @@ to be bottlenecked by cache misses. In this section, we introduce a
 second algorithm, called the \defn{Smoothed Striding Algorithm}, which
 exhibits provably optimal cache behavior (up to small-order
 factors). The Smoothed Striding Algorithm is fully in-place and has
-polylogarithmic span.
+polylogarithmic span. In particular, this means that the total amount
+of auxilary memory allocated at a given moment in the execution never
+exceeds $\polylog n$ per active worker.
 
 %% In this section, we follow the convention of 0-indexing arrays (i.e.,
 %% every array starts with element $0$), in order to allow for modular
@@ -431,7 +459,7 @@ polylogarithmic span.
 
 
 \paragraph{Modeling Cache Misses}
-We treat memory as consisting of fixed-size cache lines of some
+We treat memory as consisting of fixed-size cache lines, each of some
 size $b$. Each processor is assumed to have a small cache of
 $\operatorname{polylog}{n}$ cache lines.  A cache miss occurs on a
 processor when the line being accessed is not currently in cache, in
@@ -658,11 +686,12 @@ access).}
 }
 
 In the \defn{Partial Partition Step} the algorithm partitions the
-cache lines of $A$ into $g$ sets $U_1, \ldots, U_{g}$ of size $s =
-\frac{n}{gb}$ and then performs a serial partition on each 
-$U_i$ in parallel over the $U_i$'s. To determine the sets $U_1, \ldots, U_{g}$, the
-algorithm uses as metadata an array $X = X[1], \ldots, X[s]$,
-where each $X[i] \in \{1, \ldots, g\}$.
+cache lines of $A$ into $g$ sets $U_1, \ldots, U_{g}$ of size
+$s = \frac{n}{gb}$ and then performs a serial partition on each $U_i$
+in parallel over the $U_i$'s. To determine the sets
+$U_1, \ldots, U_{g}$, the algorithm uses as metadata an array
+$X = X[1], \ldots, X[s]$, where each $X[i] \in \{1, \ldots,
+g\}$. 
 
 Formally, the Partial Partition Step performs the following procedure:
 \begin{itemize}
@@ -764,7 +793,7 @@ to $$\frac{n+s}{b}+O(1).$$
 
 The span of the algorithm is $O(n/g + s) = O(b\cdot s)$, since the
 each $U_i$ is of size $O(n / g)$, and because the initialization of
-array $X$ can be performed in time $O(|X|) = O(s)$.
+array $X$ can trivially be performed in time $O(|X|) = O(s)$.
 
 It remains to show that with probability $1-\epsilon$, $v_{\text{max}}
 - v_{\text{min}} < 4n\delta$. Let $\mu$ denote the fraction of
@@ -846,7 +875,7 @@ Rather than parameterizing the Partial Partition step in each algorithm by $s$, 
 
 We will assume that both the hybrid and the recursive algorithms use $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$). Moreover, the Recursive Smoothed Striding Algorithm continues to use the same value of $\epsilon$ within recursive subproblems (i.e., the $\epsilon$ is chosen based on the size of the first subproblem in the recursion), so that the entire algorithm succeeds with high probability in $n$.
 
-For both algorithms, the choice of $\delta$ results in a tradeoff between cache misses and span. For the Recursive algorithm, we allow for $\delta$ to be chosen arbitrarily at the top level of recursion, and then fix $\delta  = \Theta(1)$ to be a sufficiently small constant at all levels of recursion after the first; this guarantees that we at least halve the size of the problem size between recursive iterations\footnote{In general, setting $\delta = 1/8$ will result in the problem size being halved. However, this relies on the assumption that $gb \mid n$, which is only without loss of generality by allowing for the size of subproblems to be sometimes artificially increased by a small amount (i.e., a factor of $1 + gb / n = 1 + 1/s$). One can handle this issue by decreasing $\delta$ to, say, $1/16$.}. Optimizing $\delta$ further (after the first level of recursion) would only affect the number of undesired cache misses by a constant factor.
+For both algorithms, the choice of $\delta$ results in a tradeoff between cache misses and span. For the Recursive algorithm, we allow for $\delta$ to be chosen arbitrarily at the top level of recursion, and then fix $\delta  = \Theta(1)$ to be a sufficiently small constant at all levels of recursion after the first; this guarantees that we at least halve the size of the problem between recursive iterations\footnote{In general, setting $\delta = 1/8$ will result in the problem size being halved. However, this relies on the assumption that $gb \mid n$, which is only without loss of generality by allowing for the size of subproblems to be sometimes artificially increased by a small amount (i.e., a factor of $1 + gb / n = 1 + 1/s$). One can handle this issue by decreasing $\delta$ to, say, $1/16$.}. Optimizing $\delta$ further (after the first level of recursion) would only affect the number of undesired cache misses by a constant factor.
 
 
 %% $\delta = 1/8$ in order to at least halve the size of the problem size at each iteration. 
@@ -856,7 +885,7 @@ For both algorithms, the choice of $\delta$ results in a tradeoff between cache 
 Next we analyze the Hybrid Smoothed Striding Algorithm.
 \begin{theorem}
 	\label{thm:fullPartition}
-	The Hybrid Smoothed Striding Algorithm algorithm using parameter $\delta\in(0,1/2)$ satisfying $\delta \ge 1/\polylog(n)$: has work $O(n)$; achieves span
+	The Hybrid Smoothed Striding Algorithm using parameter $\delta\in(0,1/2)$ satisfying $\delta \ge 1/\polylog(n)$: has work $O(n)$; achieves span
         $$O\paren*{\log n \log\log n +\frac{b\log n}{\delta^2}},$$
 with high probability in $n$; and incurs fewer than 
 $$(n+O(n\delta))/b$$
@@ -872,7 +901,7 @@ An interesting corollary of the above theorem concerns what happens when $b$ is 
 %%ve low span along with a small number of cache misses.
 \begin{corollary}[Corollary of Theorem \ref{thm:fullPartition}]
 	\label{cor:fullPartition}
-Suppose $b \le o(\log \log n)$. Then the Cache-Efficient Full-Partition Algorithm algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.\\\\
+Suppose $b \le o(\log \log n)$. Then the Cache-Efficient Full-Partition Algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.\\\\
 \end{corollary}
 
 \begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
@@ -1022,16 +1051,18 @@ low-space implementation. We show that all three implementations are
 bottlenecked by memory throughput, however, suggesting that the cache-optimal Smoothed Striding Algorithm can do better.
 
 In Subsection \ref{subsecstrided}, we evaluate the performance of the
-Recursive Smoothed Striding Algorithm and the Strided Algorithms. The
-cache efficiency of the two algorithms allows for them to achieve
-substantially better scaling than their parallel-prefix-based
-counterparts. The Strided Algorithm tends to slightly outperform the
-Smoothed Striding Algorithm, though on 18 threads their performance is
-within 15\% of one-another. We conclude that the Smoothed Striding
-Algorithm allows for one to obtain empirical performance comparable to
-that of the Strided Algorithm, while simultaneously achieving the
-provable guarantees on span and cache-efficiency missing from the
-original Strided Algorithm.
+Recursive Smoothed Striding Algorithm and the Strided
+Algorithms. Unlike the algorithms described above, the implementations
+of both of these algorithms are fully in-place, meaning that the total
+space overhead is only $\polylog n$. The cache efficiency of the two
+algorithms allows for them to achieve substantially better scaling
+than their parallel-prefix-based counterparts. The Strided Algorithm
+tends to slightly outperform the Smoothed Striding Algorithm, though
+on 18 threads their performance is within 15\% of one-another. We
+conclude that the Smoothed Striding Algorithm allows for one to obtain
+empirical performance comparable to that of the Strided Algorithm,
+while simultaneously achieving the provable guarantees on span and
+cache-efficiency missing from the original Strided Algorithm.
 
 
 %% In Subsection \ref{subsechighspan}, we present a fourth
@@ -1221,7 +1252,7 @@ threads are attempting to immediately overwrite entries to the array
 after reading them. Given read-bandwidth $r$ bytes/second and
 read/write bandwidth $w$ bytes/second, the time needed for the
 low-space algorithm to perform its memory operations on an input of
-$m$ bytes will be roughly $3.5 m / w + .5m / r$ seconds. We call this
+$m$ bytes will be roughly $3.5 m / w + .5m / r$ seconds.\footnote{A naive implementation of the algorithm would require roughly $m / r$ time to count the number of predecessors, followed by $2m / w$ time to perform the Preprocessing Phase, followed by roughly $m / r$ time to perform the Parallel Prefix Sum Pase, and then roughly $1.5 m/w$ time for the In-Place Reordering Phase. As described in the previous paragraph, however, the counting of predecessors and the Parallel Prefix Sum phase can both be overlapped with the Preprocessing phase so that their total added contribution to the Memory-Bandwidth Limitation is only $.5 m / r$.}  We call this
 the \defn{bandwidth constraint}. No matter how optimized the
 implementation of the low-space algorithm is, the bandwidth constraint
 serves as a hard lower bound for the running
@@ -1478,11 +1509,15 @@ In this section, we present an in-place algorithm for parallel
 partition with span $O(\log n \log \log n)$. Each thread in the
 algorithm requires memory at most $O(\log n)$.
 
-We assume without loss of generality that the total number of
-successors in $A$ exceeds the number of predecessors, since otherwise
-their roles can simply be swapped in the algorithm. Further, we assume
-for simplicity that the elements of $A$ are distinct; this assumption
-is removed at the end of the section.
+Prior to beginning the algorithm, the first step implicit step of the
+algorithm is to count the number of predecessors in the array, in
+order to determine whether the majority of elements are either
+predecessors or successors. Throughout the rest of the section, we
+assume without loss of generality that the total number of successors
+in $A$ exceeds the number of predecessors, since otherwise their roles
+can simply be swapped in the algorithm. Further, we assume for
+simplicity that the elements of $A$ are distinct; this assumption is
+removed at the end of the section.
 
 
 \paragraph{Algorithm Outline}
@@ -1529,8 +1564,10 @@ $O(n / \log n)$ arithmetic operations on values that are implicitly
 encoded in blocks; since each such operation requires $O(\log n)$
 work, the total work remains linear.
 
-In the remainder of the section, we present the algorithm in detail.
-It proceeds in three phases.
+In the remainder of the section, we present the algorithm in detail,
+and prove the key properties of each phase of the algorithm. We also
+provide detailed pseudocode in Appendix \ref{sec:pseudocode}.  The
+algorithm proceeds in three phases.
 
 \paragraph{A Preprocessing Phase}
 The goal of the Preprocessing phase is to make every prefix of $A$
@@ -1630,7 +1667,7 @@ divide-and-conquer recursive approach to encode and decode the bits of
 $v$.
 \end{proof}
 
-To perform the Parallel Prefix Sum phase, our algorithm beings by
+To perform the Parallel Prefix Sum phase, our algorithm begins by
 performing a parallel-for loop through the blocks, and storing in each
 block $X_i$ a value $v_i$ equal to the number of predecessors in the
 block. (This can be done in place with work $O(n)$ and span $O(\log
@@ -1646,11 +1683,12 @@ is defined to be zero.
 
 Lemma \ref{lem:parallelprefix} analyzes the phase:
 \begin{lemma}
-The Parallel Prefix Sum phase uses work $O(n)$ and span $O(\log n \log
-\log n)$. At the end of the phase, each $X_i$ encodes a value $v_i$
-counting the number of predecessors in the prefix $X_1 \circ X_2 \circ
-\cdots \circ X_i$; and each prefix $X_1 \circ X_2 \circ \cdots \circ
-X_i$ is successor-heavy.
+  The Parallel Prefix Sum phase uses work $O(n)$ and span
+  $O(\log n \log \log n)$. At the end of the phase, each $X_i$ encodes
+  a value $v_i$ counting the number of predecessors in the prefix
+  $X_1 \circ X_2 \circ \cdots \circ X_i$; and each prefix of blocks
+  (i.e., each prefix of the form
+  $X_1 \circ X_2 \circ \cdots \circ X_i$) is successor-heavy.
 \label{lem:parallelprefix}
 \end{lemma}
 \begin{proof}
@@ -1661,7 +1699,7 @@ requires work $O(\log n)$ and span $O(\log \log n)$ to read/write (by
 Lemma \ref{lem:bitstore}), the prefix sum takes work $O(n)$ and span
 $O(\log n \cdot \log \log n)$.
 
-Once of the prefix-sum that has been performed, every block $X_i$
+Once the prefix-sum has been performed, every block $X_i$
 encodes a value $v_i$ counting the number of predecessors in the
 prefix $X_1 \circ X_2 \circ \cdots \circ X_i$. Moreover, because the
 Parallel Prefix Sum phase only rearranges elements within each $X_i$,
@@ -1700,12 +1738,13 @@ completes the algorithm.
  n)$. At the end of the phase, the array $A$ is fully partitioned.
 \end{lemma}
 \begin{proof}
-After $P$ has been recursively partitioned, it will be of the form
-$P_1 \circ P_2$ where $P_1$ contains only predecessors and $P_2$
-contains only successors. Because $P$ is successor-heavy (by Lemma
-\ref{lem:parallelprefix}), we have that $|P_2| \ge |P| / 4$, and thus
-that $|P_2| \ge |X_{t + 1} \circ \cdots \circ X_{\lfloor n / b
-  \rfloor}|$.
+  After $P$ has been recursively partitioned, it will be of the form
+  $P_1 \circ P_2$ where $P_1$ contains only predecessors and $P_2$
+  contains only successors. Because $P$ was successor-heavy before the
+  recursive partitioning (by Lemma \ref{lem:parallelprefix}), we have
+  that $|P_2| \ge |P| / 4$, and thus that
+  $|P_2| \ge |X_{t + 1} \circ \cdots \circ X_{\lfloor n / b
+    \rfloor}|$.
 
 After the recursion, the swaps performed by the algorithm will swap
 the $i$-th predecessor in $X_{t + 1} \circ \cdots \circ X_{\lfloor n /
@@ -1872,7 +1911,7 @@ See figures below.
   \label{tablesort}
 \end{figure*}
 
-\section{Pseudocode}
+\section{Pseudocode}\label{sec:pseudocode}
 See figures below.
 \begin{figure*}
   \caption{The Smoothed Striding Algorithm}
