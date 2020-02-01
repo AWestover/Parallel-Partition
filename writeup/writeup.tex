@@ -118,28 +118,58 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \textbf{Abstract}
 \end{center}
 
-We present an in-place algorithm for the parallel partition problem
-that has work $O(n)$ and span $O(\log n \cdot \log \log n)$. The
-algorithm uses only exclusive read/write shared variables, and can be
-implemented using parallel-for-loops without any additional
-concurrency considerations (i.e., the algorithm is EREW). As an
-immediate consequence, we also get an in-place quicksort algorithm
-with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
+We present a randomized in-place algorithm for the parallel partition problem with
+polylogarithmic span and provably optimal cache behavior, up to small-order
+factors. The algorithm uses only exclusive read/write shared variables, and can
+be implemented using parallel-for-loops without any additional concurrency
+considerations (i.e., the algorithm is EREW). 
 
-A low-space implmentation of the algorithm leverages its improved
+We also present a prefix-sum based in-place EREW algorithm for the parallel
+partition problem that has work $O(n)$ and span $O(\log n \cdot \log \log n)$,
+which is within a $\log\log n$ factor of the optimal span.  As an immediate
+consequence, we also get an in-place quicksort algorithm with work $O(n \log
+n)$ and span $O(\log^2 n \cdot \log \log n)$.
+
+A low-space implementation of the prefix-sum based algorithm leverages its improved
 cache behavior to achieve a speedup over its fully out-of-place
 counterpart. Both algorithms remain bottlenecked by memory bandwidth,
 however, due to the fact that they require multiple passes over the
-input array.
+input array. 
 
-Our second contribution is an in-place EREW algorithm with
-polylogarithmic span and provably optimal cache behavior, up to
-small-order factors.  The resulting algorithm achieves near-ideal
-scaling in practice by avoiding the memory-bandwidth bottleneck. The
-algorithm's performance is comparable to that of the Blocked Strided
-Algorithm of Francis, Pannan, Frias, and Petit, which is the previous
-state-of-the art for parallel EREW sorting algorithms, but which lacks
-theoretical guarantees on its span and cache behavior.
+By using the prefix-sum based algorithm as a subroutine within our
+randomized algorithm, we are able to combine the theoretical guarantees of both
+algorithms to get an algorithm with span $O(\log n \cdot \log \log n)$ and provably
+optimal cache behavior.
+
+The randomized algorithm achieves near-ideal scaling in practice by avoiding the
+memory-bandwidth bottleneck. The algorithm's performance is comparable to that
+of the Blocked Strided Algorithm of Francis, Pannan, Frias, and Petit, which is
+the previous state-of-the art for parallel EREW sorting algorithms, but which
+lacks theoretical guarantees on its span and cache behavior.
+
+
+% We present an in-place algorithm for the parallel partition problem
+% that has work $O(n)$ and span $O(\log n \cdot \log \log n)$. The
+% algorithm uses only exclusive read/write shared variables, and can be
+% implemented using parallel-for-loops without any additional
+% concurrency considerations (i.e., the algorithm is EREW). As an
+% immediate consequence, we also get an in-place quicksort algorithm
+% with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
+
+% A low-space implementation of the algorithm leverages its improved
+% cache behavior to achieve a speedup over its fully out-of-place
+% counterpart. Both algorithms remain bottlenecked by memory bandwidth,
+% however, due to the fact that they require multiple passes over the
+% input array.
+
+% Our second contribution is an in-place EREW algorithm with
+% polylogarithmic span and provably optimal cache behavior, up to
+% small-order factors.  The resulting algorithm achieves near-ideal
+% scaling in practice by avoiding the memory-bandwidth bottleneck. The
+% algorithm's performance is comparable to that of the Blocked Strided
+% Algorithm of Francis, Pannan, Frias, and Petit, which is the previous
+% state-of-the art for parallel EREW sorting algorithms, but which lacks
+% theoretical guarantees on its span and cache behavior.
  
 \end{titlepage}
 
@@ -1988,7 +2018,7 @@ See figures below.
 See figures below.
 \begin{figure*}
   \caption{The Smoothed Striding Algorithm}
-	\label{alg:parallelPartition}
+	\label{alg:parallelPartition_smoothedStriding}
 	\begin{algorithmic}% [1] for line numbers
     \State \textbf{Recall:} 
     \State $A$ is the array to be partitioned, of length $n$. 
@@ -2051,7 +2081,7 @@ See figures below.
 
 \begin{figure*}
   \caption{Section \ref{secalg}'s Prefix-Sum Based Parallel Partition Pseudocode: Helper Functions}
-	\label{alg:parallelPartition}
+	\label{alg:parallelPartition_prefixsumbased_helpers}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \Procedure{WriteToBlock}{$A$, $b$, $i$, $v$} \Comment Write value $v$ to the $i$-th block $X_i$ of $A$, where $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
       \ForAll{$j \in \{1,2,\ldots, \lfloor b/2 \rfloor \}$ in parallel}
@@ -2090,7 +2120,7 @@ See figures below.
 
 \begin{figure*}
   \caption{Section \ref{secalg}'s Prefix-Sum Based Parallel Partition Pseudocode: Main Functions}
-	\label{alg:parallelPartition}
+	\label{alg:parallelPartition_prefixsumbased_main}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \Require Each prefix of $A$ is ``successor heavy''
     \Ensure Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
