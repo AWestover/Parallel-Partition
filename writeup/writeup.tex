@@ -2110,8 +2110,8 @@ See figures below.
     \EndProcedure
     \State
 
-    \Require $A$ has more successors than predecessors
-    \Ensure Each prefix of $A$ is ``successor heavy''
+    \State \textbf{Require: } $A$ has more successors than predecessors
+    \State \textbf{Ensure: }  Each prefix of $A$ is ``successor heavy''
     \Procedure{MakeSuccessorHeavy}{$A$, $n$}
       \ForAll{$i \in \{1,2,\ldots,\lfloor n/2 \rfloor\}$ in parallel}
         \If{$A[i]$ is a predecessor and $A[n-i+1]$ is a successor}
@@ -2128,8 +2128,8 @@ See figures below.
   \caption{Section \ref{secalg}'s Prefix-Sum Based Parallel Partition Pseudocode: Main Functions}
 	\label{alg:parallelPartition_prefixsumbased_main}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
-    \Require Each prefix of $A$ is ``successor heavy''
-    \Ensure Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
+    \State \textbf{Require: } Each prefix of $A$ is ``successor heavy''
+    \State \textbf{Ensure: }  Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
     \Procedure{ImplicitParallelPrefixSum}{A, n}
       \State Pick $b \in \Theta(\log n)$ to be the "block size"
       \Comment \emph{We now think of $A$ as being composed of blocks, with $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$}
@@ -2147,8 +2147,8 @@ See figures below.
    \EndProcedure
     \State
 
-    \Require Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
-    \Ensure $A$ is partitioned
+  \State \textbf{Require: } Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
+  \State \textbf{Ensure: }  $A$ is partitioned
     \Procedure{Reorder}{$A$, $n$}
       \State $t \gets $ least integer such that $t\cdot b > n\cdot 4/5$
       \State Reorder($A$, $t$)
