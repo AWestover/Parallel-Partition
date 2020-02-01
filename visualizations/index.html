@@ -14,10 +14,18 @@
 		<link rel="stylesheet" href="pkgs/bootstrap/bootstrap.min.css" type="text/css">
 	</head>
 	<body>
-		<div style="padding-left: 3%; padding-right: 3%;">
-		<h2>This is a visualization of the parallel step of the strided algorithm. Rectangles heights correspond to the values in the array A that we are partitioning. There are t levels that are interleaved. These are the P_i in the strided algorithm. A rectangle is colored red if it is currently being processed, black if it was processed and did not need to be swapped, yellow if it was processed and did need to be swapped, and white if it has not yet been processed. The fact that the different levels tend to end up at about the same index is evidence that the strided algorithm works (i.e. all the P_is have about the same middle, so the recursive subproblem is small).</h2>
-		</div>
-		<div style="padding-left: 3%; padding-right: 3%; width: 40%">
+		<div style="padding-left: 3vw; padding-right: 3vw; padding-top: 2vh; width: 100vw">
+      <div style="width:50vw; float:left ">
+        <h2>Parallel Partition Visualization</h2>
+        <h4>Alek Westover</h4>
+        <p><strong>What is this?</strong> <br> I was accepted into <a href="http://math.mit.edu/research/highschool/primes/index.php">MIT PRIMES</a>, and worked on a Computer Science research project with the help of my mentor Bill. Specifically, I considered the problem of creating a fast algorithm with good theoretical guarantees for the "Parallel Partition Problem". This website is a nice visualization that I made of a parallel partition algorithm. </p>
+        <p>For more information, see <a href="parallelPartitionProblemWriteupAlek.pdf">my paper</a></p>
+      <p>This is a visualization of the parallel step of the strided algorithm. Rectangles heights correspond to the values in the array A that we are partitioning. There are t levels that are interleaved. These are the P_i in the strided algorithm. A rectangle is colored red if it is currently being processed, black if it was processed and did not need to be swapped, yellow if it was processed and did need to be swapped, and white if it has not yet been processed. The fact that the different levels tend to end up at about the same index is evidence that the strided algorithm works (i.e. all the P_is have about the same middle, so the recursive subproblem is small). </p>
+      <p>The top array is the whole array, and below it are the subarrays that each processor gets to work on. This allows for inspection of what is happening in the entire array based on what happens in the subarrays. </p>
+      </div>
+    </div>
+		<div style="padding-left: 3%; padding-right: 3%; width: 40vw; float: left">
+      <h4>Toggle Simulation Parameters:</h4>
 			<label>next N:</label>
 			<input type="number" value="300" name="nextN" id="nextN"/>
 			<label>speed:</label>
