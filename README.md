@@ -8,7 +8,7 @@ See how-to-use.txt for more information.
 
 # Confusions:
 
-- [ ]
+- [X]
 Q: Is this really EREW?
 A: Emphasizez that CREW is really just as good, we assume for loops contant depth, but dispersal of local variables in EREW is "really" log-depth  
 @: Bill
@@ -41,8 +41,8 @@ A:
 
 - [ ]
 Q: Why no worst-case inputs for strided (*3)
-A: ???????????/
-@:
+A: ???????????/ sentence about why that would be useless?
+@:  no one
 
 # minor
 
@@ -52,7 +52,7 @@ A: increase clarity
 @: alek does, bill checks
 
 - [ ]
-Q: pg 11 3.5 and 0.5 #s
+Q: pg 11 [3.5 and 0.5 #s]
 A: clarify
 @: Bill
 
@@ -61,7 +61,7 @@ Q: separate phase to figure out if preds > succ in first alg
 A: separate phase to figure out if preds > succ in first alg
 @: Bill
 
-- [ ]
+- [X]
 Q: 1 based arrays as convention
 A: clarify
 @: Alek
@@ -86,7 +86,7 @@ A: polylog cache *per* processor  [[add in prelims]]
 - [ ]
 Q: More minor critiques
 
-- []
+- [X]
 Q: Citation for work stealing
 
 

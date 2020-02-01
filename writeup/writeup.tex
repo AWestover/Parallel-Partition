@@ -100,9 +100,15 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 \usepackage{hyperref}
 
-
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\fancyfoot[R]{\thepage}
+% \AtBeginDocument{\thispagestyle{plain}}
 
 \begin{document}
+
 \begin{titlepage}
 \begin{center}
   \vspace*{1cm}
@@ -136,10 +142,10 @@ counterpart. Both algorithms remain bottlenecked by memory bandwidth,
 however, due to the fact that they require multiple passes over the
 input array. 
 
-By using the prefix-sum based algorithm as a subroutine within our
-randomized algorithm, we are able to combine the theoretical guarantees of both
-algorithms to get an algorithm with span $O(\log n \cdot \log \log n)$ and provably
-optimal cache behavior.
+We show that by using the prefix-sum based algorithm as a subroutine within the
+randomized algorithm, one can combine the theoretical guarantees of both
+algorithms, achieving span $O(\log n \cdot \log \log n)$ and provably
+optimal cache behavior up to low-order terms.
 
 The randomized algorithm achieves near-ideal scaling in practice by avoiding the
 memory-bandwidth bottleneck. The algorithm's performance is comparable to that
@@ -216,11 +222,11 @@ lacks theoretical guarantees on its span and cache behavior.
 
 %% \keywords{Parallel Partition, EREW PRAM, in-place algorithms}
 
-
 \maketitle
+\thispagestyle{fancy}
 % \begin{abstract}
 % \end{abstract}
-% \thispagestyle{empty}
+% \pagestyle{plain}
 % \clearpage
 % \setcounter{page}{1}
 
@@ -280,7 +286,7 @@ that wishes to achieve state-of-the art performance on a large
 multi-processor machine must be (at least close to) in place.
 
 Currently the only practical in-place parallel sorting algorithms either rely
-heavily on concurrency mechanisms such as atomic operations mechanisms
+heavily on concurrency mechanisms such as atomic operations
 \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03}, or abstain from
 theoretical guarantees \cite{FrancisPa92}. Parallel merge sort
 \cite{Hagerup89} was made in-place by Katajainen \cite{Katajainen93},
@@ -344,9 +350,9 @@ theoretical guarantees on work/span and on cache-optimality. This is
 achieved by randomly perturbing the internal structure of the Strided
 Algorithm, and adding a recursion step that was previously not
 possible. Whereas the Strided Algorithm comes with theoretical
-guarantees only for certain inputs, the Smoothed Striding Algorithm is
+guarantees only for certain inputs, the Smoothed Striding Algorithm 
 has polylogarithmic span, and exhibits provably optimal cache behavior
-up to small-order factors. In practice, the Smoothed Striding
+up to small-order factors for all inputs. In practice, the Smoothed Striding
 Algorithm performs within 15\% of the Strided Algorithm on a large
 number of threads.
 
@@ -391,7 +397,7 @@ number of threads.
 % large number of threads.
 
 \paragraph{Outline} We begin in Section \ref{secprelim} by discussing
-background parallel algorithms and the Parallel Partition Problem. In
+background on parallel algorithms and the Parallel Partition Problem. In
 Section \ref{sec:smoothing}, we present and analyze the Smoothed
 Striding Algorithm. In Appendix \ref{secalg} we give an alternative
 algorithm that achieves a nearly optimal span of
@@ -408,7 +414,7 @@ performances. Finally, we conclude with open questions in Section
 \section{Preliminaries}\label{secprelim}
 
 We begin by describing the parallelism and memory model used in
-the paper, and by presenting background on parallel partition.
+the paper, and by presenting background on the parallel partition problem.
 
 \paragraph{Workflow Model} We consider a simple language-based model of parallelism in which algorithms achieve parallelism through the use of \defn{parallel-for-loops} (see, e.g.,
 \cite{Blelloch96,AcarBl16,CLRS}); function calls within the inner loop
@@ -611,7 +617,7 @@ is, our analyses will treat non-pinned contents of the cache as being
 managed via LRU.
 
 \paragraph{The Strided Algorithm \cite{FrancisPa92}}
-The Smoothed Striding Algorithm borrows several structural ideas from a previous algorithm of Francis and Pannan \cite{FrancisPa92}, which we call the Strided Algorithm. The Strided Algorithm is designed to behave well on random arrays $A$, achieving span $\tilde{O}(n^{2/3})$ and exhibiting only $n/b + \tilde{O}(n^{2/3} / b)$  cache misses on such inputs. On worst-case inputs, however, the Strided Algorithm has span $\Omega(n)$ and incurs $n/b + \Omega(n/b)$ cache misses. Our algorithm, the Smoothed Striding Algorithm, builds on the Strided Algorithm by randomly perturbing the internal structure of the original algorithm; in doing so, we are able to provide provable performance guarantees on arbitrary inputs, and to add a recursion step that was previously impossible.
+The Smoothed Striding Algorithm borrows several structural ideas from a previous algorithm of Francis and Pannan \cite{FrancisPa92}, which we call the Strided Algorithm. The Strided Algorithm is designed to behave well on random arrays $A$, achieving span $\tilde{O}(n^{2/3})$ and exhibiting only $n/b + \tilde{O}(n^{2/3} / b)$  cache misses on such inputs. On worst-case inputs, however, the Strided Algorithm has span $\Omega(n)$ and incurs $n/b + \Omega(n/b)$ cache misses. Our algorithm, the Smoothed Striding Algorithm, builds on the Strided Algorithm by randomly perturbing the internal structure of the original algorithm; in doing so, we are able to provide provable performance guarantees for arbitrary inputs, and to add a recursion step that was previously impossible.
 
 The original \defn{Strided Algorithm} consists of two steps: 
 \begin{itemize}
@@ -710,7 +716,7 @@ no progress.
 The main challenge in designing the Smoothed Striding Algorithm
 becomes the construction of $U_1, \ldots, U_{g}$ without
 violating the in-place nature of the algorithm. A natural approach
-might be to store for each $U_i$ and each $C_j$ the index of the cache
+might be to store for each $U_i, C_j$ the index of the cache
 line in $C_j$ that $U_i$ contains. This would require the storage of
 $\Theta(n / b)$ numbers as metadata, however, preventing the algorithm
 from being in-place. To save space, the key insight is to select a
@@ -728,7 +734,7 @@ the algorithm to achieve polylogarithmic span. As an alternative to
 recursing, one can also use the in-place algorithm from Appendix
 \ref{secalg} in order to partition \\ $A[v_{\text{min}}], \ldots,
   A[v_{\text{max}} - 1]$. This results in an improved span (since the
-algorithm from Appendix \ref{secalg} has span only $O(\log n \log \log
+algorithm from Appendix \ref{secalg} has span only \\ $O(\log n \log \log
 n)$), while still incurring only $n (1 + o(1))$ cache misses (since
 the cache-inefficient algorithm from Appendix \ref{secalg} is only used
 on a small subarray of $A$). We analyze both the recursive version of
@@ -935,7 +941,7 @@ probability at least $1 - \epsilon$, all of $\mu_1, \ldots, \mu_{g}$ are within 
 
 
 To complete the proof we will show that the occurrence of the event
-that all $y$ simultaneously satisfy $|\mu - \mu_y| < \delta$ implies
+that all $\mu_y$ simultaneously satisfy $|\mu - \mu_y| < \delta$ implies
 that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
 
 %% Let $U_i(j)$ denote the index in $A$ of the $j$-th element in
@@ -1120,8 +1126,8 @@ A particularly natural parameter setting for the Recursive algorithm occurs at $
 
 \section{Performance Comparisons}\label{secexp}
 
-In this section, we implement the techniques from Sections
-\ref{secalg} and \ref{sec:smoothing} to build space-efficient and
+In this section, we implement the techniques from Appendix
+\ref{secalg} and Section \ref{sec:smoothing} to build space-efficient and
 in-place parallel-partition functions.
 
 
@@ -1131,7 +1137,7 @@ initially generated so that each is randomly either larger or smaller
 than the pivot.
 
 In Subsection \ref{subsecclassic}, we evaluate the techniques in
-Section \ref{secalg} for transforming the standard
+Appendix \ref{secalg} for transforming the standard
 parallel-prefix-based partition algorithm into an in-place
 algorithm. We compare the performance of three parallel-partition
 implementations: (1) The \defn{high-space} implementation which
@@ -1142,7 +1148,7 @@ which further eliminates the auxiliary space used in the Reordering
 phase of the algorithm. The low-space implementation still uses a
 small amount of auxiliary memory for the parallel-prefix, storing
 every $O(\log n)$-th element of the parallel-prefix array explicitly
-rather than using the implicit-storage approach in Section
+rather than using the implicit-storage approach in Appendix
 \ref{secalg}. Nonetheless the space consumption is several orders of
 magnitude smaller than the original algorithm.
 
@@ -1155,9 +1161,9 @@ bottlenecked by memory throughput, however, suggesting that the cache-optimal Sm
 
 In Subsection \ref{subsecstrided}, we evaluate the performance of the
 Recursive Smoothed Striding Algorithm and the Strided
-Algorithms. Unlike the algorithms described above, the implementations
+Algorithm. Unlike the algorithms described above, the implementations
 of both of these algorithms are fully in-place, meaning that the total
-space overhead is only $\polylog n$. The cache efficiency of the two
+space overhead is only $\polylog n$. The cache efficiency of these two
 algorithms allows for them to achieve substantially better scaling
 than their parallel-prefix-based counterparts. The Strided Algorithm
 tends to slightly outperform the Smoothed Striding Algorithm, though
@@ -1202,7 +1208,7 @@ be performed on shared values such as $n$ and the pointer to the input
 array. Our code is compiled using g++ 7.3.0, with \emph{march=native}
 and at optimization level three. 
 
-Our implementations are available at \\ \github.
+Our implementations are available on GitHub.
 
 
 \subsection{Comparing Parallel-Prefix-Based Algorithms}\label{subsecclassic}
@@ -1213,7 +1219,7 @@ achieve space efficiency:
 \begin{itemize}[leftmargin = .15in]
 \item \emph{A Serial Baseline:} This uses the serial in-place
   partition implementation from GNU Libc quicksort, with minor
-  adaptions to optimize it for the case of sorting 64-bit integers
+  adaptations to optimize it for the case of sorting 64-bit integers
   (i.e., inlining the comparison function, etc.).
 \item \emph{The High-Space Parallel Implementation:} This uses the
   standard parallel partition algorithm \cite{Blelloch96,AcarBl16}, as
@@ -1225,7 +1231,7 @@ achieve space efficiency:
   element of the prefix-sum array $B$, as in Section
   \ref{secalg}. (Here $O(\log n)$ is hard-coded as 64.) The array $B$
   is initialized to be of size $n / 64$, with each component equal to
-  a sum of 64 elements, and then a parallel prefix sum is computed on
+  $\sum_{i=1}^{64} \dec(A[64 (i-1)+1])$, and then a parallel prefix sum is computed on
   the array $B$. Rather than implicitly encoding the elements of $B$ in
   $A$, we use an auxiliary array of size $n / 64$ to explicitly store
   the prefix sums.
@@ -1242,13 +1248,13 @@ achieve space efficiency:
     we use a series of smaller arrays of sizes $n / 128, n / 256,
     \ldots$ in the recursive computation of the prefix sum. The
     alternative of performing the parallel-prefix sum in place, as in
-    Section \ref{secalg}, tends to be less cache-friendly in
+    Appendix \ref{secalg}, tends to be less cache-friendly in
     practice.}
 \item \emph{The Low-Space Parallel Implementation:}
 Starting with the medium-space implementation, we make the reordering
-phase completely in-place using the preprocessing technique in Section
+phase completely in-place using the preprocessing technique in Appendix
 \ref{secalg}.\footnote{Depending on whether the majority of elements
-  are predecessors are successors, the algorithm goes down separate
+  are predecessors or successors, the algorithm goes down separate
   (but symmetric) code paths. In our timed experiments we test only
   with inputs containing more predecessors than successors, since this
   the slower of the two cases (by a very slight amount) for our
@@ -1588,7 +1594,7 @@ paper.
 Another important direction of work is the design of in-place parallel
 algorithms for sample-sort, the variant of quicksort in which multiple
 pivots are used simultaneously in each partition. Sample-sort can be
-implemented to exhibit fewer cache misses than quicksort, which is be
+implemented to exhibit fewer cache misses than quicksort, which is
 especially important when the computation is memory-bandwidth
 bound. The known in-place parallel algorithms for sample-sort rely
 heavily on atomic instructions \cite{AxtmannWi17} (even requiring
@@ -1945,7 +1951,7 @@ phase. Lemma \ref{lem:bitstore2} can therefore used in place of Lemma
 \ref{lem:bitstore} in order to complete the proof of Theorem
 \ref{thminplace} for arrays $A$ that contain duplicate elements.
 
-\section{Figures}
+\section{Figures}\label{sec:figures}
 See figures below.
 \begin{figure*}
   \begin{center}
