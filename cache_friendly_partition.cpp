@@ -2,7 +2,7 @@
 // AUTHOR: Alek Westover
 // Grouped Partition Algorithm (and Cache-Efficient Partial-Partition Algorithm)
 // 
-// TODO: TOGGLE THE FOLLOWING IN EXPERIMENTS:
+// Parameters to toggle in experiments:
 // * delta 
 // 		equalDelta makes it faster according to serial experiments
 // 		note: modify delta in the _groupedPartition_ function on line 294 ish to change this
@@ -63,7 +63,6 @@ int64_t computeS(int64_t n, double delta){
     return (int64_t)(log2(n) / (2*delta*delta));
 }
 
-// TODO: Define what the input and output are for this function -- Alek's IO description is below
 /*
  * INPUT: an array A of size n, the size n, and the pivotVal which the array will be partitioned with respect to
  * OUTPUT: the function partitions the array A in place and returns the number of predecessors in the array
@@ -340,8 +339,7 @@ int64_t groupedPartition(int64_t* A, int64_t N0, int64_t pivotVal){
     return middle;
 }
 
-// This is for testing correctness of the partition function when invoked by the sort function. Right now it is not passing!
-// TODO: Comment out the use of this in final version.
+// This is for testing correctness of the partition function when invoked by the sort function. 
 int64_t get_num_preds(int64_t* array, int64_t n, int64_t pivot) {
   int64_t num_preds = 0;
   for (int i = 0; i < n; i++) {
