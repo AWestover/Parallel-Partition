@@ -1345,7 +1345,7 @@ Prefix Sum phase, saving another half of a pass.
 %% will be recursing on the left or right half of the array. One could
 %% also implement the later levels of the Preprocessing Phase to have a
 %% more cache-friendly recursive structure, starting with the final step
-%% of the Preprocessing Phase and recursively working backwords to
+%% of the Preprocessing Phase and recursively working backwards to
 %% perform the entire phase in a depth-first recursive tree. Evaluating
 %% these optimizations would be an interesting direction of future work.
 
@@ -1361,7 +1361,7 @@ threads are attempting to immediately overwrite entries to the array
 after reading them. Given read-bandwidth $r$ bytes/second and
 read/write bandwidth $w$ bytes/second, the time needed for the
 low-space algorithm to perform its memory operations on an input of
-$m$ bytes will be roughly $3.5 m / w + .5m / r$ seconds.\footnote{A naive implementation of the algorithm would require roughly $m / r$ time to count the number of predecessors, followed by $2m / w$ time to perform the Preprocessing Phase, followed by roughly $m / r$ time to perform the Parallel Prefix Sum Pase, and then roughly $1.5 m/w$ time for the In-Place Reordering Phase. As described in the previous paragraph, however, the counting of predecessors and the Parallel Prefix Sum phase can both be overlapped with the Preprocessing phase so that their total added contribution to the Memory-Bandwidth Limitation is only $.5 m / r$.}  We call this
+$m$ bytes will be roughly $3.5 m / w + .5m / r$ seconds.\footnote{A naive implementation of the algorithm would require roughly $m / r$ time to count the number of predecessors, followed by $2m / w$ time to perform the Preprocessing Phase, followed by roughly $m / r$ time to perform the Parallel Prefix Sum Phase, and then roughly $1.5 m/w$ time for the In-Place Reordering Phase. As described in the previous paragraph, however, the counting of predecessors and the Parallel Prefix Sum phase can both be overlapped with the Preprocessing phase so that their total added contribution to the Memory-Bandwidth Limitation is only $.5 m / r$.}  We call this
 the \defn{bandwidth constraint}. No matter how optimized the
 implementation of the low-space algorithm is, the bandwidth constraint
 serves as a hard lower bound for the running
