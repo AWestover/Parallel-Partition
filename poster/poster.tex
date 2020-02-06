@@ -208,7 +208,7 @@
 	\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim3.eps}
   Define $v_i = $ index of first element greater than the pivot in $U_i$. 
 	\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim35.eps}
-	Identify leftmost and rightmost $v_i$. Note that $A[k] \le \text{pivot}$ for all $k \le v_\min$, and $A[k] > \text{pivot}$ for all $k > v_{\max}$.
+  Identify leftmost and rightmost $v_i$. Note that $A[k] \le \text{pivot}$ for all $k < v_{\min}$, and $A[k] > \text{pivot}$ for all $k \ge v_{\max}$.
 	\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim4.eps}
 	Recursively partition the subarray.\\
   {\color{blue}This step was previously impossible; adding randomization enables this step, which enables our algorithm's low span. }
