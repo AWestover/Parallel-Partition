@@ -1,0 +1,217 @@
+\documentclass[table,serif,mathserif,final]{beamer}
+\mode<presentation>{\usetheme{Lankton}}
+\RequirePackage{ragged2e}
+\usepackage{amsmath,amsfonts,amssymb,pxfonts,xspace}
+\usepackage{graphicx}
+\graphicspath{{./figures/}}
+\usepackage[orientation=landscape,size=custom,width=29.5,height=121,scale=.4,debug]{beamerposter}
+%\usepackage{pslatex} % use times roman
+\usepackage{amsthm}
+\usepackage{color}
+\usepackage{array}
+\usepackage{xy}
+\usepackage{setspace}
+\usepackage{tikz}
+\usetikzlibrary{matrix}
+\usepackage{mathptmx }
+\usetikzlibrary{arrows,shapes}
+\usepackage{pifont}
+\newcommand{\cmark}{{\color{blue}\fontsize{65}{60}\selectfont \ding{51}}}%
+\newcommand{\xmark}{{\color{red}\fontsize{65}{60}\selectfont \ding{55}}}%
+\newcommand{\citefont}[1]{{\huge \textcolor{gray}{#1}}}
+
+\usepackage{algorithm, algpseudocode}
+\def\E{\operatorname{\mathbb{E}}}
+\newcommand{\polylog}{\operatorname{polylog}}
+
+\usepackage[makeroom]{cancel}
+\usepackage{verbatim}
+\usetikzlibrary{arrows,shapes}
+
+
+\newcommand*\mycirc[1]{%
+  \begin{tikzpicture}
+    \node[draw,circle,inner sep=1pt] {#1};
+  \end{tikzpicture}}
+
+\newcommand\iitem{\item[\begin{Large}$\bullet$\end{Large}]}
+
+\newcommand{\rot}{\operatorname*{rot}}
+
+%\usepackage[pdftex]{graphicx}
+%\usepackage[left=1.5in,right=1.5in, top=1.5in,bottom=1.5in,]{geometry}
+\newcommand{\edit}[1]{{\color{red}\textbf{#1}}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\ot}{\otimes}
+\newcommand{\sign}{\operatorname{sign}}
+
+%----------------MACROS---------------%
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{clm}[thm]{Claim} 
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+\theoremstyle{remark}
+\newtheorem{rem}[thm]{Remark}
+\newtheorem{ex}[thm]{Example}
+
+\newcommand{\mycenter}[1]{\hfil #1 \hfil}
+\newcommand{\myzero}{\hfil $0$ \hfil}
+\newcommand{\ca}{\cellcolor{ca}}
+\newcommand{\cb}{\cellcolor{cb}}
+\newcommand{\cc}{\cellcolor{cc}}
+\def \av {\text{AV}}
+\newcommand{\match}[3]{
+\item {\textbf{#1}\newline Appears for #2 sets of patterns. \\ Example match: $\av_n($#3$)$ }
+}
+\newcommand{\matchone}[2]{
+\item {\textbf{#1}\newline Match: #2 \newline}
+}
+
+\newcommand{\footleft}{}
+\newcommand{\footright}{}
+%% %\dologotrue
+% \title{Cache Efficient Parallel Partition Algorithms \\An In-Place Exclusive Read/Write Memory Algorithm}
+
+%-- Header and footer information ----------------------------------
+\setbeamertemplate{headline}{
+ \leavevmode
+    \vskip1cm
+    \centering
+    % \usebeamercolor{title in headline}{\fontsize{40}{50}\selectfont \textbf{\inserttitle} \\[0.5ex]}
+    % \usebeamercolor{author in headline}{\Huge{\insertauthor}\\[1ex]}
+    % \usebeamercolor{institute in headline}{\Huge{\insertinstitute}\\[1ex]}
+
+ \hspace{0.5in}\begin{beamercolorbox}[wd=47in,colsep=0.15cm]{cboxb}\end{beamercolorbox}
+}
+
+
+%-------------------------------------------------------------------
+\definecolor{math}{rgb}{0.4,0.4,1}
+%\definecolor{proven}{rgb}{0.4,0.4,1}
+%\definecolor{conject}{rgb}{0.7.0,7,1}
+%\definecolor{comput}{rgb}{09,0.9,1}
+%\definecolor{lightslateblue}{rgb}{0.517647,0.43921569,1} % light slate blue 0x8470ff (132,112,255)
+%\definecolor{proven}{rgb}{0.52941176,0.80784313,0.98039} % sky blue 0x87ceeb (135,206,250)
+%\definecolor{conject}{rgb}{0.7.0,7,1}
+%\definecolor{comput}{rgb}{0.9,0.9,1}
+%\definecolor{proven}{rgb}{0.7,1,1} % sky blue 0x87ceeb (135,206,250)
+%\definecolor{conject}{rgb}{0.4,0.4,1}
+%\definecolor{comput}{rgb}{1,0.9,1}
+
+%\definecolor{proven}{rgb}{0.59608,0.98431,0.59608} % pale green 0x98fb98 152,251,152
+%\definecolor{comput}{rgb}{0.75,1,0.75} % pale green 0x98fb98 152,251,152
+\definecolor{ca}{rgb}{0.875,1,0.875} % lighter than pale green
+\definecolor{cb}{rgb}{0.75,1,1} % sky blue 0x87ceeb (135,206,250)
+\definecolor{cc}{rgb}{1,0.9,1}
+%\definecolor{comput}{rgb}{1,1,1} % sky blue 0x87ceeb (135,206,250)
+
+
+\definecolor{darkgreen}{rgb}{0.4,0.8,0.5} 
+
+%-- Main Document --------------------------------------------------
+\begin{document}
+\begin{frame}{}
+
+\begin{block}{\Huge Recursive Strategies}
+  \justifying
+  % TODO: fix this
+  \Huge The smoothed striding algorithm allows for the subproblems to be solved with recursion. There are two algorithms that can be used in recursion: \\
+	\begin{itemize}
+    \item In the \emph{Recursive Smoothed Striding Algorithm} we recurse with the smoothed striding algorithm. {\color{red}This gets span $O(\log^2 n)$ which is not great,} but this algorithm {\color{green}is very simple to implement, while maintaining optimal cache behavior}.
+    \item We can also recurse with a Cache-Inneficient In-Place Parallel-Partition algorithm, that was developed concurrently to our algorithm. Doing so we achieve span $O(\log n \log\log n)$ and optimal cache behavior.
+	\end{itemize}
+\end{block}
+
+\begin{block}{\Huge Analysis Overview}
+  \justifying
+  \Huge
+  % TODO: fix this
+    Let $\mu$ be the faction of elements of the array that are less than the pivot, and $\mu_i$ be the fraction of elements of $U_i$ that are less than the pivot.
+  \begin{itemize}
+    \item Each $U_i$ has a random element from each chunk of the array, so each
+      element of each $U_i$ is randomly either greater than or less than the
+      pivot, with probabilities $1-\mu, \mu$.
+    \item $|U_i| = \polylog n$, so a Chernoff Bound guarantees that all $U_i$'s
+      will have $\mu_i$'s similar to $\E[\mu_i] = \mu$ with high probability in $n$.
+    \item The concentration of $\mu_i$'s induces a concentration of $v_i$'s. 
+    \item This guarantees that $v_{\max} - v_{\min}$ is small. 
+  \end{itemize}
+\end{block}
+
+\begin{block}{\Huge Pseudocode}
+  \justifying
+  % TODO: fix this
+  % \Huge
+
+\begin{figure}
+  \caption{The Smoothed Striding Algorithm}
+  \label{alg:parallelPartition_smoothedStriding}
+  \begin{algorithmic}% [1] for line numbers
+    \State \textbf{Recall:} 
+    \State $A$ is the array to be partitioned, of length $n$. 
+    \State We break $A$ into chunks, each consisting of $g$ cache lines of size $b$.
+    \State We create $g$ groups $U_1,\ldots, U_g$ that each contain a single cache line from each chunk,
+    \State $U_i$'s $j$-th cache line is the $(X[j]+i \bmod g + 1)$-th cache line in the $j$-th chunk of $A$.
+    \State
+
+    \Procedure{Get Block Start Index}{$X$, $g$, $b$, $i$, $j$}
+      \Comment This procedure returns the index in $A$ of the start of $U_i's$ $j$-th block.
+      \State\Return $b\cdot ((X[j] + i \bmod g) +(j-1)\cdot g)+1$
+    \EndProcedure
+    \State
+
+    \Procedure{ParallelPartition}{$A$, $n$, $g$, $b$}
+      \If{$g<2$}
+        \State serial partition $A$
+      \Else
+        \For{$j \in \{1,2,\ldots,n/(gb)\}$}
+          \State $X[j] \gets$ a random integer from $[1,g]$ 
+        \EndFor
+
+        % \State // \emph{We implement the following parallel for-loop with recursive spawns}
+        % \State // \emph{This facilitates computing $v_{min}$, $v_{max}$ without storing $v_y$'s}
+        \ForAll{$ i \in \{1,2,\ldots,g\}$ in parallel} \Comment We perform a serial partition on all $U_i$'s in parallel
+
+          \State low $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$1$)
+          \Comment low $\gets$ index of the first element in $U_i$
+          \State high $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$n/(gb)$) + $b-1$
+          \Comment high $\gets$ index of the last element in $U_i$
+
+          \While{low $<$ high} 
+            \While{A[low] $\leq$ pivotValue}
+              \State low $\gets$ low$+1$
+              \If{low $\bmod b \equiv 0$ } 
+                \Comment Perform a block increment once low reaches the end of a block
+                \State $k \gets $ number of block increments so far (including this one)
+                \State low $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$k$)
+                \Comment Increase low to start of block $k$ of $G_i$
+              \EndIf
+            \EndWhile
+            \While{A[high] $>$ pivotValue}
+              \State high $\gets$ high$-1$
+              \If{high $\bmod b \equiv 1$} 
+                \Comment Perform a block decrement once high reaches the beginning of a block
+                \State $k \gets $ number of block decrements so far (including this one)
+                \State $k' \gets n/(gb) - k$
+                \State high $\gets$ GetBlockStartIndex($X$, $g$,$b$,$i$,$k'$) $+b-1$
+                \Comment Decrease high to end of block $k'$ of $G_i$
+              \EndIf
+            \EndWhile
+            \State Swap $A[\text{low}]$ and $A[\text{high}]$
+          \EndWhile
+        \EndFor
+        \State Recurse on $A[v_{min}],\ldots,A[v_{max}-1]$
+      \EndIf
+    \EndProcedure
+  \end{algorithmic}	
+\end{figure}
+
+\end{block}
+
+\end{frame}
+\end{document}
