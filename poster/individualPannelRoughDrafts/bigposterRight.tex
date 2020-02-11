@@ -4,7 +4,7 @@
 \usepackage{amsmath,amsfonts,amssymb,pxfonts,xspace}
 \usepackage{graphicx}
 \graphicspath{{./figures/}}
-\usepackage[orientation=landscape,size=custom,width=29.5,height=121,scale=.4,debug]{beamerposter}
+\usepackage[orientation=landscape,size=custom,width=29.5,height=121,scale=.5,debug]{beamerposter}
 %\usepackage{pslatex} % use times roman
 \usepackage{amsthm}
 \usepackage{color}
@@ -23,6 +23,7 @@
 \usepackage{algorithm, algpseudocode}
 \def\E{\operatorname{\mathbb{E}}}
 \newcommand{\polylog}{\operatorname{polylog}}
+\newcommand{\poly}{\operatorname{poly}}
 
 \usepackage[makeroom]{cancel}
 \usepackage{verbatim}
@@ -126,6 +127,37 @@
     \item We can also recurse with a Cache-Inneficient In-Place Parallel-Partition algorithm, that was developed concurrently to our algorithm. Doing so we achieve span $O(\log n \log\log n)$ and optimal cache behavior.
 	\end{itemize}
 \end{block}
+\vspace{1cm}
+
+\begin{block}{\Huge Formal Theoretical Results }
+  \Huge
+  \textbf{Proposition:\\}
+  Let $\epsilon \in (0, 1/2)$ and $\delta \in (0, 1/2)$ such that
+  $\epsilon \ge \frac{1}{\poly(n)}$ and $\delta \ge
+  \frac{1}{\polylog(n)}$. Suppose $s > \frac{\ln
+    (n/\epsilon)}{\delta^2}$. Finally, suppose that each processor has
+  a cache of size at least $s + c$ for a sufficiently large constant
+  $c$.
+
+  Then the Partial-Partition Algorithm achieves work $O(n)$; achieves
+  span $O\left(b \cdot s\right)$; incurs $\frac{s+n}{b} + O(1)$ cache
+  misses; and guarantees with probability $1 - \epsilon$ that
+  $$v_{\text{max}}-v_{\text{min}} < 4 n \delta.$$
+  
+  We have the following corrolaries based on the two recursive strategies: 
+
+  \textbf{Corrolarry: \\}
+Suppose $b \le o(\log \log n)$. Then the Cache-Efficient Full-Partition Algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.\\
+
+\textbf{Corrolarry: \\}
+	With high probability in $n$, the Recursive Smoothed Striding Algorithm using parameter $\delta=1/\sqrt{\log n}$:
+  achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log n}))$ cache misses. 
+
+
+
+
+\end{block}
+\vspace{1cm}
 
 \begin{block}{\Huge Analysis Overview}
   \justifying
@@ -133,7 +165,7 @@
   % TODO: fix this
     Let $\mu$ be the faction of elements of the array that are less than the pivot, and $\mu_i$ be the fraction of elements of $U_i$ that are less than the pivot.
   \begin{itemize}
-    \item Each $U_i$ has a random element from each chunk of the array, so each
+    \item {\color{red} NOPE}Each $U_i$ has a random element from each chunk of the array, so each
       element of each $U_i$ is randomly either greater than or less than the
       pivot, with probabilities $1-\mu, \mu$.
     \item $|U_i| = \polylog n$, so a Chernoff Bound guarantees that all $U_i$'s
@@ -142,11 +174,11 @@
     \item This guarantees that $v_{\max} - v_{\min}$ is small. 
   \end{itemize}
 \end{block}
+\vspace{1cm}
 
 \begin{block}{\Huge Pseudocode}
   \justifying
-  % TODO: fix this
-  % \Huge
+  \Large
 
 \begin{figure}
   \caption{The Smoothed Striding Algorithm}

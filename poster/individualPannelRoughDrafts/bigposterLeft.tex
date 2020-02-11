@@ -4,7 +4,7 @@
 \usepackage{amsmath,amsfonts,amssymb,pxfonts,xspace}
 \usepackage{graphicx}
 \graphicspath{{./figures/}}
-\usepackage[orientation=landscape,size=custom,width=29.5,height=121,scale=.4,debug]{beamerposter}
+\usepackage[orientation=landscape,size=custom,width=29.5,height=121,scale=.5,debug]{beamerposter}
 %\usepackage{pslatex} % use times roman
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -129,6 +129,7 @@
 
   \includegraphics[width=\linewidth]{imgs/partitionDefn/partitionDefn2Ann.eps}
 \end{block}
+\vspace{1cm}
 
 \begin{block}{\Huge What is A Parallel Algorithm?}
   \justifying
@@ -138,11 +139,12 @@
 
   \textbf{Example:} Many tasks have parts that can be performed concurrently; such tasks can be performed faster with parallel computing.
 
-  {\color{blue} Program execution in serial and in parallel }
+  {\color{blue} Program execution in serial and in parallel: }
 
   \centering
   \includegraphics[width=0.8\linewidth]{imgs/parallelForLoop/serialParallelComparison.eps}
 \end{block}
+\vspace{1cm}
 
 \begin{block}{\Huge Performance Metrics for Parallel Algorithms}
   \Huge
@@ -164,12 +166,13 @@
     \vspace{0.3cm}
     \textbf{Span:} $T_\infty$
     \begin{itemize}
-      \item time to run on infinitely many processors
+      \item time to run on infinitely \\many processors
       \item "height of the graph"
     \end{itemize}	
     \end{column}
 \end{columns}
 \end{block}
+\vspace{1cm}
 
 \begin{block}{\Huge What is Cache Efficiency?}
   \justifying
@@ -183,19 +186,7 @@
     \item Deal with elements that are close in memory together
   \end{itemize}
 \end{block}
-
-\begin{block}{\Huge Why is The Partition Problem Important?}
-  \justifying
-  \Huge
-  % TODO: fix this
-  The Partition Problem is a fundamental problem in computer science. Additionally, it is used in many algorithms such as
-  \begin{itemize}
-    \item Parallel Quicksort. This is the most well-known application of parallel-partition. Sorting is a very fundamental problem.
-    \item Filtering operations.
-  \end{itemize}
-  Humans like sorted data.\\
-  Computers like sorted data.
-\end{block}
+\vspace{1cm}
 
 \begin{block}{\Huge Previous Work on the Partition Problem}
   \justifying

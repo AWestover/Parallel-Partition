@@ -4,7 +4,7 @@
 \usepackage{amsmath,amsfonts,amssymb,pxfonts,xspace}
 \usepackage{graphicx}
 \graphicspath{{./figures/}}
-\usepackage[orientation=landscape,size=custom,width=59,height=121,scale=.4,debug]{beamerposter}
+\usepackage[orientation=landscape,size=custom,width=59,height=121,scale=.5,debug]{beamerposter}
 %\usepackage{pslatex} % use times roman
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -116,7 +116,21 @@
 \begin{document}
 \begin{frame}{}
 \begin{columns}[t]
-  \begin{column}{0.5\linewidth}
+  \begin{column}{0.4\linewidth}
+
+\begin{block}{\Huge Why is The Partition Problem Important?}
+  \justifying
+  \Huge
+  % TODO: fix this
+  The Partition Problem is a fundamental problem in computer science. Additionally, it is used in many algorithms such as
+  \begin{itemize}
+    \item Parallel Quicksort. This is the most well-known application of parallel-partition. Sorting is a very fundamental problem.
+    \item Filtering operations.
+  \end{itemize}
+  Humans like sorted data.\\
+  Computers like sorted data.
+\end{block}
+
 \begin{block}{\Huge Our Research Question}
   \justifying
   \Huge Can we create an algorithm with \emph{theoretical guarantees} that is \emph{fast in practice}?
@@ -149,7 +163,7 @@
 \begin{block}{\Huge Strided Versus Smoothed-Striding Algorithm}
   \Huge
 	\begin{columns}[T] % align columns
-	\begin{column}{.45\textwidth}
+	\begin{column}{.4\textwidth}
 		\textbf{Strided Algorithm}\\\citefont{[Francis and Pannan, 92; Frias and Petit, 08]}\\
 		\vspace{0.25cm}
 		\begin{itemize}
@@ -159,7 +173,7 @@
 		\end{itemize}
 	\end{column}
 	\hfill
-	\begin{column}{.55\textwidth}
+	\begin{column}{.5\textwidth}
 		\textbf{Smoothed-Striding Algorithm}\\\citefont{}\\
 		\vspace{0.25cm}
 		\begin{itemize}
@@ -172,9 +186,20 @@
 
 \end{block}
 
+\begin{block}{\Huge Application To Parallel Quicksort}
+  \Huge
+  Parallel Quicksort is the most important application of Parallel Partition. Parallel Quicksort works as follows:
+  \begin{itemize}
+    \item Chose a pivot value randomly from the array
+    \item \emph{Partition} the array relative to the pivot value 
+    \item Recursively sort the subarrays (in parallel)
+  \end{itemize}
+  The depth of recursion is $O(\log n)$ with high probability in $n$, and each level of recursion requires span $O(\log n \log \log n)$ when using the smoothed striding algorithm, which results in span $O(\log^2 n \log \log n)$ and work $O(n\log n)$ for the entire parallel quicksort algorithm, which is within a factor of $\log \log n$ of optimal, while additionally guaranteeing that the algorithm is cache-friendly.
+\end{block}
+
   \end{column}
 
-  \begin{column}{0.5\linewidth}
+  \begin{column}{0.6\linewidth}
 \begin{block}{\Huge Smoothed Striding Algorithm}
   \Huge
 	Logically partition the array into chunks of adjacent elements.
@@ -211,13 +236,13 @@ Storing which elements make up each $U_i$ takes too much space!\\
 \end{figure}
 \end{block}
 
-\begin{block}{How to Store the groups}
+\begin{block}{\Huge How to Store the groups}
   %TODO fix
   \Huge
 	\textbf{Key Insight:} While each $U_i$ does need to contain a random element from each chunk, the $U_i$'s don't need to be \emph{independent}.
 
 	\vspace{0.5cm}
-	We store $U_1$, and all other groups are determined by a "circular shift" of $U_1$ (wraparound within each chunk).
+	We store $U_1$, and all other groups are determined by a ``circular shift" of $U_1$ (wraparound within each chunk).
 	% Specifically, let $X$ be an array with values chosen uniformly from $\{1,2,\ldots,g\}$. Then the $i$-th element of $U_j$ has index 
 	% $$ 1 + ((X[i]+j)\mod g)$$
 	\vspace{0.5cm}
