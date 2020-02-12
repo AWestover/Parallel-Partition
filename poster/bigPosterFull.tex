@@ -194,7 +194,7 @@
   \Huge
   \textbf{Explanation:} \emph{Cache} is a small part of memory that can be accessed much faster than ordinary RAM. When data is already loaded into Cache a program can rapidly access it; this is called a \emph{cache hit}. When data needed by a program isn't in cache it must be loaded into cache; this is called a \emph{cache miss}, and takes time. \\
   \textbf{Remark:} An algorithm with very few cache misses is \emph{Cache Efficient}; cache efficiency leads to faster performance in practice.\\
-  \textbf{Factors in Cache-Efficiency:}
+  \textbf{Factors Affecting Cache-Efficiency:}
   \begin{itemize}
     \item Perform low number of passes over the data
     \item Don't use extra memory, i.e. are \emph{In-Place}
@@ -206,14 +206,14 @@
 \begin{block}{\Huge Previous Work on the Partition Problem}
   \justifying
   \Huge
-  The ``Standard Algorithm" is {\color{darkgreen} theoretically optimal with span $O(\log n)$,} {\color{red} but slow in practice due to poor cache behavior.}
+  The ``Standard Algorithm" is {\color{blue} theoretically optimal with span $O(\log n)$,} {\color{red} but slow in practice due to poor cache behavior.}
 
-  The {\color{darkgreen}fastest algorithms in practice} {\color{red}lack theoretical guarantees}
+  The {\color{blue}fastest algorithms in practice} {\color{red}lack theoretical guarantees}
   \begin{itemize}
     \item Lock-based and atomic-variable based algorithms\\ \citefont{[Michael Axtmann, Sascha Witt, Daniel Ferizovic, and Peter Sanders, 2017; Philip Heidelberger, Alan Norton, and John T. Robinson, 1990; Philippas Tsigas and Yi Zhang, 2003]}\\
       {\color{red} Not Exclusive Read/Write Memory}
     \item The Strided Algorithm\\ \citefont{[Francis and Pannan, 92; Frias and Petit, 08]}\\ 
-      {\color{darkgreen}No locks or atomic-variables,} {\color{red}but no bound on span}
+      {\color{blue}No locks or atomic-variables,} {\color{red}but no bound on span}
   \end{itemize}
 \end{block}
 \end{column}
@@ -228,13 +228,13 @@
   \Huge
   The Partition Problem is a fundamental problem in computer science. Additionally, it is a subproblem that must be solved in many algorithms such as:
   \begin{itemize}
-    \item \emph{Parallel Quicksort} (the most famous and important application partition algorithms)
+    \item \emph{Parallel Quicksort} (the most prominent application of partition algorithms)
     \item \emph{Filtering operations}
   \end{itemize}
   Furthermore, the partition problem is of great practical importance as:
   \begin{itemize}
     \item Humans want organized data often, e.g. performing ``ORDER BY" on information from a database, or simply ordering data in a spreadsheet 
-    \item Many algorithms run faster, or rely on, having sorted data 
+    \item Many algorithms run faster, or rely on, sorted data 
   \end{itemize}
 \end{block}
 \vspace{0.5cm}
@@ -408,18 +408,18 @@ Storing which elements make up each $U_i$ takes too much space!\\
   \Huge We propose two algorithms for solving the recursive subproblem: \\
 	\begin{itemize}
     \item In the \emph{Hybrid Smoothed Striding Algorithm} we recurse with a (Cache-Inneficient) In-Place Parallel-Partition algorithm, that has span $O(\log n \log \log n)$. With this recursive strategy we achieve span $O(\log n \log \log n)$ overall -- which is within a $\log\log n$ factor of optimal -- and incur fewer than $(n+o(n))/b$ cache misses -- which is optimal up to low order terms-- for appropriate parameter choices, with high probability in $n$.
-    \item In the \emph{Recursive Smoothed Striding Algorithm} we recurse with the Smoothed Striding algorithm. {\color{red}This algorithm achieves span $O(\log^2 n)$ which is worse than the other approahc,} but this algorithm {\color{green} has the major benefit of simplicity to implement, while maintaining optimal cache behavior of $(n+o(n))/b$ for appropriate parameter choices, with high probability in $n$}.
+    \item In the \emph{Recursive Smoothed Striding Algorithm} we recurse with the Smoothed Striding algorithm. {\color{red}This algorithm achieves span $O(\log^2 n)$ which is worse than the other approach,} but this algorithm {\color{blue} has the major benefit of simplicity to implement, while maintaining optimal cache behavior of $(n+o(n))/b$ for appropriate parameter choices, with high probability in $n$}.
 	\end{itemize}
 \end{block}
 \vspace{1cm}
 
 % \begin{block}{\Huge Formal Theoretical Results }
 %   \Huge
-%   We have the following corrolaries based on the two recursive strategies: 
-%   \textbf{Corrolarry: \\}
+%   We have the following corollaries based on the two recursive strategies: 
+%   \textbf{Corollary: \\}
 % Suppose $b \le o(\log \log n)$. Then the Cache-Efficient Full-Partition Algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.\\
 
-% \textbf{Corrolarry: \\}
+% \textbf{Corollary: \\}
 %   With high probability in $n$, the Recursive Smoothed Striding Algorithm using parameter $\delta=1/\sqrt{\log n}$:
 %   achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log n}))$ cache misses. 
 
