@@ -19,7 +19,7 @@
         <h2>Parallel Partition Visualization</h2>
         <h4>Alek Westover</h4>
         <p><strong>What is this?</strong> <br> I was accepted into <a href="http://math.mit.edu/research/highschool/primes/index.php">MIT PRIMES</a>, and worked on a Computer Science research project with the help of my mentor Bill. Specifically, I considered the problem of creating a fast algorithm with good theoretical guarantees for the "Parallel Partition Problem". This website is a nice visualization that I made of a parallel partition algorithm. </p>
-        <p>For more information, see <a href="https://github.com/awestover/Parallel-Partition/blob/master/visualizations/parallelPartitionProblemWriteupAlek.pdf">a draft of my paper on github</a></p>
+        <p>For more information, see <a href="#poster">my poster below</a> or for <b>a lot</b> of information see <a href="https://github.com/awestover/Parallel-Partition/blob/master/visualizations/parallelPartitionProblemWriteupAlek.pdf">a draft of my paper on github</a></p>
       <p>This is a visualization of the parallel step of the strided algorithm. Rectangles heights correspond to the values in the array A that we are partitioning. There are t levels that are interleaved. These are the P_i in the strided algorithm. A rectangle is colored red if it is currently being processed, black if it was processed and did not need to be swapped, yellow if it was processed and did need to be swapped, and white if it has not yet been processed. The fact that the different levels tend to end up at about the same index is evidence that the strided algorithm works (i.e. all the P_is have about the same middle, so the recursive subproblem is small). </p>
       <p>The top array is the whole array, and below it are the subarrays that each processor gets to work on. This allows for inspection of what is happening in the entire array based on what happens in the subarrays. </p>
       </div>
@@ -56,5 +56,6 @@
 		<script src="sketch.js" charset="utf-8"></script>
 		<div id="cnv-parent" style="padding-left: 2%; padding-right: 2%">
 		</div>
+    <img id="poster" width=100% src="bigPosterFull.png" alt="poster"/>
 	</body>
 </html>
