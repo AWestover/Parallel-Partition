@@ -109,91 +109,90 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 \begin{document}
 
-\begin{titlepage}
-\begin{center}
-  \vspace*{1cm}
+% \begin{titlepage}
+% \begin{center}
+%   \vspace*{1cm}
 
-  {\Huge \textbf{Cache-Efficient Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}}
+%   {\Huge \textbf{Cache-Efficient Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}}
 
-  \vspace{0.5cm}
-  {\LARGE An In-Place Algorithm With Provably Optimal Cache Behavior}
-  \vspace{4cm}
-\end{center}
+%   \vspace{0.5cm}
+%   {\LARGE An In-Place Algorithm With Provably Optimal Cache Behavior}
+%   \vspace{4cm}
+% \end{center}
 
-\begin{center}
-\textbf{Abstract}
-\end{center}
-
-
-We present an in-place algorithm for the parallel partition problem
-that has linear work and polylogarithmic span. The algorithm uses only
-exclusive read/write shared variables, and can be implemented using
-parallel-for-loops without any additional concurrency considerations
-(i.e., the algorithm is EREW). A key feature of the algorithm is that
-it exhibits provably optimal cache behavior, up to small-order factors.
-
-We also present a second in-place EREW algorithm that has linear work
-and span $O(\log n \cdot \log \log n)$, which is within an
-$O(\log\log n)$ factor of the optimal span. By using this low-span
-algorithm as a subroutine within the cache-friendly algorithm, we are
-able to obtain a single EREW algorithm that combines their theoretical
-guarantees: the algorithm achieves span $O(\log n \cdot \log \log n)$ and
-optimal cache behavior. As an immediate consequence, we also get an
-in-place EREW quicksort algorithm with work $O(n \log n)$, span
-$O(\log^2 n \cdot \log \log n)$.
-
-Whereas the standard EREW algorithm for parallel partitioning is
-memory-bandwidth bound on large numbers of cores, our cache-friendly
-algorithm is able to achieve near-ideal scaling in practice by
-avoiding the memory-bandwidth bottleneck. The algorithm's performance
-is comparable to that of the Blocked Strided Algorithm of Francis,
-Pannan, Frias, and Petit, which is the previous state-of-the art for
-parallel EREW sorting algorithms, but which lacks theoretical
-guarantees on its span and cache behavior.
+% \begin{center}
+% \textbf{Abstract}
+% \end{center}
 
 
 % We present an in-place algorithm for the parallel partition problem
-% that has work $O(n)$ and span $O(\log n \cdot \log \log n)$. The
-% algorithm uses only exclusive read/write shared variables, and can be
-% implemented using parallel-for-loops without any additional
-% concurrency considerations (i.e., the algorithm is EREW). As an
-% immediate consequence, we also get an in-place quicksort algorithm
-% with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
+% that has linear work and polylogarithmic span. The algorithm uses only
+% exclusive read/write shared variables, and can be implemented using
+% parallel-for-loops without any additional concurrency considerations
+% (i.e., the algorithm is EREW). A key feature of the algorithm is that
+% it exhibits provably optimal cache behavior, up to small-order factors.
 
-% A low-space implementation of the algorithm leverages its improved
-% cache behavior to achieve a speedup over its fully out-of-place
-% counterpart. Both algorithms remain bottlenecked by memory bandwidth,
-% however, due to the fact that they require multiple passes over the
-% input array.
+% We also present a second in-place EREW algorithm that has linear work
+% and span $O(\log n \cdot \log \log n)$, which is within an
+% $O(\log\log n)$ factor of the optimal span. By using this low-span
+% algorithm as a subroutine within the cache-friendly algorithm, we are
+% able to obtain a single EREW algorithm that combines their theoretical
+% guarantees: the algorithm achieves span $O(\log n \cdot \log \log n)$ and
+% optimal cache behavior. As an immediate consequence, we also get an
+% in-place EREW quicksort algorithm with work $O(n \log n)$, span
+% $O(\log^2 n \cdot \log \log n)$.
 
-% Our second contribution is an in-place EREW algorithm with
-% polylogarithmic span and provably optimal cache behavior, up to
-% small-order factors.  The resulting algorithm achieves near-ideal
-% scaling in practice by avoiding the memory-bandwidth bottleneck. The
-% algorithm's performance is comparable to that of the Blocked Strided
-% Algorithm of Francis, Pannan, Frias, and Petit, which is the previous
-% state-of-the art for parallel EREW sorting algorithms, but which lacks
-% theoretical guarantees on its span and cache behavior.
+% Whereas the standard EREW algorithm for parallel partitioning is
+% memory-bandwidth bound on large numbers of cores, our cache-friendly
+% algorithm is able to achieve near-ideal scaling in practice by
+% avoiding the memory-bandwidth bottleneck. The algorithm's performance
+% is comparable to that of the Blocked Strided Algorithm of Francis,
+% Pannan, Frias, and Petit, which is the previous state-of-the art for
+% parallel EREW sorting algorithms, but which lacks theoretical
+% guarantees on its span and cache behavior.
+
+
+% % We present an in-place algorithm for the parallel partition problem
+% % that has work $O(n)$ and span $O(\log n \cdot \log \log n)$. The
+% % algorithm uses only exclusive read/write shared variables, and can be
+% % implemented using parallel-for-loops without any additional
+% % concurrency considerations (i.e., the algorithm is EREW). As an
+% % immediate consequence, we also get an in-place quicksort algorithm
+% % with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
+
+% % A low-space implementation of the algorithm leverages its improved
+% % cache behavior to achieve a speedup over its fully out-of-place
+% % counterpart. Both algorithms remain bottlenecked by memory bandwidth,
+% % however, due to the fact that they require multiple passes over the
+% % input array.
+
+% % Our second contribution is an in-place EREW algorithm with
+% % polylogarithmic span and provably optimal cache behavior, up to
+% % small-order factors.  The resulting algorithm achieves near-ideal
+% % scaling in practice by avoiding the memory-bandwidth bottleneck. The
+% % algorithm's performance is comparable to that of the Blocked Strided
+% % Algorithm of Francis, Pannan, Frias, and Petit, which is the previous
+% % state-of-the art for parallel EREW sorting algorithms, but which lacks
+% % theoretical guarantees on its span and cache behavior.
  
-\end{titlepage}
+% \end{titlepage}
 
 
 
-% \title[]{In-Place Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
-\title[]{}
-% \subtitle{}
+\title[]{In-Place Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
+\subtitle{An In-Place Algorithm With Provably Optimal Cache Behavior}
 
-% \author{William Kuszmaul}
-% \authornote{Supported by a Hertz Fellowship and a NSF GRFP Fellowship}
-% \affiliation{%
-%   \institution{Massachusetts Institute of Technology}
-% }
-% \email{kuszmaul@mit.edu}
+\author{William Kuszmaul}
+\authornote{Supported by a Hertz Fellowship and a NSF GRFP Fellowship}
+\affiliation{%
+  \institution{Massachusetts Institute of Technology}
+}
+\email{kuszmaul@mit.edu}
 
 
-% \author{Alek Westover}
-% \authornote{Supported by MIT PRIMES.}
-% \email{alek.westover@gmail.com}
+\author{Alek Westover}
+\authornote{Supported by MIT PRIMES.}
+\email{alek.westover@gmail.com}
 
 
 % The default list of authors is too long for headers.
@@ -220,13 +219,39 @@ guarantees on its span and cache behavior.
 
 %% \keywords{Parallel Partition, EREW PRAM, in-place algorithms}
 
-\maketitle
 \thispagestyle{fancy}
-% \begin{abstract}
-% \end{abstract}
+\begin{abstract}
+
+We present an in-place algorithm for the parallel partition problem
+that has linear work and polylogarithmic span. The algorithm uses only
+exclusive read/write shared variables, and can be implemented using
+parallel-for-loops without any additional concurrency considerations
+(i.e., the algorithm is EREW). A key feature of the algorithm is that
+it exhibits provably optimal cache behavior, up to small-order factors.
+
+We also present a second in-place EREW algorithm that has linear work
+and span $O(\log n \cdot \log \log n)$, which is within an
+$O(\log\log n)$ factor of the optimal span. By using this low-span
+algorithm as a subroutine within the cache-friendly algorithm, we are
+able to obtain a single EREW algorithm that combines their theoretical
+guarantees: the algorithm achieves span $O(\log n \cdot \log \log n)$ and
+optimal cache behavior. As an immediate consequence, we also get an
+in-place EREW quicksort algorithm with work $O(n \log n)$, span
+$O(\log^2 n \cdot \log \log n)$.
+
+Whereas the standard EREW algorithm for parallel partitioning is
+memory-bandwidth bound on large numbers of cores, our cache-friendly
+algorithm is able to achieve near-ideal scaling in practice by
+avoiding the memory-bandwidth bottleneck. The algorithm's performance
+is comparable to that of the Blocked Strided Algorithm of Francis,
+Pannan, Frias, and Petit, which is the previous state-of-the art for
+parallel EREW sorting algorithms, but which lacks theoretical
+guarantees on its span and cache behavior.
+\end{abstract}
 % \pagestyle{plain}
 % \clearpage
 % \setcounter{page}{1}
+\maketitle
 
 \section{Introduction}
 
