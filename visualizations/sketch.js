@@ -171,21 +171,22 @@ function partitionAnimation(){
 	pop();
 
 	for(let ti = 0; ti < t; ti++){
-		for(let i = ti; i < n; i+=t){
-			if (i == lows[ti]*t+(X[lows[ti]]+ti)%t || i == highs[ti]*t+(X[highs[ti]]+ti)%t){
+    for(let i = 0; i < n/t; i++){
+      let real_idx = i*t + (X[ti] + ti)% t;
+      if(i == lows[ti] || i == highs[ti]){
 				fill(255,0,0); // red
 			}
-			else if(swapFlags[i]){
+			else if(swapFlags[real_idx]){
 				// fill(255,255,0, 100);
-        fill(0,255,255,100);
+        fill(0,255,255);
 			}
-			else if (i < lows[ti]*t+(X[lows[ti]]+ti)%t || i > highs[ti]*t+(X[highs[ti]]+ti)%t) {
+			else if (i < lows[ti] || i > highs[ti]) {
 				fill(0,0,0); // black
 			}
 			else {
 				fill(255,255,255); // white
 			}
-			rect(i*width/n, 0.25*height*(1-A[i]), width/n, 0.25*height*A[i]);
+			rect(real_idx*width/n, 0.25*height*(1-A[real_idx]), width/n, 0.25*height*A[real_idx]);
 		}
 	}
 	// pivot value
