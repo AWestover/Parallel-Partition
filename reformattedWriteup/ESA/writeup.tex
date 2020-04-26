@@ -1,12 +1,13 @@
 \documentclass[10pt,a4paper]{article} 
 \usepackage[margin=2cm]{geometry} 
-\usepackage[moderate]{savetrees}
+\usepackage[subtle, mathspacing=normal]{savetrees}
 \usepackage{titling}
 
 \usepackage{mathtools}
 \newcommand{\defeq}{\vcentcolon=}
 \DeclarePairedDelimiter{\paren}{(}{)}
 
+\usepackage{xspace}
 \usepackage{enumitem}
 \usepackage{subcaption}
 
@@ -36,7 +37,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \newcommand{\poly}{\operatorname{poly}}
 \newcommand{\polylog}{\operatorname{polylog}}
 \newcommand{\github}{\url{github.com/awestover/Parallel-Partition}}
-\newcommand{\defn}[1]{{\textit{\textbf{\boldmath #1}}}}
+\newcommand{\defn}[1]{{\textit{\textbf{\boldmath #1}}}\xspace}
 \renewcommand{\paragraph}[1]{\vspace{0.09in}\noindent{\bf \boldmath #1.}} 
 \usepackage{amsmath}
 \usepackage{dsfont}
@@ -313,7 +314,7 @@ be used as a subroutine within the Smoothed Striding Algorithm to
 achieve the same span. Section \ref{secexp} implements the algorithms
 from this paper, along with the Strided Algorithm and the standard
 linear-space algorithm, in order to experimentally evaluate their
-performances. Finally, we conclude with open questions in Section
+performances. Finally, we conclude with open questions in Appendix
 \ref{sec:open}. Figures and pseudocode are differed to Appendices
 \ref{sec:figures} and \ref{sec:pseudocode}.
 
@@ -323,15 +324,22 @@ performances. Finally, we conclude with open questions in Section
 We begin by describing the parallelism and memory model used in
 the paper, and by presenting background on the parallel partition problem.
 
-\paragraph{Workflow Model} We consider a simple language-based model of parallelism in which algorithms achieve parallelism through the use of \defn{parallel-for-loops} (see, e.g.,
+\paragraph{Workflow Model} We consider a simple language-based model of
+parallelism in which algorithms achieve parallelism through the use of
+\defn{parallel-for-loops} (see, e.g.,
 \cite{Blelloch96,AcarBl16,CLRS}); function calls within the inner loop
-then allow for more complicated parallel structures (e.g., recursion). Our algorithms can also be implemented in the less restrictive PRAM model \cite{Blelloch96, AcarBl16}.
+then allow for more complicated parallel structures (e.g., recursion). Our
+algorithms can also be implemented in the PRAM model \cite{Blelloch96,
+AcarBl16}.
 
 Formally, a parallel-for-loop is given a range size $R \in \mathbb{N}$, a
 constant number of arguments $\arg_1, \arg_2, \ldots, \arg_c$, and a
 body of code. For each $i \in \{1, \ldots, R\}$, the loop launches a
 thread that is given loop-counter $i$ and local copies of the
-arguments $\arg_1, \arg_2, \ldots, \arg_c$. The threads are then taken up by processors and the iterations of the loop are performed in parallel. Only after every iteration of the loop is complete can control flow continue past the loop.
+arguments $\arg_1, \arg_2, \ldots, \arg_c$. The threads are then taken up by
+processors and the iterations of the loop are performed in parallel. Only after
+every iteration of the loop is complete can control flow continue past the
+loop.
 
 A parallel algorithm may be run on an arbitrary number $p$ of
 processors. The algorithm itself is oblivious to $p$, however, leaving
@@ -451,14 +459,14 @@ number of threads is fixed.
 
 \section{An In-Place Algorithm with Span $O(\log n \log \log n)$}
 In this section, we present an overview of the key algorithmic ideas needed to
-make the classic Parallel Partition algorithm in-place.
+make the classic Parallel Partition algorithm in-place, with span $O(\log n \log\log n)$.
 The algorithm we describe here is useful as a subroutine in our main algorithm,
-the Smoothed Striding Algorithm, which is discussed in Appendix
+the Smoothed Striding Algorithm, which is discussed in Section
 \ref{sec:smoothing}.
 The algorithm we discuss here has poor cache behavior, and so performs poorly
 in practice. However, using it as a subroutine on a small subproblem in the
-Smoothed Striding Algorithm allows it to achieve span $O(\log n \log\log n)$
-without sacrificing it's cache behavior. 
+Smoothed Striding Algorithm will allow the Smoothed Striding Algorithm to achieve span $O(\log n \log\log n)$
+without sacrificing its cache behavior. 
 Detailed analysis of this algorithm, in particular proof of correctness, is
 included in Appendix \ref{secalg}.
 We now outline the algorithm. 
@@ -492,12 +500,12 @@ reordering the prefix $P$ of $A$ consisting of the first $4/5 \cdot n$
 elements, so that the predecessors appear before the successors; (2)
 Then we simply swap each predecessor $A[i]$ in the final $1/5 \cdot n$
 elements with the corresponding element $S[A[i]]$. The fact that the
-prefix $P$ is successor-heavy ensures that the final $\frac{1}{5}
-\cdot n$ elements of the reordered $P$ will consist of
-successors. This implies that for each of the swaps between
-predecessors $A[i]$ in the final $1/5 \cdots n$ elements and earlier
-positions $S[A[i]]$, the latter element will be a successor. In other
-words, the swaps are now conflict free.
+prefix $P$ is successor-heavy ensures that, after step (1), the final 
+$\frac{1}{5} \cdot n$ elements of (the reordered) $P$ are successors. 
+This implies in step (2) that for each of the swaps between predecessors $A[i]$
+in the final $1/5 \cdot n$ elements and earlier positions $S[A[i]]$, the latter
+element will be in the prefix $P$. In other words, the swaps are now conflict
+free.
 
 Next consider how to remove the array $S$ from the Parallel-Prefix
 Phase. At face value, this would seem quite difficult since the
@@ -945,15 +953,15 @@ that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
 %% \alek{
   Recall that $G_i(j)$ denotes the index within $A$ of the $j$ th cache-line contained in $U_i$. By the definition of $G_i(j)$, $$(j - 1)g + 1 \le G_i(j) \le jg.$$ Note that $A[v_i]$ will occur in the $\lceil s\mu_i \rceil$-th cache-line of $U_i$ because $U_i$ is composed of $s$ cache lines. Hence $$(\lceil s\mu_i \rceil - 1) g b + 1 \le v_i \le \lceil s\mu_i \rceil g b,$$
   which means that
-  $$s\mu_i g b - gb - 1 \le v_i \le s\mu_i g b + gb.$$ Since $sgb =
+  $$s\mu_i g b - gb + 1 \le v_i \le s\mu_i g b + gb.$$ Since $sgb =
   n$, it follows that $|v_i - n \mu_i| \le gb$. Therefore,
   $$|v_i - n \mu| < gb + n\delta.$$
   This
 implies that the maximum of $|v_i - v_j|$ for
 any $i$ and $j$ is at most, $2bg + 2\delta n$. Thus,
 \begin{align*}
-  v_{\text{max}} - v_{\text{min}} & \le 2n \left( \delta + \frac{n}{bg} \right)  = 2n \left( \delta + s \right) \\
-  & \le 2n \left(\delta + \frac{2\delta^2}{\ln (2n / (b\epsilon))}\right) < 4n\cdot\delta.
+  v_{\text{max}} - v_{\text{min}} & \le 2n \left( \delta + \frac{bg}{n} \right)  = 2n \left( \delta + 1/s \right) \\
+  & \le 2n \left(\delta + \frac{\delta^2}{\ln (n / \epsilon)}\right) < 4n\cdot\delta.
 \end{align*}
 \end{proof}
 
@@ -1530,62 +1538,6 @@ quicksort, and further improving the scaling.
 %% suffering on smaller inputs as the number of cores grows.
 
 
-\section{Conclusion and Open Questions}\label{sec:open}
-
-Parallel partition is a fundamental primitive in parallel algorithms
-\cite{Blelloch96,AcarBl16}. Achieving faster and more space-efficient
-implementations, even by constant factors, is therefore of high
-practical importance. Until now, the only space-efficient algorithms
-for parallel partition have relied extensively on concurrency
-mechanisms or atomic operations, or lacked provable performance
-guarantees. If a parallel function is going to be invoked within a large
-variety of applications, then provable guarantees are highly
-desirable. Moreover, algorithms that avoid the use of concurrency
-mechanisms tend to scale more reliably (and with less dependency on
-the particulars of the underlying hardware).
-
-In this paper, we have shown that, somewhat surprisingly, one can
-adapt the classic parallel algorithm to completely eliminate the use
-of auxiliary memory, while still using only exclusive read/write
-shared variables, and maintaining a polylogarithmic span. Although the
-superior cache performance of the low-space algorithm results in
-practical speedups over its out-of-place counterpart, both algorithms
-remain far from the state-of-the art due to memory bandwidth bottlenecks. To close this gap, we also
-presented a second in-place algorithm, the Smoothed Striding
-Algorithm, which achieves polylogarithmic span while guaranteeing
-provably optimal cache performance up to low-order factors. The
-Smoothed Striding Algorithm introduces randomization techniques to the
-previous (blocked) Striding Algorithm of \cite{Frias08, FrancisPa92},
-which was known to perform well in practice but which previously
-exhibited poor theoretical guarantees. Our implementation of the
-Smoothed Striding Algorithm is fully in-place, exhibits
-polylogarithmic span, and has optimal cache performance.
-
-Our work prompts several theoretical questions. Can fast
-space-efficient algorithms with polylogarithmic span be found for
-other classic problems such as randomly permuting an array
-\cite{Anderson90, AlonsoSc96, ShunGu15}, and integer sorting
-\cite{Rajasekaran92, HanHe12, AlbersHa97, Han01, GerbessiotisSi04}?
-Such algorithms are of both theoretical and practical interest, and
-might be able to utilize some of the techniques introduced in this
-paper.
-
-Another important direction of work is the design of in-place parallel
-algorithms for sample-sort, the variant of quicksort in which multiple
-pivots are used simultaneously in each partition. Sample-sort can be
-implemented to exhibit fewer cache misses than quicksort, which is
-especially important when the computation is memory-bandwidth
-bound. The known in-place parallel algorithms for sample-sort rely
-heavily on atomic instructions \cite{AxtmannWi17} (even requiring
-128-bit compare-and-swap instructions). Finding fast algorithms that
-use only exclusive-read-write memory (or
-concurrent-read-exclusive-write memory) is an important direction of
-future work.
-
-
-% \paragraph{Acknowledgments} The authors would like to thank Bradley C. Kuszmaul for several suggestions that helped simplify both the algorithm and its exposition. The authors would also like to thank Reza Zadeh for encouragement and advice.
-
-% This research was supported in part by NSF Grants 1314547 and 1533644. 
 
 \clearpage
 
@@ -1631,12 +1583,12 @@ reordering the prefix $P$ of $A$ consisting of the first $4/5 \cdot n$
 elements, so that the predecessors appear before the successors; (2)
 Then we simply swap each predecessor $A[i]$ in the final $1/5 \cdot n$
 elements with the corresponding element $S[A[i]]$. The fact that the
-prefix $P$ is successor-heavy ensures that the final $\frac{1}{5}
-\cdot n$ elements of the reordered $P$ will consist of
-successors. This implies that for each of the swaps between
-predecessors $A[i]$ in the final $1/5 \cdots n$ elements and earlier
-positions $S[A[i]]$, the latter element will be a successor. In other
-words, the swaps are now conflict free.
+prefix $P$ is successor-heavy ensures that, after step (1), the final 
+$\frac{1}{5} \cdot n$ elements of (the reordered) $P$ are successors. 
+This implies in step (2) that for each of the swaps between predecessors $A[i]$
+in the final $1/5 \cdot n$ elements and earlier positions $S[A[i]]$, the latter
+element will be in the prefix $P$. In other words, the swaps are now conflict
+free.
 
 Next consider how to remove the array $S$ from the Parallel-Prefix
 Phase. At face value, this would seem quite difficult since the
@@ -1928,9 +1880,71 @@ phase. Lemma \ref{lem:bitstore2} can therefore used in place of Lemma
 \ref{lem:bitstore} in order to complete the proof of Theorem
 \ref{thminplace} for arrays $A$ that contain duplicate elements.
 
+\section{Conclusion and Open Questions}\label{sec:open}
+
+Parallel partition is a fundamental primitive in parallel algorithms
+\cite{Blelloch96,AcarBl16}. Achieving faster and more space-efficient
+implementations, even by constant factors, is therefore of high
+practical importance. Until now, the only space-efficient algorithms
+for parallel partition have relied extensively on concurrency
+mechanisms or atomic operations, or lacked provable performance
+guarantees. If a parallel function is going to be invoked within a large
+variety of applications, then provable guarantees are highly
+desirable. Moreover, algorithms that avoid the use of concurrency
+mechanisms tend to scale more reliably (and with less dependency on
+the particulars of the underlying hardware).
+
+In this paper, we have shown that, somewhat surprisingly, one can
+adapt the classic parallel algorithm to completely eliminate the use
+of auxiliary memory, while still using only exclusive read/write
+shared variables, and maintaining a polylogarithmic span. Although the
+superior cache performance of the low-space algorithm results in
+practical speedups over its out-of-place counterpart, both algorithms
+remain far from the state-of-the art due to memory bandwidth bottlenecks. To close this gap, we also
+presented a second in-place algorithm, the Smoothed Striding
+Algorithm, which achieves polylogarithmic span while guaranteeing
+provably optimal cache performance up to low-order factors. The
+Smoothed Striding Algorithm introduces randomization techniques to the
+previous (blocked) Striding Algorithm of \cite{Frias08, FrancisPa92},
+which was known to perform well in practice but which previously
+exhibited poor theoretical guarantees. Our implementation of the
+Smoothed Striding Algorithm is fully in-place, exhibits
+polylogarithmic span, and has optimal cache performance.
+
+Our work prompts several theoretical questions. Can fast
+space-efficient algorithms with polylogarithmic span be found for
+other classic problems such as randomly permuting an array
+\cite{Anderson90, AlonsoSc96, ShunGu15}, and integer sorting
+\cite{Rajasekaran92, HanHe12, AlbersHa97, Han01, GerbessiotisSi04}?
+Such algorithms are of both theoretical and practical interest, and
+might be able to utilize some of the techniques introduced in this
+paper.
+
+Another important direction of work is the design of in-place parallel
+algorithms for sample-sort, the variant of quicksort in which multiple
+pivots are used simultaneously in each partition. Sample-sort can be
+implemented to exhibit fewer cache misses than quicksort, which is
+especially important when the computation is memory-bandwidth
+bound. The known in-place parallel algorithms for sample-sort rely
+heavily on atomic instructions \cite{AxtmannWi17} (even requiring
+128-bit compare-and-swap instructions). Finding fast algorithms that
+use only exclusive-read-write memory (or
+concurrent-read-exclusive-write memory) is an important direction of
+future work.
+
+
+% \paragraph{Acknowledgments} The authors would like to thank Bradley C. Kuszmaul for several suggestions that helped simplify both the algorithm and its exposition. The authors would also like to thank Reza Zadeh for encouragement and advice.
+
+% This research was supported in part by NSF Grants 1314547 and 1533644. 
+
+
 \section{Figures}\label{sec:figures}
 See figures below.
-\begin{figure*}
+
+\section{Pseudocode}\label{sec:pseudocode}
+See figures below.
+
+\begin{figure*}[h]
   \begin{center}
     \CILKtable 
   \end{center}
@@ -1957,7 +1971,7 @@ See figures below.
 %% \end{figure*}
 
 
-\begin{figure*}
+\begin{figure*}[h]
   \begin{center}
     \serialtable
   \end{center}
@@ -1970,7 +1984,7 @@ See figures below.
   \label{tableserial}
 \end{figure*}
 
-\begin{figure*}
+\begin{figure*}[h]
   \begin{center}
     \partitionbandwidthboundtable
   \end{center}
@@ -1984,7 +1998,7 @@ See figures below.
   \label{tablebandwidth}
 \end{figure*}
 
-\begin{figure*}
+\begin{figure*}[h]
   \begin{center}
     \CILKsorttable
   \end{center}
@@ -1997,8 +2011,6 @@ See figures below.
   \label{tablesort}
 \end{figure*}
 
-\section{Pseudocode}\label{sec:pseudocode}
-See figures below.
 \begin{figure*}
   \caption{The Smoothed Striding Algorithm}
 	\label{alg:parallelPartition_smoothedStriding}
