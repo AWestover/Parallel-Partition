@@ -1,0 +1,173 @@
+\begin{thebibliography}{10}
+
+\bibitem{AcarBl00}
+Blelloch Acar and Blumofe.
+\newblock The data locality of work stealing.
+\newblock 2000.
+
+\bibitem{AcarBl16}
+Umut~A Acar and Guy Blelloch.
+\newblock Algorithm design: Parallel and sequential, 2016.
+
+\bibitem{AlbersHa97}
+Susanne Albers and Torben Hagerup.
+\newblock Improved parallel integer sorting without concurrent writing.
+\newblock {\em Information and Computation}, 136(1):25--51, 1997.
+
+\bibitem{AlonsoSc96}
+Laurent Alonso and Ren{\'e} Schott.
+\newblock A parallel algorithm for the generation of a permutation and
+  applications.
+\newblock {\em Theoretical Computer Science}, 159(1):15--28, 1996.
+
+\bibitem{Anderson90}
+R\_ Anderson.
+\newblock Parallel algorithms for generating random permutations on a shared
+  memory machine.
+\newblock In {\em Proceedings of the second annual ACM Symposium on Parallel
+  Algorithms and Architectures}, pages 95--102. ACM, 1990.
+
+\bibitem{AxtmannWi17}
+Michael Axtmann, Sascha Witt, Daniel Ferizovic, and Peter Sanders.
+\newblock In-place parallel super scalar samplesort.
+\newblock {\em arXiv preprint arXiv:1705.02257}, 2017.
+
+\bibitem{Blelloch96}
+Guy~E Blelloch.
+\newblock Programming parallel algorithms.
+\newblock {\em Communications of the ACM}, 39(3):85--97, 1996.
+
+\bibitem{BlellochFi12}
+Guy~E Blelloch, Jeremy~T Fineman, Phillip~B Gibbons, and Julian Shun.
+\newblock Internally deterministic parallel algorithms can be fast.
+\newblock In {\em ACM SIGPLAN Notices}, volume~47, pages 181--192. ACM, 2012.
+
+\bibitem{BlellochLe98}
+Guy~E. Blelloch, Charles~E. Leiserson, Bruce~M Maggs, C~Greg Plaxton, Stephen~J
+  Smith, and Marco Zagha.
+\newblock An experimental analysis of parallel sorting algorithms.
+\newblock {\em Theory of Computing Systems}, 31(2):135--167, 1998.
+
+\bibitem{BlumofeJo96}
+Robert~D Blumofe, Christopher~F Joerg, Bradley~C Kuszmaul, Charles~E Leiserson,
+  Keith~H Randall, and Yuli Zhou.
+\newblock Cilk: An efficient multithreaded runtime system.
+\newblock {\em Journal of parallel and distributed computing}, 37(1):55--69,
+  1996.
+
+\bibitem{BlumofeLe99}
+Robert~D Blumofe and Charles~E Leiserson.
+\newblock Scheduling multithreaded computations by work stealing.
+\newblock {\em Journal of the ACM (JACM)}, 46(5):720--748, 1999.
+
+\bibitem{Brent74}
+Richard~P Brent.
+\newblock The parallel evaluation of general arithmetic expressions.
+\newblock {\em Journal of the ACM (JACM)}, 21(2):201--206, 1974.
+
+\bibitem{CLRS}
+Thomas~H Cormen, Charles~E Leiserson, Ronald~L Rivest, and Clifford Stein.
+\newblock {\em Introduction to algorithms}.
+\newblock MIT press, 2009.
+
+\bibitem{FrancisPa92}
+Rhys~S. Francis and LJH Pannan.
+\newblock A parallel partition for enhanced parallel quicksort.
+\newblock {\em Parallel Computing}, 18(5):543--550, 1992.
+
+\bibitem{Frias08}
+Leonor Frias and Jordi Petit.
+\newblock Parallel partition revisited.
+\newblock In {\em International Workshop on Experimental and Efficient
+  Algorithms}, pages 142--153. Springer, 2008.
+
+\bibitem{FrigoLe09}
+Matteo Frigo, Pablo Halpern, Charles~E Leiserson, and Stephen Lewin-Berlin.
+\newblock Reducers and other cilk++ hyperobjects.
+\newblock In {\em Proceedings of the twenty-first annual symposium on
+  Parallelism in algorithms and architectures}, pages 79--90. ACM, 2009.
+
+\bibitem{GerbessiotisSi04}
+Alexandros~V Gerbessiotis and Constantinos~J Siniolakis.
+\newblock Probabilistic integer sorting.
+\newblock {\em Information processing letters}, 90(4):187--193, 2004.
+
+\bibitem{Hagerup89}
+Torben Hagerup and Christine R{\"u}b.
+\newblock Optimal merging and sorting on the erew pram.
+\newblock {\em Information Processing Letters}, 33(4):181--185, 1989.
+
+\bibitem{Han01}
+Yijie Han.
+\newblock Improved fast integer sorting in linear space.
+\newblock In {\em Proceedings of the twelfth annual ACM-SIAM symposium on
+  Discrete algorithms}, pages 793--796. Society for Industrial and Applied
+  Mathematics, 2001.
+
+\bibitem{HanHe12}
+Yijie Han and Xin He.
+\newblock More efficient parallel integer sorting.
+\newblock In {\em Frontiers in Algorithmics and Algorithmic Aspects in
+  Information and Management}, pages 279--290. Springer, 2012.
+
+\bibitem{HeidelbergerNo90}
+Philip Heidelberger, Alan Norton, and John~T. Robinson.
+\newblock Parallel quicksort using fetch-and-add.
+\newblock {\em IEEE Transactions on Computers}, 39(1):133--138, 1990.
+
+\bibitem{Katajainen93}
+Jyrki Katajainen, Christos Levcopoulos, and Ola Petersson.
+\newblock Space-efficient parallel merging.
+\newblock {\em RAIRO-Theoretical Informatics and Applications}, 27(4):295--310,
+  1993.
+
+\bibitem{Kleen05}
+Andi Kleen.
+\newblock A numa api for linux.
+\newblock {\em Novel Inc}, 2005.
+
+\bibitem{LiuKn05}
+Jie Liu, Clinton Knowles, and Adam~Brian Davis.
+\newblock A cost optimal parallel quicksorting and its implementation on a
+  shared memory parallel computer.
+\newblock In {\em International Symposium on Parallel and Distributed
+  Processing and Applications}, pages 491--502. Springer, 2005.
+
+\bibitem{MatiasVi95}
+E~Matias and Uzi Vishkin.
+\newblock A note on reducing parallel model simulations to integer sorting.
+\newblock In {\em Parallel Processing Symposium, 1995. Proceedings., 9th
+  International}, pages 208--212. IEEE, 1995.
+
+\bibitem{Rajasekaran92}
+Sanguthevar Rajasekaran and Sandeep Sen.
+\newblock On parallel integer sorting.
+\newblock {\em Acta Informatica}, 29(1):1--15, 1992.
+
+\bibitem{ShunGu15}
+Julian Shun, Yan Gu, Guy~E Blelloch, Jeremy~T Fineman, and Phillip~B Gibbons.
+\newblock Sequential random permutation, list contraction and tree contraction
+  are highly parallel.
+\newblock In {\em Proceedings of the twenty-sixth annual ACM-SIAM symposium on
+  Discrete algorithms}, pages 431--448. Society for Industrial and Applied
+  Mathematics, 2015.
+
+\bibitem{SleatorTa85}
+Daniel~D Sleator and Robert~E Tarjan.
+\newblock Amortized efficiency of list update and paging rules.
+\newblock {\em Communications of the ACM}, 28(2):202--208, 1985.
+
+\bibitem{TsigasZh03}
+Philippas Tsigas and Yi~Zhang.
+\newblock A simple, fast parallel implementation of quicksort and its
+  performance evaluation on sun enterprise 10000.
+\newblock In {\em Proceedings of the Eleventh Euromicro Conference on Parallel,
+  Distributed and Network-Based Processing}, page 372. IEEE, 2003.
+
+\bibitem{Vitter08}
+Jeffrey~Scott Vitter.
+\newblock Algorithms and data structures for external memory.
+\newblock {\em Foundations and Trends{\textregistered} in Theoretical Computer
+  Science}, 2(4):305--474, 2008.
+
+\end{thebibliography}

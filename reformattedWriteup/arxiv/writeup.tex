@@ -1,42 +1,14 @@
-\documentclass[sigplan, 10pt, nonacm]{acmart}
-\usepackage[moderate]{savetrees}
-
-\newcommand{\alek}[1]{\textcolor{red}{#1}}
-
-\usepackage{booktabs} % For formal tables
-\usepackage{appendix}
-
-
-% Copyright
-%\setcopyright{none}
-%\setcopyright{acmcopyright}
-%\setcopyright{acmlicensed}
-\setcopyright{rightsretained}
-%\setcopyright{usgov}
-%\setcopyright{usgovmixed}
-%\setcopyright{cagov}
-%\setcopyright{cagovmixed}
-
-
-% DOI
-\acmDOI{10.475/123_4}
-
-% ISBN
-\acmISBN{123-4567-24-567/08/06}
-
-%Conference
-%% \acmConference[APOCS '20]{}{January 2020}{Salt Lake City, UT, USA}
-%% \acmYear{2019}
-%% \copyrightyear{2019}
-
-
-\acmArticle{4}
-\acmPrice{15.00}
+\documentclass[twocolumn,10pt]{article} 
+\usepackage[margin=2cm]{geometry} 
+\usepackage[subtle, mathspacing=normal]{savetrees}
+% \usepackage{titling}
+\usepackage{authblk}
 
 \usepackage{mathtools}
 \newcommand{\defeq}{\vcentcolon=}
 \DeclarePairedDelimiter{\paren}{(}{)}
 
+\usepackage{xspace}
 \usepackage{enumitem}
 \usepackage{subcaption}
 
@@ -66,7 +38,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \newcommand{\poly}{\operatorname{poly}}
 \newcommand{\polylog}{\operatorname{polylog}}
 \newcommand{\github}{\url{github.com/awestover/Parallel-Partition}}
-\newcommand{\defn}[1]{{\textit{\textbf{\boldmath #1}}}}
+\newcommand{\defn}[1]{{\textit{\textbf{\boldmath #1}}}\xspace}
 \renewcommand{\paragraph}[1]{\vspace{0.09in}\noindent{\bf \boldmath #1.}} 
 \usepackage{amsmath}
 \usepackage{dsfont}
@@ -102,156 +74,39 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\fancyhead{}
+\fancyhead[R]{William Kuszmaul and Alek Westover}
 \fancyfoot{}
 \fancyfoot[R]{\thepage}
-% \AtBeginDocument{\thispagestyle{plain}}
 
-\begin{document}
+\title{In-Place Parallel-Partition Algorithms \\ using Exclusive-Read-and-Write Memory:\\ An In-Place Algorithm With Provably Optimal Cache Behavior}
+\date{\vspace{-5ex}}
 
-% \begin{titlepage}
-% \begin{center}
-%   \vspace*{1cm}
+\author[1]{\small William Kuszmaul\thanks{Supported by a Hertz fellowship and a NSF GRFP fellowship}}
+\author[2]{\small Alek Westover\thanks{Supported by MIT PRIMES}}
 
-%   {\Huge \textbf{Cache-Efficient Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}}
-
-%   \vspace{0.5cm}
-%   {\LARGE An In-Place Algorithm With Provably Optimal Cache Behavior}
-%   \vspace{4cm}
-% \end{center}
-
-% \begin{center}
-% \textbf{Abstract}
-% \end{center}
+\affil[1]{\footnotesize MIT}
+\affil[2]{\footnotesize MIT PRIMES}
+\affil[ ]{\textit{kuszmaul@mit.edu, alek.westover@gmail.com}}
 
 
-% We present an in-place algorithm for the parallel partition problem
-% that has linear work and polylogarithmic span. The algorithm uses only
-% exclusive read/write shared variables, and can be implemented using
-% parallel-for-loops without any additional concurrency considerations
-% (i.e., the algorithm is EREW). A key feature of the algorithm is that
-% it exhibits provably optimal cache behavior, up to small-order factors.
-
-% We also present a second in-place EREW algorithm that has linear work
-% and span $O(\log n \cdot \log \log n)$, which is within an
-% $O(\log\log n)$ factor of the optimal span. By using this low-span
-% algorithm as a subroutine within the cache-friendly algorithm, we are
-% able to obtain a single EREW algorithm that combines their theoretical
-% guarantees: the algorithm achieves span $O(\log n \cdot \log \log n)$ and
-% optimal cache behavior. As an immediate consequence, we also get an
-% in-place EREW quicksort algorithm with work $O(n \log n)$, span
-% $O(\log^2 n \cdot \log \log n)$.
-
-% Whereas the standard EREW algorithm for parallel partitioning is
-% memory-bandwidth bound on large numbers of cores, our cache-friendly
-% algorithm is able to achieve near-ideal scaling in practice by
-% avoiding the memory-bandwidth bottleneck. The algorithm's performance
-% is comparable to that of the Blocked Strided Algorithm of Francis,
-% Pannan, Frias, and Petit, which is the previous state-of-the art for
-% parallel EREW sorting algorithms, but which lacks theoretical
-% guarantees on its span and cache behavior.
-
-
-% % We present an in-place algorithm for the parallel partition problem
-% % that has work $O(n)$ and span $O(\log n \cdot \log \log n)$. The
-% % algorithm uses only exclusive read/write shared variables, and can be
-% % implemented using parallel-for-loops without any additional
-% % concurrency considerations (i.e., the algorithm is EREW). As an
-% % immediate consequence, we also get an in-place quicksort algorithm
-% % with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
-
-% % A low-space implementation of the algorithm leverages its improved
-% % cache behavior to achieve a speedup over its fully out-of-place
-% % counterpart. Both algorithms remain bottlenecked by memory bandwidth,
-% % however, due to the fact that they require multiple passes over the
-% % input array.
-
-% % Our second contribution is an in-place EREW algorithm with
-% % polylogarithmic span and provably optimal cache behavior, up to
-% % small-order factors.  The resulting algorithm achieves near-ideal
-% % scaling in practice by avoiding the memory-bandwidth bottleneck. The
-% % algorithm's performance is comparable to that of the Blocked Strided
-% % Algorithm of Francis, Pannan, Frias, and Petit, which is the previous
-% % state-of-the art for parallel EREW sorting algorithms, but which lacks
-% % theoretical guarantees on its span and cache behavior.
- 
-% \end{titlepage}
-
-
-
-\title[]{In-Place Parallel-Partition Algorithms using Exclusive-Read-and-Write Memory}
-\subtitle{An In-Place Algorithm With Provably Optimal Cache Behavior}
-
-\author{William Kuszmaul}
-\authornote{Supported by a Hertz Fellowship and a NSF GRFP Fellowship}
-\affiliation{%
-  \institution{Massachusetts Institute of Technology}
-}
-\email{kuszmaul@mit.edu}
-
-
-\author{Alek Westover}
-\authornote{Supported by MIT PRIMES.}
-\email{alek.westover@gmail.com}
-
-
-% The default list of authors is too long for headers.
+% the default list of authors is too long for headers.
 % \renewcommand{\shortauthors}{William Kuszmaul and Alek Westover}
 
+%% \ccsdesc[500]{theory of computation~shared memory algorithms}
+
+% \keywords{parallel partition, parallel algorithms, in-place algorithms, sorting}
 
 
-%
-% The code below should be generated by the tool at
-% http://dl.acm.org/ccs.cfm
-% Please copy and paste the code instead of the example below.
-%
-%% \begin{CCSXML}
-%% <ccs2012>
-%% <concept>
-%% <concept_id>10003752.10003809.10010170.10010171</concept_id>
-%% <concept_desc>Theory of computation~Shared memory algorithms</concept_desc>
-%% <concept_significance>500</concept_significance>
-%% </concept>
-%% </ccs2012>
-%% \end{CCSXML}
+\begin{document}
+  \maketitle
 
-%% \ccsdesc[500]{Theory of computation~Shared memory algorithms}
+  \begin{abstract}
+We present an in-place algorithm for the parallel partition problem that has linear work and polylogarithmic span. The algorithm uses only exclusive read/write shared variables, and can be implemented using parallel-for-loops without any additional concurrency considerations (i.e., the algorithm is EREW). A key feature of the algorithm is that it exhibits provably optimal cache behavior, up to small-order factors.
 
-%% \keywords{Parallel Partition, EREW PRAM, in-place algorithms}
+We also present a second in-place EREW algorithm that has linear work and span $O(\log n \cdot \log \log n)$, which is within an $O(\log\log n)$ factor of the optimal span. By using this low-span algorithm as a subroutine within the cache-friendly algorithm, we are able to obtain a single EREW algorithm that combines their theoretical guarantees: the algorithm achieves span $O(\log n \cdot \log \log n)$ and optimal cache behavior. As an immediate consequence, we also get an in-place EREW quicksort algorithm with work $O(n \log n)$, span $O(\log^2 n \cdot \log \log n)$.
 
-\thispagestyle{fancy}
-\begin{abstract}
-
-We present an in-place algorithm for the parallel partition problem
-that has linear work and polylogarithmic span. The algorithm uses only
-exclusive read/write shared variables, and can be implemented using
-parallel-for-loops without any additional concurrency considerations
-(i.e., the algorithm is EREW). A key feature of the algorithm is that
-it exhibits provably optimal cache behavior, up to small-order factors.
-
-We also present a second in-place EREW algorithm that has linear work
-and span $O(\log n \cdot \log \log n)$, which is within an
-$O(\log\log n)$ factor of the optimal span. By using this low-span
-algorithm as a subroutine within the cache-friendly algorithm, we are
-able to obtain a single EREW algorithm that combines their theoretical
-guarantees: the algorithm achieves span $O(\log n \cdot \log \log n)$ and
-optimal cache behavior. As an immediate consequence, we also get an
-in-place EREW quicksort algorithm with work $O(n \log n)$, span
-$O(\log^2 n \cdot \log \log n)$.
-
-Whereas the standard EREW algorithm for parallel partitioning is
-memory-bandwidth bound on large numbers of cores, our cache-friendly
-algorithm is able to achieve near-ideal scaling in practice by
-avoiding the memory-bandwidth bottleneck. The algorithm's performance
-is comparable to that of the Blocked Strided Algorithm of Francis,
-Pannan, Frias, and Petit, which is the previous state-of-the art for
-parallel EREW sorting algorithms, but which lacks theoretical
-guarantees on its span and cache behavior.
-\end{abstract}
-% \pagestyle{plain}
-% \clearpage
-% \setcounter{page}{1}
-\maketitle
+Whereas the standard EREW algorithm for parallel partitioning is memory-bandwidth bound on large numbers of cores, our cache-friendly algorithm is able to achieve near-ideal scaling in practice by avoiding the memory-bandwidth bottleneck. The algorithm's performance is comparable to that of the Blocked Strided Algorithm of Francis, Pannan, Frias, and Petit, which is the previous state-of-the art for parallel EREW sorting algorithms, but which lacks theoretical guarantees on its span and cache behavior.
+  \end{abstract}
 
 \section{Introduction}
 
@@ -439,15 +294,22 @@ performances. Finally, we conclude with open questions in Section
 We begin by describing the parallelism and memory model used in
 the paper, and by presenting background on the parallel partition problem.
 
-\paragraph{Workflow Model} We consider a simple language-based model of parallelism in which algorithms achieve parallelism through the use of \defn{parallel-for-loops} (see, e.g.,
+\paragraph{Workflow Model} We consider a simple language-based model of
+parallelism in which algorithms achieve parallelism through the use of
+\defn{parallel-for-loops} (see, e.g.,
 \cite{Blelloch96,AcarBl16,CLRS}); function calls within the inner loop
-then allow for more complicated parallel structures (e.g., recursion). Our algorithms can also be implemented in the less restrictive PRAM model \cite{Blelloch96, AcarBl16}.
+then allow for more complicated parallel structures (e.g., recursion). Our
+algorithms can also be implemented in the PRAM model \cite{Blelloch96,
+AcarBl16}.
 
 Formally, a parallel-for-loop is given a range size $R \in \mathbb{N}$, a
 constant number of arguments $\arg_1, \arg_2, \ldots, \arg_c$, and a
 body of code. For each $i \in \{1, \ldots, R\}$, the loop launches a
 thread that is given loop-counter $i$ and local copies of the
-arguments $\arg_1, \arg_2, \ldots, \arg_c$. The threads are then taken up by processors and the iterations of the loop are performed in parallel. Only after every iteration of the loop is complete can control flow continue past the loop.
+arguments $\arg_1, \arg_2, \ldots, \arg_c$. The threads are then taken up by
+processors and the iterations of the loop are performed in parallel. Only after
+every iteration of the loop is complete can control flow continue past the
+loop.
 
 A parallel algorithm may be run on an arbitrary number $p$ of
 processors. The algorithm itself is oblivious to $p$, however, leaving
@@ -555,7 +417,6 @@ elements of $A$, this places the successors in $C$ in the same order that they
 appear in $A$. Finally, the algorithm copies $C$ into $A$, completing the
 parallel partition.
 
-
 Both phases can be implemented with $O(n)$ work and $O(\log n)$
 span. Like its serial out-of-place counterpart, the algorithm is
 stable but not in place. The algorithm uses multiple auxiliary arrays of
@@ -566,6 +427,79 @@ array $A$ into $p$ parts and assigns one part to each thread. Reducing
 the extra space below $o(n)$ has remained open until now, even when the
 number of threads is fixed.
 
+\section{An In-Place Algorithm with Span $O(\log n \log \log n)$}
+In this section, we present an overview of the key algorithmic ideas needed to
+make the classic Parallel Partition algorithm in-place, with span $O(\log n \log\log n)$.
+The algorithm we describe here is useful as a subroutine in our main algorithm,
+the Smoothed Striding Algorithm, which is discussed in Section
+\ref{sec:smoothing}.
+The algorithm we discuss here has poor cache behavior, and so performs poorly
+in practice. However, using it as a subroutine on a small subproblem in the
+Smoothed Striding Algorithm will allow the Smoothed Striding Algorithm to achieve span $O(\log n \log\log n)$
+without sacrificing its cache behavior. 
+Detailed analysis of this algorithm, in particular proof of correctness, is
+included in Appendix \ref{secalg}.
+We now outline the algorithm. 
+
+\paragraph{Algorithm Outline}
+Prior to beginning the algorithm, the first implicit step of the
+algorithm is to count the number of predecessors in the array, in
+order to determine whether the majority of elements are either
+predecessors or successors. We assume without loss of generality that the total
+number of successors in $A$ exceeds the number of predecessors, since otherwise
+their roles can simply be swapped in the algorithm. Further, we assume for
+simplicity that the elements of $A$ are distinct; this assumption is removed at
+the end of Appendix \ref{secalg}.
+
+Consider how to remove the auxiliary array $C$ from the Reordering
+Phase. If one attempts to simply swap in parallel each predecessor
+$A[i]$ with the element in position $j = S[i]$ of $A$, then the swaps
+will almost certainly conflict. Indeed, $A[j]$ may also be a
+predecessor that needs to be swapped with $A[S[j]]$. Continuing like
+this, there may be an arbitrarily long list of dependencies on the
+swaps.
+
+To combat this, we begin the algorithm with a Preprocessing Phase in
+which $A$ is rearranged so that every prefix is
+\defn{successor-heavy}, meaning that for all $t$, the first $t$
+elements contain at least $\frac{t}{4}$ successors. Then we compute
+the prefix-sum array $S$, and begin the Reordering Phase. Using the
+fact that the prefixes of $A$ are successor-heavy, the reordering can
+now be performed in place as follows: (1) We begin by recursively
+reordering the prefix $P$ of $A$ consisting of the first $4/5 \cdot n$
+elements, so that the predecessors appear before the successors; (2)
+Then we simply swap each predecessor $A[i]$ in the final $1/5 \cdot n$
+elements with the corresponding element $S[A[i]]$. The fact that the
+prefix $P$ is successor-heavy ensures that, after step (1), the final 
+$\frac{1}{5} \cdot n$ elements of (the reordered) $P$ are successors. 
+This implies in step (2) that for each of the swaps between predecessors $A[i]$
+in the final $1/5 \cdot n$ elements and earlier positions $S[A[i]]$, the latter
+element will be in the prefix $P$. In other words, the swaps are now conflict
+free.
+
+Next consider how to remove the array $S$ from the Parallel-Prefix
+Phase. At face value, this would seem quite difficult since the
+reordering phase relies heavily on $S$. Our solution is to
+\emph{implicitly} store the value of every $O(\log n)$-th element of
+$S$ in the ordering of the elements of $A$. That is, we break $A$ into
+blocks of size $O(\log n)$, and use the order of the elements in each
+block to encode an entry of $S$. (If the elements are not all
+  distinct, then a slightly more sophisticated encoding is necessary.)
+Moreover, we modify the algorithm for building $S$ to only construct
+every $O(\log n)$-th element. The new parallel-prefix sum performs
+$O(n / \log n)$ arithmetic operations on values that are implicitly
+encoded in blocks; since each such operation requires $O(\log n)$
+work, the total work remains linear.
+
+In Appendix \ref{secalg}, we present the algorithm in detail,
+and prove the key properties of each phase of the algorithm. We also
+provide detailed pseudocode in Appendix \ref{sec:pseudocode}. 
+The analysis of the algorithm yields the following theorem:
+\begin{theorem}[Theorem \ref{thminplace}]
+  There exists an in-place algorithm using exclusive-read-write
+  variables that performs parallel-partition with work $O(n)$ and span
+  $O(\log n \cdot \log \log n)$.
+\end{theorem}
 
 
 \section{A Cache Efficient In-Place Parallel Partition}\label{sec:smoothing}
@@ -987,17 +921,14 @@ that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
 %% \alek{also, I think that the bounds that you get on $U_i(j)$ shouldn't be symmetric}
 %% \alek{in fact, here is what I think the derivation should look like: }
 %% \alek{
-  Recall that $G_i(j)$ denotes the index within $A$ of the $j$ th cache-line
-  contained in $U_i$. By the definition of $G_i(j)$, $$(j - 1)g + 1 \le G_i(j)
-  \le jg.$$ Note that $A[v_i]$ will occur in the $\lceil s\mu_i \rceil$-th
-  cache-line of $U_i$ because $U_i$ is composed of $s$ cache lines. Hence
-  $$(\lceil s\mu_i \rceil - 1) g b + 1 \le v_i \le \lceil s\mu_i \rceil g b,$$
+  Recall that $G_i(j)$ denotes the index within $A$ of the $j$ th cache-line contained in $U_i$. By the definition of $G_i(j)$, $$(j - 1)g + 1 \le G_i(j) \le jg.$$ Note that $A[v_i]$ will occur in the $\lceil s\mu_i \rceil$-th cache-line of $U_i$ because $U_i$ is composed of $s$ cache lines. Hence $$(\lceil s\mu_i \rceil - 1) g b + 1 \le v_i \le \lceil s\mu_i \rceil g b,$$
   which means that
-  $$s\mu_i g b - gb + 1 \le v_i \le s\mu_i g b + gb.$$ Since $sgb = n$, it
-  follows that $|v_i - n \mu_i| \le gb$. Therefore, $$|v_i - n \mu| < gb +
-  n\delta.$$
-  This implies that the maximum of $|v_i - v_j|$ for any $i$ and $j$ is at
-  most, $2bg + 2\delta n$. Thus,
+  $$s\mu_i g b - gb + 1 \le v_i \le s\mu_i g b + gb.$$ Since $sgb =
+  n$, it follows that $|v_i - n \mu_i| \le gb$. Therefore,
+  $$|v_i - n \mu| < gb + n\delta.$$
+  This
+implies that the maximum of $|v_i - v_j|$ for
+any $i$ and $j$ is at most, $2bg + 2\delta n$. Thus,
 \begin{align*}
   v_{\text{max}} - v_{\text{min}} & \le 2n \left( \delta + \frac{bg}{n} \right)  = 2n \left( \delta + 1/s \right) \\
   & \le 2n \left(\delta + \frac{\delta^2}{\ln (n / \epsilon)}\right) < 4n\cdot\delta.
@@ -1036,7 +967,10 @@ An interesting corollary of the above theorem concerns what happens when $b$ is 
 %%ve low span along with a small number of cache misses.
 \begin{corollary}[Corollary of Theorem \ref{thm:fullPartition}]
 	\label{cor:fullPartition}
-Suppose $b \le o(\log \log n)$. Then the Hybrid Smoothed Striding Algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.\\\\
+Suppose $b \le o(\log \log n)$. Then the Hybrid Smoothed Striding using $\delta
+= \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high
+probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than
+$(n+o(n))/b$ cache misses.
 \end{corollary}
 
 \begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
@@ -1576,7 +1510,6 @@ quicksort, and further improving the scaling.
 %% over the low-space algorithm, but also demonstrates its larger span by
 %% suffering on smaller inputs as the number of cores grows.
 
-
 \section{Conclusion and Open Questions}\label{sec:open}
 
 Parallel partition is a fundamental primitive in parallel algorithms
@@ -1630,13 +1563,10 @@ concurrent-read-exclusive-write memory) is an important direction of
 future work.
 
 
-% \paragraph{Acknowledgments} The authors would like to thank Bradley C. Kuszmaul for several suggestions that helped simplify both the algorithm and its exposition. The authors would also like to thank Reza Zadeh for encouragement and advice.
-
-% This research was supported in part by NSF Grants 1314547 and 1533644. 
 
 \clearpage
-\begin{appendices}
 
+\appendix
 
 \section{An In-Place Algorithm with Span $O(\log n \log \log n)$}\label{secalg}
 
@@ -1644,7 +1574,7 @@ In this section, we present an in-place algorithm for parallel
 partition with span $O(\log n \log \log n)$. Each thread in the
 algorithm requires memory at most $O(\log n)$.
 
-Prior to beginning the algorithm, the first step implicit step of the
+Prior to beginning the algorithm, the first implicit step of the
 algorithm is to count the number of predecessors in the array, in
 order to determine whether the majority of elements are either
 predecessors or successors. Throughout the rest of the section, we
@@ -1661,9 +1591,9 @@ to construct an in-place algorithm.
 
 Consider how to remove the auxiliary array $C$ from the Reordering
 Phase. If one attempts to simply swap in parallel each predecessor
-$A[i]$ with the element in position $j = B[i]$ of $A$, then the swaps
+$A[i]$ with the element in position $j = S[i]$ of $A$, then the swaps
 will almost certainly conflict. Indeed, $A[j]$ may also be a
-predecessor that needs to be swapped with $A[B[j]]$. Continuing like
+predecessor that needs to be swapped with $A[S[j]]$. Continuing like
 this, there may be an arbitrarily long list of dependencies on the
 swaps.
 
@@ -1671,29 +1601,29 @@ To combat this, we begin the algorithm with a Preprocessing Phase in
 which $A$ is rearranged so that every prefix is
 \defn{successor-heavy}, meaning that for all $t$, the first $t$
 elements contain at least $\frac{t}{4}$ successors. Then we compute
-the prefix-sum array $B$, and begin the Reordering Phase. Using the
+the prefix-sum array $S$, and begin the Reordering Phase. Using the
 fact that the prefixes of $A$ are successor-heavy, the reordering can
 now be performed in place as follows: (1) We begin by recursively
 reordering the prefix $P$ of $A$ consisting of the first $4/5 \cdot n$
 elements, so that the predecessors appear before the successors; (2)
 Then we simply swap each predecessor $A[i]$ in the final $1/5 \cdot n$
-elements with the corresponding element $B[A[i]]$. The fact that the
-prefix $P$ is successor-heavy ensures that the final $\frac{1}{5}
-\cdot n$ elements of the reordered $P$ will consist of
-successors. This implies that for each of the swaps between
-predecessors $A[i]$ in the final $1/5 \cdots n$ elements and earlier
-positions $B[A[i]]$, the latter element will be a successor. In other
-words, the swaps are now conflict free.
+elements with the corresponding element $S[A[i]]$. The fact that the
+prefix $P$ is successor-heavy ensures that, after step (1), the final 
+$\frac{1}{5} \cdot n$ elements of (the reordered) $P$ are successors. 
+This implies in step (2) that for each of the swaps between predecessors $A[i]$
+in the final $1/5 \cdot n$ elements and earlier positions $S[A[i]]$, the latter
+element will be in the prefix $P$. In other words, the swaps are now conflict
+free.
 
-Next consider how to remove the array $B$ from the Parallel-Prefix
+Next consider how to remove the array $S$ from the Parallel-Prefix
 Phase. At face value, this would seem quite difficult since the
-reordering phase relies heavily on $B$. Our solution is to
+reordering phase relies heavily on $S$. Our solution is to
 \emph{implicitly} store the value of every $O(\log n)$-th element of
-$B$ in the ordering of the elements of $A$. That is, we break $A$ into
+$S$ in the ordering of the elements of $A$. That is, we break $A$ into
 blocks of size $O(\log n)$, and use the order of the elements in each
-block to encode an entry of $B$. (If the elements are not all
+block to encode an entry of $S$. (If the elements are not all
   distinct, then a slightly more sophisticated encoding is necessary.)
-Moreover, we modify the algorithm for building $B$ to only construct
+Moreover, we modify the algorithm for building $S$ to only construct
 every $O(\log n)$-th element. The new parallel-prefix sum performs
 $O(n / \log n)$ arithmetic operations on values that are implicitly
 encoded in blocks; since each such operation requires $O(\log n)$
@@ -1701,7 +1631,7 @@ work, the total work remains linear.
 
 In the remainder of the section, we present the algorithm in detail,
 and prove the key properties of each phase of the algorithm. We also
-provide detailed pseudocode in Appendix \ref{sec:pseudocode}.  The
+provide detailed pseudocode in Appendix \ref{sec:pseudocode}. The
 algorithm proceeds in three phases.
 
 \paragraph{A Preprocessing Phase}
@@ -1898,8 +1828,6 @@ recursion, and within each level of recursion each $X_i$ in the
 parallel-for-loop incurs span $O(\log \log n)$. 
 \end{proof}
 
-
-
 Combining the phases, the full algorithm has work $O(n)$ and span
 $O(\log \log n)$. Thus we have:
 \begin{theorem}
@@ -1977,9 +1905,18 @@ phase. Lemma \ref{lem:bitstore2} can therefore used in place of Lemma
 \ref{lem:bitstore} in order to complete the proof of Theorem
 \ref{thminplace} for arrays $A$ that contain duplicate elements.
 
+% \paragraph{Acknowledgments} The authors would like to thank Bradley C. Kuszmaul for several suggestions that helped simplify both the algorithm and its exposition. The authors would also like to thank Reza Zadeh for encouragement and advice.
+
+% This research was supported in part by NSF Grants 1314547 and 1533644. 
+
+
 \section{Figures}\label{sec:figures}
 See figures below.
-\begin{figure*}
+
+\section{Pseudocode}\label{sec:pseudocode}
+See figures below.
+
+\begin{figure*}[h]
   \begin{center}
     \CILKtable 
   \end{center}
@@ -2006,7 +1943,7 @@ See figures below.
 %% \end{figure*}
 
 
-\begin{figure*}
+\begin{figure*}[h]
   \begin{center}
     \serialtable
   \end{center}
@@ -2019,7 +1956,7 @@ See figures below.
   \label{tableserial}
 \end{figure*}
 
-\begin{figure*}
+\begin{figure*}[h]
   \begin{center}
     \partitionbandwidthboundtable
   \end{center}
@@ -2033,7 +1970,7 @@ See figures below.
   \label{tablebandwidth}
 \end{figure*}
 
-\begin{figure*}
+\begin{figure*}[h]
   \begin{center}
     \CILKsorttable
   \end{center}
@@ -2046,8 +1983,6 @@ See figures below.
   \label{tablesort}
 \end{figure*}
 
-\section{Pseudocode}\label{sec:pseudocode}
-See figures below.
 \begin{figure*}
   \caption{The Smoothed Striding Algorithm}
 	\label{alg:parallelPartition_smoothedStriding}
@@ -2208,23 +2143,13 @@ See figures below.
 	\end{algorithmic}	
 \end{figure*}
 
-\end{appendices}
-
 \clearpage
 \clearpage
 
-\bibliographystyle{ACM-Reference-Format}
+\bibliographystyle{plain}
 \bibliography{paper}
 
+
+
+
 \end{document}
-
-%%% PRIVATE CACHES
-%%% work stealing
-%%% each processor has a private cache that it caries with it as it does workstealing, and this is WLOG (by resource augmentation) managed by OPT, so WLOG it pins $X$
-%%% no longer assuming that children inherit their parents cache
-
-%%% reread Bill's inplace alg section
-
-
-%%% do a correctness chekc of the algorithm, I think the 1 indexing might have thrown you in a couple of places
-

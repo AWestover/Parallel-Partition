@@ -85,31 +85,11 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
   \maketitle
 
   \begin{abstract}
-We present an in-place algorithm for the parallel partition problem
-that has linear work and polylogarithmic span. The algorithm uses only
-exclusive read/write shared variables, and can be implemented using
-parallel-for-loops without any additional concurrency considerations
-(i.e., the algorithm is EREW). A key feature of the algorithm is that
-it exhibits provably optimal cache behavior, up to small-order factors.
+We present an in-place algorithm for the parallel partition problem that has linear work and polylogarithmic span. The algorithm uses only exclusive read/write shared variables, and can be implemented using parallel-for-loops without any additional concurrency considerations (i.e., the algorithm is EREW). A key feature of the algorithm is that it exhibits provably optimal cache behavior, up to small-order factors.
 
-We also present a second in-place EREW algorithm that has linear work
-and span $O(\log n \cdot \log \log n)$, which is within an
-$O(\log\log n)$ factor of the optimal span. By using this low-span
-algorithm as a subroutine within the cache-friendly algorithm, we are
-able to obtain a single EREW algorithm that combines their theoretical
-guarantees: the algorithm achieves span $O(\log n \cdot \log \log n)$ and
-optimal cache behavior. As an immediate consequence, we also get an
-in-place EREW quicksort algorithm with work $O(n \log n)$, span
-$O(\log^2 n \cdot \log \log n)$.
+We also present a second in-place EREW algorithm that has linear work and span $O(\log n \cdot \log \log n)$, which is within an $O(\log\log n)$ factor of the optimal span. By using this low-span algorithm as a subroutine within the cache-friendly algorithm, we are able to obtain a single EREW algorithm that combines their theoretical guarantees: the algorithm achieves span $O(\log n \cdot \log \log n)$ and optimal cache behavior. As an immediate consequence, we also get an in-place EREW quicksort algorithm with work $O(n \log n)$, span $O(\log^2 n \cdot \log \log n)$.
 
-Whereas the standard EREW algorithm for parallel partitioning is
-memory-bandwidth bound on large numbers of cores, our cache-friendly
-algorithm is able to achieve near-ideal scaling in practice by
-avoiding the memory-bandwidth bottleneck. The algorithm's performance
-is comparable to that of the Blocked Strided Algorithm of Francis,
-Pannan, Frias, and Petit, which is the previous state-of-the art for
-parallel EREW sorting algorithms, but which lacks theoretical
-guarantees on its span and cache behavior.
+Whereas the standard EREW algorithm for parallel partitioning is memory-bandwidth bound on large numbers of cores, our cache-friendly algorithm is able to achieve near-ideal scaling in practice by avoiding the memory-bandwidth bottleneck. The algorithm's performance is comparable to that of the Blocked Strided Algorithm of Francis, Pannan, Frias, and Petit, which is the previous state-of-the art for parallel EREW sorting algorithms, but which lacks theoretical guarantees on its span and cache behavior.
   \end{abstract}
 
 \end{titlingpage}
@@ -956,9 +936,8 @@ that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
   $$s\mu_i g b - gb + 1 \le v_i \le s\mu_i g b + gb.$$ Since $sgb =
   n$, it follows that $|v_i - n \mu_i| \le gb$. Therefore,
   $$|v_i - n \mu| < gb + n\delta.$$
-  This
-implies that the maximum of $|v_i - v_j|$ for
-any $i$ and $j$ is at most, $2bg + 2\delta n$. Thus,
+  This implies that the maximum of $|v_i - v_j|$ for any $i$ and $j$ is at
+  most, $2bg + 2\delta n$. Thus,
 \begin{align*}
   v_{\text{max}} - v_{\text{min}} & \le 2n \left( \delta + \frac{bg}{n} \right)  = 2n \left( \delta + 1/s \right) \\
   & \le 2n \left(\delta + \frac{\delta^2}{\ln (n / \epsilon)}\right) < 4n\cdot\delta.
@@ -997,7 +976,7 @@ An interesting corollary of the above theorem concerns what happens when $b$ is 
 %%ve low span along with a small number of cache misses.
 \begin{corollary}[Corollary of Theorem \ref{thm:fullPartition}]
 	\label{cor:fullPartition}
-Suppose $b \le o(\log \log n)$. Then the Cache-Efficient Full-Partition Algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.\\\\
+Suppose $b \le o(\log \log n)$. Then the Hybrid Smoothed Striding Algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.\\\\
 \end{corollary}
 
 \begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
