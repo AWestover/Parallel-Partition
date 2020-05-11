@@ -108,7 +108,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 \title[]{Brief Announcement\\
 In-Place Parallel-Partition Algorithms \\using Exclusive-Read-and-Write Memory}
-\subtitle{An In-Place Algorithm With Provably Optimal Cache Behavior}
+% \subtitle{An In-Place Algorithm With Provably Optimal Cache Behavior}
 
 \author{William Kuszmaul}
 \authornote{Supported by a Hertz Fellowship and a NSF GRFP Fellowship}
@@ -203,9 +203,6 @@ An algorithm's memory efficiency can be critical on large inputs.
 
 \section{Preliminaries}\label{secprelim}
 
-We begin by describing the parallelism and memory model used in
-the paper, and by presenting background on the parallel partition problem.
-
 \paragraph{Workflow Model} We consider a simple language-based model of parallelism in which algorithms achieve parallelism through the use of \defn{parallel-for-loops} (see, e.g.,
 \cite{Blelloch96,AcarBl16,CLRS}); function calls within the inner loop
 then allow for more complicated parallel structures (e.g., recursion). Our algorithms can also be implemented in the less restrictive PRAM model \cite{Blelloch96, AcarBl16}.
@@ -279,27 +276,24 @@ span. However, the algorithm uses multiple auxiliary arrays of size $n$.
 Reducing the extra space below $o(n)$ has remained open until now, even when
 the number of threads is fixed.
 
-
-\section{An In-Place Algorithm \\with Span $O(\log n \log \log n)$}\label{sec:prefixbasedalg}
-In this section, we present an overview of the key algorithmic ideas needed to
-make the classic Parallel Partition algorithm in-place, with span $O(\log n \log\log n)$.
-The algorithm we describe here is useful as a subroutine in our main algorithm,
-the Smoothed Striding Algorithm, which is discussed in Section
-\ref{sec:smoothing}.
-The algorithm we discuss here has poor cache behavior, and so performs poorly
-in practice. However, using it as a subroutine on a small subproblem in the
+\section{An In-Place Algorithm \\with Span $O(\log n \log \log
+n)$}\label{sec:prefixbasedalg} We now outline the key algorithmic ideas needed
+to make the classic Parallel Partition algorithm in-place with span $O(\log n
+\log \log n)$. Although it is in-place, and hence more cache-efficient than the
+standard out-of-place parallel partition algorithm, the algorithm described
+here still exhibits poor cache behavior, and performs poorly in practice;
+however, using this algorithm as a subroutine on a small subproblem in the
 Smoothed Striding Algorithm will allow the Smoothed Striding Algorithm to
-achieve span $O(\log n \log\log n)$ without sacrificing its cache behavior. 
+achieve span $O(\log n \log \log n)$ without sacrificing its cache behavior.
 
 \paragraph{Algorithm Outline}
 Prior to beginning the algorithm, the first implicit step of the
-algorithm is to count the number of predecessors in the array, in
+algorithm is to count the number of predecessors in the array in
 order to determine whether the majority of elements are either
 predecessors or successors. We assume without loss of generality that the total
 number of successors in $A$ exceeds the number of predecessors, since otherwise
 their roles can simply be swapped in the algorithm. Further, we assume for
-simplicity that the elements of $A$ are distinct; this assumption is removed at
-the end of Appendix \ref{secalg}.
+simplicity that the elements of $A$ are distinct; this assumption can be removed.
 
 Consider how to remove the auxiliary array $C$ from the Reordering
 Phase. If one attempts to simply swap in parallel each predecessor
@@ -343,6 +337,7 @@ work, the total work remains linear.
 
 Analysis of the algorithm yields the following theorem:
 \begin{theorem}
+  \label{thminplace}
   There exists an in-place algorithm using exclusive-read-write
   variables that performs parallel-partition with work $O(n)$ and span
   $O(\log n \cdot \log \log n)$.
@@ -353,10 +348,14 @@ Analysis of the algorithm yields the following theorem:
 \paragraph{The Strided Algorithm \cite{FrancisPa92}}
 The Smoothed Striding Algorithm borrows several structural ideas from a
 previous algorithm of Francis and Pannan \cite{FrancisPa92}, which we call the
-Strided Algorithm. The Strided Algorithm is designed to behave well on random
-arrays $A$, achieving span $\tilde{O}(n^{2/3})$ and exhibiting only $n/b +
-\tilde{O}(n^{2/3} / b)$  cache misses on such inputs. On worst-case inputs,
-however, the Strided Algorithm has span $\Omega(n)$ and incurs $n/b +
+Strided Algorithm\footnote{The original algorithm of Francis and Pannan
+  \cite{FrancisPa92} does not consider the cache-line size $b$. Frias and Petit
+later introduced the parameter $b$ \cite{Frias08}, and showed that by setting
+$b$ appropriately, one obtains an algorithm whose empirical performance is
+close to the state-of-the-art.}. The Strided Algorithm is designed to behave
+well on random arrays $A$, achieving span $\tilde{O}(n^{2/3})$ and exhibiting
+only $n/b + \tilde{O}(n^{2/3} / b)$  cache misses on such inputs. On worst-case
+inputs, however, the Strided Algorithm has span $\Omega(n)$ and incurs $n/b +
 \Omega(n/b)$ cache misses. Our algorithm, the Smoothed Striding Algorithm,
 builds on the Strided Algorithm by randomly perturbing the internal structure
 of the original algorithm; in doing so, we are able to provide provable
@@ -369,9 +368,6 @@ The original \defn{Strided Algorithm} consists of two steps:
   parameter, and assume for simplicity that $gb \mid n$. Partition the
   array $A$ into $\frac{n}{gb}$ chunks $C_1, \ldots, C_{n / gb}$,
   each consisting of $g$ cache lines of size $b$.
-  %% \footnote{In this
-  %%   gection we zero-index arrays in order to enable modular arithmetic
-  %%   on array indices.}
 	For $i \in \{1, 2, \ldots, g\}$, define 
   $P_i$ to consist of the $i$-th cache line from each of the
   chunks $C_1, \ldots, C_{n / gb}$. One can think of the $P_i$'s
@@ -392,36 +388,6 @@ The original \defn{Strided Algorithm} consists of two steps:
 	sub-array \\$A[v_{\text{min}}],\ldots, A[v_{\text{max}}-1]$. This completes the   
     full partition of $A$.
 \end{itemize}
-
-Note that the Cleanup Step of the Strided Algorithm has no
-parallelism, and thus has span $\Theta(v_{\text{max}} -
-v_{\text{min}})$.  In general, this results in an algorithm with
-linear-span (i.e., no parallelism guarantee).  When the number of
-predecessors in each of the $P_i$'s is close to equal, however, the
-quantity $v_{\text{max}} - v_{\text{min}}$ can be much smaller than
-$\Theta(n)$. For example, if $b = 1$, and if each element of $A$ is
-selected independently from some distribution, then one can use
-Chernoff bounds to prove that with high probability in $n$,
-$v_{\text{max}} - v_{\text{min}} \le O(\sqrt{n \cdot g \cdot \log
-  n})$.  The full span of the algorithm is then $\tilde{O}(n/g +
-\sqrt{n \cdot g})$, which optimizes at $g = n^{1/3}$ to
-$\tilde{O}(n^{2/3})$. Since the Partial Partition Step incurs only $n
-/ b$ cache misses, the full algorithm incurs $n + \tilde{O}(n^{2/3})$ cache
-misses on a random array $A$.
-
-Using Hoeffding's Inequality in place of Chernoff bounds, one can
-obtain analogous bounds for larger values of $b$; in particular for $b
-\in \operatorname{polylog}(n)$, the optimal span remains
-$\tilde{O}(n^{2/3})$ and the number of cache misses becomes $n / b +
-\tilde{O}(n^{2/3} / b)$ on an array $A$ consisting of randomly sampled
-elements.\footnote{The original algorithm of Francis and Pannan
-  \cite{FrancisPa92} does not consider the cache-line size $b$. Frias
-  and Petit later introduced the parameter $b$ \cite{Frias08}, and
-  showed that by setting $b$ appropriately, one obtains an algorithm
-  whose empirical performance is close to the state-of-the-art.}
-
-
-%% With this optimization, one advantage of the Strided Algorithm is that when $v_{\text{max}} - v_{\text{min}}$ is small, the total number of cache misses by the algorithm is close to the same as for a single scan through the data. 
 
 \paragraph{The Smoothed Striding Algorithm}
 To obtain an algorithm with provable guarantees for all inputs $A$, we
@@ -486,151 +452,151 @@ step the algorithm from the Appendix; one significant advantage
 of the recursive version is that it is simple to implement in
 practice.
 
-\paragraph{Formal Algorithm Description} Let $b < n$ be the size of a cache line, let $A$ be an input array of size
-$n$, and let $g$ be a parameter. (One should think of $g$ as being
-relatively large, satisfying $\frac{n}{bg} \le
-\operatorname{polylog}(n)$.)  We assume for simplicity that that $n$
-is divisible by $gb$, and we define $s = \frac{n}{gb}$.
-\footnote{This assumption can be made without loss of generality by treating $A$ as
-an array of size $n' = n + {(gb - n \pmod {gb})}$, and then treating
-the final $gb - n \pmod {gb}$ elements of the array as being
-successors (which consequently the algorithm needs not explicitly
-access). Note that the extra $n' - n$ elements are completely virtual, meaning they do not physically exist or reside in memory.
-}
+% \paragraph{Formal Algorithm Description} Let $b < n$ be the size of a cache line, let $A$ be an input array of size
+% $n$, and let $g$ be a parameter. (One should think of $g$ as being
+% relatively large, satisfying $\frac{n}{bg} \le
+% \operatorname{polylog}(n)$.)  We assume for simplicity that that $n$
+% is divisible by $gb$, and we define $s = \frac{n}{gb}$.
+% \footnote{This assumption can be made without loss of generality by treating $A$ as
+% an array of size $n' = n + {(gb - n \pmod {gb})}$, and then treating
+% the final $gb - n \pmod {gb}$ elements of the array as being
+% successors (which consequently the algorithm needs not explicitly
+% access). Note that the extra $n' - n$ elements are completely virtual, meaning they do not physically exist or reside in memory.
+% }
 
-In the \defn{Partial Partition Step} the algorithm partitions the
-cache lines of $A$ into $g$ sets $U_1, \ldots, U_{g}$ of size
-$s = \frac{n}{gb}$ and then performs a serial partition on each $U_i$
-in parallel over the $U_i$'s. To determine the sets
-$U_1, \ldots, U_{g}$, the algorithm uses as metadata an array
-$X = X[1], \ldots, X[s]$, where each $X[i] \in \{1, \ldots,
-g\}$. 
+% In the \defn{Partial Partition Step} the algorithm partitions the
+% cache lines of $A$ into $g$ sets $U_1, \ldots, U_{g}$ of size
+% $s = \frac{n}{gb}$ and then performs a serial partition on each $U_i$
+% in parallel over the $U_i$'s. To determine the sets
+% $U_1, \ldots, U_{g}$, the algorithm uses as metadata an array
+% $X = X[1], \ldots, X[s]$, where each $X[i] \in \{1, \ldots,
+% g\}$. 
 
-Formally, the Partial Partition Step performs the following procedure:
-\begin{itemize}
-\item Set each of $X[1], \ldots, X[s]$ to be uniformly random and
-  independently selected elements of $\{1, 2, \ldots, g\}$. For each $i \in
-  \{1, 2, \ldots, g\}$, $j \in \{1, 2, \ldots, s\}$, define
-  $$G_i(j) = (X[j] + i \pmod g) + (j - 1)g + 1.$$ Using this
-  terminology, we define each $U_i$ for $i \in \{1, \ldots, g\}$ to
-  contain the $G_i(j)$-th cache line of $A$ for each $j \in \{1, 2,
-  \ldots, s\}$. That is, $G_i(j)$ denotes the index of the $j$-th
-  cache line from array $A$ contained in $U_i$.
+% Formally, the Partial Partition Step performs the following procedure:
+% \begin{itemize}
+% \item Set each of $X[1], \ldots, X[s]$ to be uniformly random and
+%   independently selected elements of $\{1, 2, \ldots, g\}$. For each $i \in
+%   \{1, 2, \ldots, g\}$, $j \in \{1, 2, \ldots, s\}$, define
+%   $$G_i(j) = (X[j] + i \pmod g) + (j - 1)g + 1.$$ Using this
+%   terminology, we define each $U_i$ for $i \in \{1, \ldots, g\}$ to
+%   contain the $G_i(j)$-th cache line of $A$ for each $j \in \{1, 2,
+%   \ldots, s\}$. That is, $G_i(j)$ denotes the index of the $j$-th
+%   cache line from array $A$ contained in $U_i$.
 
-  Note that, to compute the index of the $j$-th cache line in $U_i$,
-  one needs only the value of $X[j]$. Thus the only metadata needed by
-  the algorithm to determine $U_1, \ldots, U_g$ is the array
-  $X$. If $|X| = s = \frac{n}{gb} \le \operatorname{polylog}(n)$, then
-  the algorithm is in place.
+%   Note that, to compute the index of the $j$-th cache line in $U_i$,
+%   one needs only the value of $X[j]$. Thus the only metadata needed by
+%   the algorithm to determine $U_1, \ldots, U_g$ is the array
+%   $X$. If $|X| = s = \frac{n}{gb} \le \operatorname{polylog}(n)$, then
+%   the algorithm is in place.
   
-\item The algorithm performs an in-place (serial) partition on each
-  $U_i$ (and performs these partitions in parallel with one
-  another). In doing so, the algorithm, also collects
-  $v_{\text{min}}=\min_i{v_i}$, $v_{\text{max}}=\max_i{v_i}$, where
-	each $v_i$ with $i \in \{1, \ldots, g\}$ is defined to be the index
-  of the first successor in $A$ (or $n$ if no such successor
-  exists).\footnote{One can calculate $v_{\text{min}}$ and
-    $v_{\text{max}}$ without explicitly storing each of $v_1, \ldots,
-		v_{g}$ as follows. Rather than using a standard $g$-way parallel
-		for-loop to partition each of $U_1, \ldots, U_{g}$, one can
-    manually implement the parallel for-loop using a recursive
-    divide-and-conquer approach. Each recursive call in the
-    divide-and-conquer can then simply collect the maximum and minimum
-    $v_i$ for the $U_i$'s that are partitioned within that recursive
-    call. This adds $O(\log n)$ to the total span of the Partial
-    Partition Step, which does not affect the overall span
-    asymptotically. %% In practice, this can also be implemented using
-    %% CilkPlus Reducers (or OpenMP Reductions) \cite{FrigoLe09}, though
-    %% empirically we have found explicitly implementing the
-    %% divide-and-conquer structure to be worthwhile for performance.
-  }
+% \item The algorithm performs an in-place (serial) partition on each
+%   $U_i$ (and performs these partitions in parallel with one
+%   another). In doing so, the algorithm, also collects
+%   $v_{\text{min}}=\min_i{v_i}$, $v_{\text{max}}=\max_i{v_i}$, where
+%   each $v_i$ with $i \in \{1, \ldots, g\}$ is defined to be the index
+%   of the first successor in $A$ (or $n$ if no such successor
+%   exists).\footnote{One can calculate $v_{\text{min}}$ and
+%     $v_{\text{max}}$ without explicitly storing each of $v_1, \ldots,
+%     v_{g}$ as follows. Rather than using a standard $g$-way parallel
+%     for-loop to partition each of $U_1, \ldots, U_{g}$, one can
+%     manually implement the parallel for-loop using a recursive
+%     divide-and-conquer approach. Each recursive call in the
+%     divide-and-conquer can then simply collect the maximum and minimum
+%     $v_i$ for the $U_i$'s that are partitioned within that recursive
+%     call. This adds $O(\log n)$ to the total span of the Partial
+%     Partition Step, which does not affect the overall span
+%     asymptotically. %% In practice, this can also be implemented using
+%     %% CilkPlus Reducers (or OpenMP Reductions) \cite{FrigoLe09}, though
+%     %% empirically we have found explicitly implementing the
+%     %% divide-and-conquer structure to be worthwhile for performance.
+%   }
   
-  The array $A$ is now partially partitioned, i.e. $A[i]$ is a
-  predecessor for all $i \le v_{\text{min}}$, and $A[i]$ is a successor
-  for all $i > v_{\text{max}}$.
-\end{itemize}
+%   The array $A$ is now partially partitioned, i.e. $A[i]$ is a
+%   predecessor for all $i \le v_{\text{min}}$, and $A[i]$ is a successor
+%   for all $i > v_{\text{max}}$.
+% \end{itemize}
 
-The second step of the Smoothed Striding Algorithm is to complete the
-partitioning of $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$. This can be done
-in one of two ways: The \defn{Recursive Smoothed Striding Algorithm}
-partitions $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ recursively using the
-same algorithm (and resorts to a serial base case when the subproblem
-is small enough that $g \le O(1)$); the \defn{Hybrid Smoothed Striding
-  Algorithm} partitions $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ using the
-in-place algorithm given in Theorem \ref{thminplace} with span $O(\log
-n \log \log n)$. In general, the Hybrid algorithm yields better
-theoretical guarantees on span than the recursive version; on the
-other hand, the recursive version has the advantage that it is
-simple to implement as fully in-place, and still achieves
-polylogarithmic span. 
+% The second step of the Smoothed Striding Algorithm is to complete the
+% partitioning of $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$. This can be done
+% in one of two ways: The \defn{Recursive Smoothed Striding Algorithm}
+% partitions $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ recursively using the
+% same algorithm (and resorts to a serial base case when the subproblem
+% is small enough that $g \le O(1)$); the \defn{Hybrid Smoothed Striding
+%   Algorithm} partitions $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ using the
+% in-place algorithm given in Theorem \ref{thminplace} with span $O(\log
+% n \log \log n)$. In general, the Hybrid algorithm yields better
+% theoretical guarantees on span than the recursive version; on the
+% other hand, the recursive version has the advantage that it is
+% simple to implement as fully in-place, and still achieves
+% polylogarithmic span. 
 
-% Detailed pseudocode for the Recursive Smoothed Striding Algorithm can
-% be found in Appendix \ref{sec:pseudocode}.
+% % Detailed pseudocode for the Recursive Smoothed Striding Algorithm can
+% % be found in Appendix \ref{sec:pseudocode}.
 
-%% note: g > s should hold
-\paragraph{Algorithm Analysis} 
-We prove the following proposition regarding the Partial Partition Step of the
-Smoothed Striding Algorithm.
-\begin{proposition}
-  \label{prop:generalResult}
-  Let $\epsilon \in (0, 1/2)$ and $\delta \in (0, 1/2)$ such that
-  $\epsilon \ge \frac{1}{\poly(n)}$ and $\delta \ge
-  \frac{1}{\polylog(n)}$. Suppose $s > \frac{\ln
-    (n/\epsilon)}{\delta^2}$. Finally, suppose that each processor has
-  a cache of size at least $s + c$ for a sufficiently large constant
-  $c$.
+% %% note: g > s should hold
+% \paragraph{Algorithm Analysis} 
+% We prove the following proposition regarding the Partial Partition Step of the
+% Smoothed Striding Algorithm.
+% \begin{proposition}
+%   \label{prop:generalResult}
+%   Let $\epsilon \in (0, 1/2)$ and $\delta \in (0, 1/2)$ such that
+%   $\epsilon \ge \frac{1}{\poly(n)}$ and $\delta \ge
+%   \frac{1}{\polylog(n)}$. Suppose $s > \frac{\ln
+%     (n/\epsilon)}{\delta^2}$. Finally, suppose that each processor has
+%   a cache of size at least $s + c$ for a sufficiently large constant
+%   $c$.
 
-  Then the Partial-Partition Algorithm achieves work $O(n)$; achieves
-  span $O\paren*{b \cdot s}$; incurs $\frac{s+n}{b} + O(1)$ cache
-  misses; and guarantees with probability $1 - \epsilon$ that
-  $$v_{\text{max}}-v_{\text{min}} < 4 n \delta.$$
-\end{proposition}
+%   Then the Partial-Partition Algorithm achieves work $O(n)$; achieves
+%   span $O\paren*{b \cdot s}$; incurs $\frac{s+n}{b} + O(1)$ cache
+%   misses; and guarantees with probability $1 - \epsilon$ that
+%   $$v_{\text{max}}-v_{\text{min}} < 4 n \delta.$$
+% \end{proposition}
 
-Using this we can analyze the hybrid and recursive smoothed striding algorithms.
+% Using this we can analyze the hybrid and recursive smoothed striding algorithms.
 
-We will assume that both the hybrid and the recursive algorithms use $\epsilon
-= 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$). Moreover,
-the Recursive Smoothed Striding Algorithm continues to use the same value of
-$\epsilon$ within recursive subproblems (i.e., the $\epsilon$ is chosen based
-on the size of the first subproblem in the recursion), so that the entire
-algorithm succeeds with high probability in $n$.
+% We will assume that both the hybrid and the recursive algorithms use $\epsilon
+% = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$). Moreover,
+% the Recursive Smoothed Striding Algorithm continues to use the same value of
+% $\epsilon$ within recursive subproblems (i.e., the $\epsilon$ is chosen based
+% on the size of the first subproblem in the recursion), so that the entire
+% algorithm succeeds with high probability in $n$.
 
-For both algorithms, the choice of $\delta$ results in a tradeoff between cache
-misses and span. For the Recursive algorithm, we allow for $\delta$ to be
-chosen arbitrarily at the top level of recursion, and then fix $\delta  =
-\Theta(1)$ to be a sufficiently small constant at all levels of recursion after
-the first; this guarantees that we at least halve the size of the problem
-between recursive iterations\footnote{In general, setting $\delta = 1/8$ will
-result in the problem size being halved. However, this relies on the assumption
-that $gb \mid n$, which is only without loss of generality by allowing for the
-size of subproblems to be sometimes artificially increased by a small amount
-(i.e., a factor of $1 + gb / n = 1 + 1/s$). One can handle this issue by
-decreasing $\delta$ to, say, $1/16$.}. Optimizing $\delta$ further (after the
-first level of recursion) would only affect the number of undesired cache
-misses by a constant factor.
+% For both algorithms, the choice of $\delta$ results in a tradeoff between cache
+% misses and span. For the Recursive algorithm, we allow for $\delta$ to be
+% chosen arbitrarily at the top level of recursion, and then fix $\delta  =
+% \Theta(1)$ to be a sufficiently small constant at all levels of recursion after
+% the first; this guarantees that we at least halve the size of the problem
+% between recursive iterations\footnote{In general, setting $\delta = 1/8$ will
+% result in the problem size being halved. However, this relies on the assumption
+% that $gb \mid n$, which is only without loss of generality by allowing for the
+% size of subproblems to be sometimes artificially increased by a small amount
+% (i.e., a factor of $1 + gb / n = 1 + 1/s$). One can handle this issue by
+% decreasing $\delta$ to, say, $1/16$.}. Optimizing $\delta$ further (after the
+% first level of recursion) would only affect the number of undesired cache
+% misses by a constant factor.
 
-Formally we prove the following performance results for these algorithms:
-\begin{corollary}
-	\label{cor:fullPartition}
-Suppose $b \le o(\log \log n)$. Then the Hybrid Smoothed Striding Algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.\\\\
-\end{corollary}
+% Formally we prove the following performance results for these algorithms:
+% \begin{corollary}
+%   \label{cor:fullPartition}
+% Suppose $b \le o(\log \log n)$. Then the Hybrid Smoothed Striding Algorithm using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.\\\\
+% \end{corollary}
 
-\begin{corollary}
-  \label{cor:groupedPartitionAlg}
-	With high probability in $n$, the Recursive Smoothed Striding Algorithm using parameter $\delta=1/\sqrt{\log n}$:
-  achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log n}))$ cache misses. 
-\end{corollary}
+% \begin{corollary}
+%   \label{cor:groupedPartitionAlg}
+%   With high probability in $n$, the Recursive Smoothed Striding Algorithm using parameter $\delta=1/\sqrt{\log n}$:
+%   achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log n}))$ cache misses. 
+% \end{corollary}
 
-\section{Performance Comparisons}\label{secexp}
-\begin{figure}[h]
-  \includegraphics[width=\linewidth]{graph_performance.png}
-% \CILKtable 
-% \caption{We compare the performance of various partition implementations, relative to the Libc serial baseline, on random arrays of size $2^{30}$.
-%  The $x$-axis plots the number of worker threads being used, and the $y$-axis
-%  plots the multiplicative speedup over the serial baseline. Each time
-%  (including the serial baseline) is averaged over five trials.}
-%  \label{tablecilk}
-\end{figure}
+% \section{Performance Comparisons}\label{secexp}
+% \begin{figure}[h]
+%   \includegraphics[width=\linewidth]{graph_performance.png}
+% % \CILKtable 
+% % \caption{We compare the performance of various partition implementations, relative to the Libc serial baseline, on random arrays of size $2^{30}$.
+% %  The $x$-axis plots the number of worker threads being used, and the $y$-axis
+% %  plots the multiplicative speedup over the serial baseline. Each time
+% %  (including the serial baseline) is averaged over five trials.}
+% %  \label{tablecilk}
+% \end{figure}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{paper}
