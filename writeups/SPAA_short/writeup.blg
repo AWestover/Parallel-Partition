@@ -13,45 +13,47 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty address in CLRS
 Warning--empty publisher in Frias08
 Warning--empty address in Frias08
-You've used 7 entries,
+Warning--no number and no volume in ARXIV
+Warning--page numbers missing in both pages and numpages fields in ARXIV
+You've used 6 entries,
             5719 wiz_defined-function locations,
-            1339 strings with 15235 characters,
-and the built_in function-call counts, 7775 in all, are:
-= -- 919
-> -- 262
+            1331 strings with 15212 characters,
+and the built_in function-call counts, 6483 in all, are:
+= -- 792
+> -- 224
 < -- 0
-+ -- 89
-- -- 104
-* -- 527
-:= -- 832
-add.period$ -- 36
-call.type$ -- 7
-change.case$ -- 43
-chr.to.int$ -- 7
-cite$ -- 10
-duplicate$ -- 694
-empty$ -- 489
-format.name$ -- 128
-if$ -- 1784
++ -- 76
+- -- 88
+* -- 432
+:= -- 693
+add.period$ -- 31
+call.type$ -- 6
+change.case$ -- 37
+chr.to.int$ -- 6
+cite$ -- 11
+duplicate$ -- 566
+empty$ -- 400
+format.name$ -- 108
+if$ -- 1506
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 23
-newline$ -- 95
-num.names$ -- 56
-pop$ -- 237
+missing$ -- 19
+newline$ -- 87
+num.names$ -- 48
+pop$ -- 206
 preamble$ -- 1
-purify$ -- 106
+purify$ -- 91
 quote$ -- 0
-skip$ -- 255
+skip$ -- 205
 stack$ -- 0
-substring$ -- 626
-swap$ -- 76
+substring$ -- 472
+swap$ -- 55
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 139
-warning$ -- 3
-while$ -- 67
+type$ -- 123
+warning$ -- 5
+while$ -- 53
 width$ -- 0
-write$ -- 157
-(There were 3 warnings)
+write$ -- 139
+(There were 5 warnings)

@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{7}
+\begin{thebibliography}{6}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -89,27 +89,16 @@
 \newblock
 
 
-\bibitem[\protect\citeauthoryear{Hagerup and R{\"u}b}{Hagerup and
-  R{\"u}b}{1989}]%
-        {Hagerup89}
-\bibfield{author}{\bibinfo{person}{Torben Hagerup} {and}
-  \bibinfo{person}{Christine R{\"u}b}.} \bibinfo{year}{1989}\natexlab{}.
-\newblock \showarticletitle{Optimal merging and sorting on the EREW PRAM}.
-\newblock \bibinfo{journal}{\emph{Inform. Process. Lett.}}
-  \bibinfo{volume}{33}, \bibinfo{number}{4} (\bibinfo{year}{1989}),
-  \bibinfo{pages}{181--185}.
-\newblock
-
-
-\bibitem[\protect\citeauthoryear{Sleator and Tarjan}{Sleator and
-  Tarjan}{1985}]%
-        {SleatorTa85}
-\bibfield{author}{\bibinfo{person}{Daniel~D Sleator} {and}
-  \bibinfo{person}{Robert~E Tarjan}.} \bibinfo{year}{1985}\natexlab{}.
-\newblock \showarticletitle{Amortized efficiency of list update and paging
-  rules}.
-\newblock \bibinfo{journal}{\emph{Commun. ACM}} \bibinfo{volume}{28},
-  \bibinfo{number}{2} (\bibinfo{year}{1985}), \bibinfo{pages}{202--208}.
+\bibitem[\protect\citeauthoryear{Kuszmaul and Westover}{Kuszmaul and
+  Westover}{2020}]%
+        {ARXIV}
+\bibfield{author}{\bibinfo{person}{William Kuszmaul} {and}
+  \bibinfo{person}{Alek Westover}.} \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{In-Place Parallel-Partition Algorithms using
+  Exclusive-Read-and-Write Memory: An In-Place Algorithm With Provably Optimal
+  Cache Behavior}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:2004.12532}}
+  (\bibinfo{year}{2020}).
 \newblock
 
 
