@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{6}
+\begin{thebibliography}{5}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -53,17 +53,6 @@
 \newblock \showarticletitle{Programming parallel algorithms}.
 \newblock \bibinfo{journal}{\emph{Commun. ACM}} \bibinfo{volume}{39},
   \bibinfo{number}{3} (\bibinfo{year}{1996}), \bibinfo{pages}{85--97}.
-\newblock
-
-
-\bibitem[\protect\citeauthoryear{Cormen, Leiserson, Rivest, and Stein}{Cormen
-  et~al\mbox{.}}{2009}]%
-        {CLRS}
-\bibfield{author}{\bibinfo{person}{Thomas~H Cormen}, \bibinfo{person}{Charles~E
-  Leiserson}, \bibinfo{person}{Ronald~L Rivest}, {and}
-  \bibinfo{person}{Clifford Stein}.} \bibinfo{year}{2009}\natexlab{}.
-\newblock \bibinfo{booktitle}{\emph{Introduction to algorithms}}.
-\newblock \bibinfo{publisher}{MIT press}.
 \newblock
 
 

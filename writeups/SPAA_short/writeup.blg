@@ -10,50 +10,49 @@ Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
 Reallocated global_strs (elt_size=20001) to 20 items from 10.
 Reallocated glb_str_end (elt_size=4) to 20 items from 10.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
-Warning--empty address in CLRS
 Warning--empty publisher in Frias08
 Warning--empty address in Frias08
 Warning--no number and no volume in ARXIV
 Warning--page numbers missing in both pages and numpages fields in ARXIV
-You've used 6 entries,
+You've used 5 entries,
             5719 wiz_defined-function locations,
-            1331 strings with 15212 characters,
-and the built_in function-call counts, 6483 in all, are:
-= -- 792
-> -- 224
+            1325 strings with 15083 characters,
+and the built_in function-call counts, 5561 in all, are:
+= -- 709
+> -- 172
 < -- 0
-+ -- 76
-- -- 88
-* -- 432
-:= -- 693
-add.period$ -- 31
-call.type$ -- 6
-change.case$ -- 37
-chr.to.int$ -- 6
-cite$ -- 11
-duplicate$ -- 566
-empty$ -- 400
-format.name$ -- 108
-if$ -- 1506
++ -- 59
+- -- 72
+* -- 349
+:= -- 576
+add.period$ -- 25
+call.type$ -- 5
+change.case$ -- 29
+chr.to.int$ -- 5
+cite$ -- 9
+duplicate$ -- 489
+empty$ -- 346
+format.name$ -- 88
+if$ -- 1311
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 19
-newline$ -- 87
-num.names$ -- 48
-pop$ -- 206
+missing$ -- 17
+newline$ -- 79
+num.names$ -- 40
+pop$ -- 174
 preamble$ -- 1
-purify$ -- 91
+purify$ -- 74
 quote$ -- 0
-skip$ -- 205
+skip$ -- 179
 stack$ -- 0
-substring$ -- 472
-swap$ -- 55
+substring$ -- 419
+swap$ -- 48
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 123
-warning$ -- 5
-while$ -- 53
+type$ -- 108
+warning$ -- 4
+while$ -- 49
 width$ -- 0
-write$ -- 139
-(There were 5 warnings)
+write$ -- 122
+(There were 4 warnings)
