@@ -134,9 +134,24 @@ on infinitely many processors. There is a well-known algorithm for
 parallel partition on arrays of size $n$ with work $O(n)$ and span
 $O(\log n)$ \cite{Blelloch96,AcarBl16}. Moreover, the algorithm uses
 only exclusive read/write shared memory variables (i.e., it is an
-\defn{EREW} algorithm).
-This parallel-partition algorithm suffers from using a large amount of
-auxiliary memory, however, and thus performs poorly in practice. 
+\defn{EREW} algorithm). This eliminates the need for concurrency
+mechanisms such as locks and atomic variables, and ensures good
+behavior even if the time to access a location is a function of the
+number of threads trying to access it (or its cache line)
+concurrently. EREW algorithms also have the advantage that their
+behavior is internally deterministic, meaning that
+the behavior of the algorithm will not differ from run to run, which
+makes test coverage, debugging, and reasoning about performance
+substantially easier \cite{BlellochFi12}.
+
+The parallel-partition algorithm suffers from using a large amount of
+auxiliary memory, however. To the best of our knowledge, the only
+known linear-work and $\operatorname{polylog}(n)$-span algorithms for
+parallel partition that are in-place require the use of atomic
+operations (e.g, fetch-and-add)
+\cite{HeidelbergerNo90,AxtmannWi17,TsigasZh03}.
+% This parallel-partition algorithm suffers from using a large amount of
+% auxiliary memory, however, and thus performs poorly in practice. 
 
 \paragraph{Results}
 We present an in-place EREW algorithm, that we call the \defn{Smoothed Striding
@@ -396,8 +411,7 @@ $U_i$ for $i \in \{1, 2, \ldots, g\}$. This allows for us to construct
 the $U_i$'s using only $O(n/(gb))$ machine words
 storing the metadata $X_1, \ldots, X_{n / gb}$. By setting $g$ to
 be relatively large, so that $\frac{n}{gb} \le
-\operatorname{polylog}(n)$, we can obtain an in-place algorithm that
-incurs $n (1 + o(1))$ cache misses.
+\operatorname{polylog}(n)$, we obtain a cache-efficient in-place algorithm.
 
 The recursive structure of the Smoothed Striding Algorithm allows for
 the algorithm to achieve polylogarithmic span. As an alternative to
@@ -572,7 +586,4 @@ recursing, one can also use the in-place algorithm from Section \ref{sec:prefixb
 \bibliography{paper}
 
 \end{document}
-
-
-
 

@@ -10,49 +10,56 @@ Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
 Reallocated global_strs (elt_size=20001) to 20 items from 10.
 Reallocated glb_str_end (elt_size=4) to 20 items from 10.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--no number and no volume in AxtmannWi17
+Warning--page numbers missing in both pages and numpages fields in AxtmannWi17
+Warning--can't use both volume and number fields in BlellochFi12
+Warning--empty publisher in BlellochFi12
+Warning--empty address in BlellochFi12
 Warning--empty publisher in Frias08
 Warning--empty address in Frias08
 Warning--no number and no volume in ARXIV
 Warning--page numbers missing in both pages and numpages fields in ARXIV
-You've used 5 entries,
+Warning--empty publisher in TsigasZh03
+Warning--empty address in TsigasZh03
+You've used 9 entries,
             5719 wiz_defined-function locations,
-            1325 strings with 15083 characters,
-and the built_in function-call counts, 5561 in all, are:
-= -- 709
-> -- 172
+            1353 strings with 15856 characters,
+and the built_in function-call counts, 10369 in all, are:
+= -- 1286
+> -- 355
 < -- 0
-+ -- 59
-- -- 72
-* -- 349
-:= -- 576
-add.period$ -- 25
-call.type$ -- 5
-change.case$ -- 29
-chr.to.int$ -- 5
-cite$ -- 9
-duplicate$ -- 489
-empty$ -- 346
-format.name$ -- 88
-if$ -- 1311
++ -- 121
+- -- 132
+* -- 703
+:= -- 1061
+add.period$ -- 45
+call.type$ -- 9
+change.case$ -- 58
+chr.to.int$ -- 9
+cite$ -- 20
+duplicate$ -- 923
+empty$ -- 648
+format.name$ -- 164
+if$ -- 2470
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 17
-newline$ -- 79
-num.names$ -- 40
-pop$ -- 174
+missing$ -- 35
+newline$ -- 109
+num.names$ -- 72
+pop$ -- 345
 preamble$ -- 1
-purify$ -- 74
+purify$ -- 139
 quote$ -- 0
-skip$ -- 179
+skip$ -- 330
 stack$ -- 0
-substring$ -- 419
-swap$ -- 48
+substring$ -- 761
+swap$ -- 93
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 108
-warning$ -- 4
-while$ -- 49
+type$ -- 200
+warning$ -- 11
+while$ -- 76
 width$ -- 0
-write$ -- 122
-(There were 4 warnings)
+write$ -- 190
+(There were 11 warnings)

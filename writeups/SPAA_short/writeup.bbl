@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{5}
+\begin{thebibliography}{9}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -46,6 +46,18 @@
 \newblock
 
 
+\bibitem[\protect\citeauthoryear{Axtmann, Witt, Ferizovic, and Sanders}{Axtmann
+  et~al\mbox{.}}{2017}]%
+        {AxtmannWi17}
+\bibfield{author}{\bibinfo{person}{Michael Axtmann}, \bibinfo{person}{Sascha
+  Witt}, \bibinfo{person}{Daniel Ferizovic}, {and} \bibinfo{person}{Peter
+  Sanders}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{In-place Parallel Super Scalar Samplesort}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:1705.02257}}
+  (\bibinfo{year}{2017}).
+\newblock
+
+
 \bibitem[\protect\citeauthoryear{Blelloch}{Blelloch}{1996}]%
         {Blelloch96}
 \bibfield{author}{\bibinfo{person}{Guy~E Blelloch}.}
@@ -53,6 +65,18 @@
 \newblock \showarticletitle{Programming parallel algorithms}.
 \newblock \bibinfo{journal}{\emph{Commun. ACM}} \bibinfo{volume}{39},
   \bibinfo{number}{3} (\bibinfo{year}{1996}), \bibinfo{pages}{85--97}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Blelloch, Fineman, Gibbons, and Shun}{Blelloch
+  et~al\mbox{.}}{2012}]%
+        {BlellochFi12}
+\bibfield{author}{\bibinfo{person}{Guy~E Blelloch}, \bibinfo{person}{Jeremy~T
+  Fineman}, \bibinfo{person}{Phillip~B Gibbons}, {and} \bibinfo{person}{Julian
+  Shun}.} \bibinfo{year}{2012}\natexlab{}.
+\newblock \showarticletitle{Internally deterministic parallel algorithms can be
+  fast}. In \bibinfo{booktitle}{\emph{ACM SIGPLAN Notices}},
+  Vol.~\bibinfo{volume}{47}. ACM, \bibinfo{pages}{181--192}.
 \newblock
 
 
@@ -78,6 +102,18 @@
 \newblock
 
 
+\bibitem[\protect\citeauthoryear{Heidelberger, Norton, and
+  Robinson}{Heidelberger et~al\mbox{.}}{1990}]%
+        {HeidelbergerNo90}
+\bibfield{author}{\bibinfo{person}{Philip Heidelberger}, \bibinfo{person}{Alan
+  Norton}, {and} \bibinfo{person}{John~T. Robinson}.}
+  \bibinfo{year}{1990}\natexlab{}.
+\newblock \showarticletitle{Parallel quicksort using fetch-and-add}.
+\newblock \bibinfo{journal}{\emph{IEEE Trans. Comput.}} \bibinfo{volume}{39},
+  \bibinfo{number}{1} (\bibinfo{year}{1990}), \bibinfo{pages}{133--138}.
+\newblock
+
+
 \bibitem[\protect\citeauthoryear{Kuszmaul and Westover}{Kuszmaul and
   Westover}{2020}]%
         {ARXIV}
@@ -88,6 +124,18 @@
   Cache Behavior}.
 \newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:2004.12532}}
   (\bibinfo{year}{2020}).
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Tsigas and Zhang}{Tsigas and Zhang}{2003}]%
+        {TsigasZh03}
+\bibfield{author}{\bibinfo{person}{Philippas Tsigas} {and} \bibinfo{person}{Yi
+  Zhang}.} \bibinfo{year}{2003}\natexlab{}.
+\newblock \showarticletitle{A simple, fast parallel implementation of quicksort
+  and its performance evaluation on SUN enterprise 10000}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the Eleventh Euromicro Conference on
+  Parallel, Distributed and Network-Based Processing}}. IEEE,
+  \bibinfo{pages}{372}.
 \newblock
 
 
