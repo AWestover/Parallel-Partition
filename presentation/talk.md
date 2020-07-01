@@ -28,7 +28,6 @@ So that's the partition problem, and when you have a single processor, this
 solution is trivial.  The optimal solution is obvious, and has linear run-time,
 and is in-place. 
 
-
 My research focussed on the much more interesting problem of creating a fast
 parallel algorithm for the partition problem.  What is a parallel algorith,?
 The fundamental primitive of a parallel algoritm is the parallel for loop.  A
