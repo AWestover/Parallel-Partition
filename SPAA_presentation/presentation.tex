@@ -73,6 +73,7 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 \title{Cache-Efficient Parallel Partition Algorithms Using
 Exclusive-Read-and-Write Memory}
 \author{William Kuszmaul, Alek Westover}
+\institute{MIT}
 
 \begin{document}
  
@@ -100,12 +101,18 @@ Exclusive-Read-and-Write Memory}
   \end{itemize}
 \end{frame}
 
-\begin{frame}[t]{What is a Parallel Algorithm?}
-  Fundamental primitive: \defn{Parallel for loop}
-  \vspace{0.5cm}
+\begin{frame}[t]{Our Model of Parallelism}
+  Language based model. Primitive: \defn{Parallel for loop}.\\
+  Similar to how Cilk works
+  \vspace{0.25cm}
 
   \centering
-  \includegraphics[width=0.6\linewidth]{images/serialParallelComparison.eps}
+  \includegraphics[width=0.55\linewidth]{images/serialParallelComparison.eps}
+
+  \begin{overprint}
+    \vspace{0.25cm}
+    \onslide<2>{\color{blue} Rule for this talk: no locks or atomic variables}
+  \end{overprint}
 \end{frame}
 
 \begin{frame}[t]{Parallel Algorithm Performance Metrics}
@@ -135,38 +142,38 @@ Exclusive-Read-and-Write Memory}
 	\end{columns}
 \end{frame}
 
-\begin{frame}{What is Cache Efficiency?}
-  Roughly, an algorithm is \textbf{cache-efficient} if it
+\begin{frame}[t]{Optimizing Cache Efficiency}
+  \defn{Cache-efficient} algorithm: serial implementation incurs $(1+o(1))n/B$
+  cache misses in the Disk Access model. \\
+  \citefont{[Aggarwal and Vitter, 1988]}
+  \vspace{.5cm}
   \begin{itemize}
-    \item Performs low number of passes over the data
-    \item Doesn't use extra memory (i.e. is \emph{In-Place})
-    \item Opperates on elements close together in memory at the same time
+    \item Perform low number of passes over the data
+    \item Don't use extra memory (\emph{In-Place})
+    \item Simultaneously operate on elements close in memory
   \end{itemize}
-  \vspace{1.5cm}
-  Cache-Efficiency makes an algorithm faster in practice.
 \end{frame}
 
-\begin{frame}[t]{The Problem}
-  Standard Algorithm {\color{blue}span $O(\log n)$} but is {\color{red}slow in practice}
+\begin{frame}[t]{Previous Work}
+  ``Standard Algorithm": span $O(\log n)$, but slow in practice
 	\begin{columns}[T] % align columns
 	\begin{column}{.65\textwidth}
 	\begin{itemize}
-    \item {\color{red}Uses extra memory}
-    \item {\color{red}Makes multiple passes over array}
+    \item Uses extra memory
+    \item Makes multiple passes over data
 	\end{itemize}
 	\end{column}
 	\begin{column}{.35\textwidth}
-	\hspace{-1cm}$\Biggr\}\text{bad cache behavior}$
+	\hspace{-1cm}$\Biggr\}\text{ bad cache behavior}$
 	\end{column}
 	\end{columns}
 	\vspace{0.4 cm}
 
-  {\color{blue}Fastest algorithms in practice} {\color{red}lack theoretical guarantees}
+  Fastest algorithms in practice: 
 	\begin{itemize}
-  \item {\color{red}Lock based} and {\color{red}atomic-variable
-    based} algorithms\\ \citefont{[Michael Axtmann, Sascha Witt, Daniel Ferizovic, and Peter Sanders, 2017; Philip Heidelberger, Alan Norton, and John T. Robinson, 1990; Philippas Tsigas and Yi Zhang, 2003]}
+  \item Lock based and atomic-variable based algorithms\\ \citefont{[Michael Axtmann, Sascha Witt, Daniel Ferizovic, and Peter Sanders, 2017; Philip Heidelberger, Alan Norton, and John T. Robinson, 1990; Philippas Tsigas and Yi Zhang, 2003]}
 		\item The Strided Algorithm\\ \citefont{[Francis and Pannan, 92; Frias and Petit, 08]}\\ 
-      {\color{blue}No locks or atomic-variables}, {\color{red}but no bound on span}
+      No locks or atomic-variables, lacks theoretical guarantees
 	\end{itemize}
 	\vspace{0.2cm}
 \end{frame}
@@ -229,6 +236,9 @@ Exclusive-Read-and-Write Memory}
 	\end{figure}
 \end{frame}
 
+% last sentence: if you want to see our cool application of
+% randomization be sure to check out our paper!
+
 % \begin{frame}[t]{}
 %   \vfill
 %   \begin{center}
@@ -271,85 +281,85 @@ Exclusive-Read-and-Write Memory}
 % \end{frame}
 
 
-\begin{frame}[t]{}
-	\vfill
-	\begin{center}
-		{\Huge The Smoothed-Striding Algorithm}
-	\end{center}
-	\vfill
-\end{frame}
+% \begin{frame}[t]{}
+%   \vfill
+%   \begin{center}
+%     {\Huge The Smoothed-Striding Algorithm}
+%   \end{center}
+%   \vfill
+% \end{frame}
 
 
-%% possibly make a terrbile pun joke "get it parallelism"
-\begin{frame}[t]{}%{Smoothed Striding Algorithm Description}
-	\vspace{0.25cm}
-	\begin{overprint}
-	\onslide<1>Logically partition the array into chunks of adjacent elements
-  \onslide<2>Form groups $U_i$ that contain a \textbf{random}
-  element from each chunk (the Strided Algorithm forms groups
-  $P_i$ that contain the $i$-th element from each chunk) 
-	\onslide<3>Perform serial partitions on each $U_i$ in parallel over the $U_i$'s
-	\onslide<4>Define $v_i = $ index of first element greater than the pivot in $U_i$
-	\onslide<5>Identify leftmost and rightmost $v_i$
-	\onslide<6>\textbf{Final step:} Recursively partition the subarray
-	\onslide<7>\textbf{Final step:} Recursively partition the subarray
-	\end{overprint}
-	\vspace{0.25cm}
-	\begin{overprint}
-	\onslide<1>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim1.eps}
-	\onslide<2>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim2.eps}
-	\onslide<3>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim3.eps}
-	\onslide<4>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim35.eps}
-	\onslide<5>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim4.eps}
-	\onslide<6>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim45.eps}
-	\onslide<7>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim45.eps}
-	\end{overprint}
-	\vspace{0.25cm}
-	\begin{overprint}
-	\onslide<3>This step is highly parallel.
-\onslide<7> \begin{itemize} \item Recursion is now possible!\\
-(unlike in the Strided Algorithm, where the subproblem is a worst
-case input) \item Randomness guarantees
-that $v_{\max} - v_{\min}$ is small \\(unlike in the Strided
-Algorithm, where $v_{\max} - v_{\min}$ could be as large as $\Theta(n)$)\end{itemize} 
-	\end{overprint}
-\end{frame}
+% %% possibly make a terrbile pun joke "get it parallelism"
+% \begin{frame}[t]{}%{Smoothed Striding Algorithm Description}
+%   \vspace{0.25cm}
+%   \begin{overprint}
+%   \onslide<1>Logically partition the array into chunks of adjacent elements
+%   \onslide<2>Form groups $U_i$ that contain a \textbf{random}
+%   element from each chunk (the Strided Algorithm forms groups
+%   $P_i$ that contain the $i$-th element from each chunk) 
+%   \onslide<3>Perform serial partitions on each $U_i$ in parallel over the $U_i$'s
+%   \onslide<4>Define $v_i = $ index of first element greater than the pivot in $U_i$
+%   \onslide<5>Identify leftmost and rightmost $v_i$
+%   \onslide<6>\textbf{Final step:} Recursively partition the subarray
+%   \onslide<7>\textbf{Final step:} Recursively partition the subarray
+%   \end{overprint}
+%   \vspace{0.25cm}
+%   \begin{overprint}
+%   \onslide<1>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim1.eps}
+%   \onslide<2>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim2.eps}
+%   \onslide<3>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim3.eps}
+%   \onslide<4>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim35.eps}
+%   \onslide<5>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim4.eps}
+%   \onslide<6>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim45.eps}
+%   \onslide<7>\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgSim/sim45.eps}
+%   \end{overprint}
+%   \vspace{0.25cm}
+%   \begin{overprint}
+%   \onslide<3>This step is highly parallel.
+% \onslide<7> \begin{itemize} \item Recursion is now possible!\\
+% (unlike in the Strided Algorithm, where the subproblem is a worst
+% case input) \item Randomness guarantees
+% that $v_{\max} - v_{\min}$ is small \\(unlike in the Strided
+% Algorithm, where $v_{\max} - v_{\min}$ could be as large as $\Theta(n)$)\end{itemize} 
+%   \end{overprint}
+% \end{frame}
 
-\begin{frame}[t]{A Key Challenge}
-How do we store the $U_i$'s if they are all random?	\\
-\vspace{0.5cm}
-Storing which elements make up each $U_i$ takes too much space!\\
+% \begin{frame}[t]{A Key Challenge}
+% How do we store the $U_i$'s if they are all random?	\\
+% \vspace{0.5cm}
+% Storing which elements make up each $U_i$ takes too much space!\\
 
-\vspace{0.5cm}
-\textbf{Strided Algorithm $P_i$.}
-\begin{figure}
-	\includegraphics[width=\linewidth]{imgs/stridedAlgHighlighted.png}
-\end{figure}
-\textbf{Smoothed-Striding Algorithm $U_i$.}
-\begin{figure}
-	\includegraphics[width=\linewidth]{imgs/smoothedStridingAlgHighlighted.png}
-\end{figure}
-\end{frame}
+% \vspace{0.5cm}
+% \textbf{Strided Algorithm $P_i$.}
+% \begin{figure}
+%   \includegraphics[width=\linewidth]{imgs/stridedAlgHighlighted.png}
+% \end{figure}
+% \textbf{Smoothed-Striding Algorithm $U_i$.}
+% \begin{figure}
+%   \includegraphics[width=\linewidth]{imgs/smoothedStridingAlgHighlighted.png}
+% \end{figure}
+% \end{frame}
 
-\begin{frame}[t]{How to Store the groups}
-	\textbf{Key Insight:} While each $U_i$ does need to contain a random element from each chunk, the $U_i$'s don't need to be \emph{independent}.
+% \begin{frame}[t]{How to Store the groups}
+%   \textbf{Key Insight:} While each $U_i$ does need to contain a random element from each chunk, the $U_i$'s don't need to be \emph{independent}.
 
-	\vspace{0.5cm}
-	We store $U_1$, and all other groups are determined by a
-  ``circular shift'' of $U_1$ (wraparound within each chunk).
-	\vspace{0.5cm}
-	\begin{figure}
-		\includegraphics[width=\linewidth]{imgs/blackrainbowAlt.eps}
-	\end{figure}	
-\end{frame}
+%   \vspace{0.5cm}
+%   We store $U_1$, and all other groups are determined by a
+%   ``circular shift'' of $U_1$ (wraparound within each chunk).
+%   \vspace{0.5cm}
+%   \begin{figure}
+%     \includegraphics[width=\linewidth]{imgs/blackrainbowAlt.eps}
+%   \end{figure}	
+% \end{frame}
 
-\begin{frame}[t]{An Open Question}
-	\vspace{0.5cm}
-	\textbf{Our algorithm:} span $T_\infty = O(\log n \log\log n)$\\
-	\vspace{0.5cm}
-	\textbf{Standard Algorithm:} span $T_\infty = O(\log n)$.\\
-	\vspace{1cm}
-	Can we get optimal cache behavior and span $O(\log n)$?
-\end{frame}
+% \begin{frame}[t]{An Open Question}
+%   \vspace{0.5cm}
+%   \textbf{Our algorithm:} span $T_\infty = O(\log n \log\log n)$\\
+%   \vspace{0.5cm}
+%   \textbf{Standard Algorithm:} span $T_\infty = O(\log n)$.\\
+%   \vspace{1cm}
+%   Can we get optimal cache behavior and span $O(\log n)$?
+% \end{frame}
 
 \end{document}
