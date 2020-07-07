@@ -88,10 +88,7 @@ Fellowship and a NSF GRFP Fellowship.}}
 % \subtitle{An In-Place Algorithm With Provably Optimal Cache Behavior}
 \author{Anonymous}
 % \author{William Kuszmaul\thanks{Massachusetts Institute of Technology} \and Alek Westover\thanks{Massachusetts Institute of Technology}}
-
 \date{}
-
-\maketitle
 
 % Default Copyright Statement
 \fancyfoot[R]{\scriptsize{Copyright \textcopyright\ 2021 by SIAM\\
@@ -110,7 +107,10 @@ Unauthorized reproduction of this article is prohibited}}
 %\pagenumbering{arabic}
 %\setcounter{page}{1}%Leave this line commented out.
 
-\begin{abstract} \small\baselineskip=9pt 
+\twocolumn[
+  \begin{@twocolumnfalse}
+    \maketitle
+\begin{abstract} 
 We present an in-place algorithm for the parallel partition problem
 that has linear work and polylogarithmic span. The algorithm uses only
 exclusive read/write shared variables, and can be implemented using
@@ -137,6 +137,8 @@ Pannan, Frias, and Petit, which is the previous state-of-the art for
 parallel EREW sorting algorithms, but which lacks theoretical
 guarantees on its span and cache behavior.
 \end{abstract}
+  \end{@twocolumnfalse}
+]
 
 \clearpage
 
@@ -316,8 +318,8 @@ be used as a subroutine within the Smoothed Striding Algorithm to
 achieve the same span. Section \ref{secexp} implements the algorithms
 from this paper, along with the Strided Algorithm and the standard
 linear-space algorithm, in order to experimentally evaluate their
-performances. Finally, we conclude with open questions in Section
-\ref{sec:open}. Figures and pseudocode are differed to Appendices
+performances. Finally, we conclude with open questions in
+Appendix \ref{sec:open}. Figures and pseudocode are differed to Appendices
 \ref{sec:figures} and \ref{sec:pseudocode}.
 
 
@@ -644,7 +646,7 @@ the algorithm to achieve polylogarithmic span. As an alternative to
 recursing, one can also use the in-place algorithm from Appendix
 \ref{secalg} in order to partition \\ $A[v_{\text{min}}], \ldots,
   A[v_{\text{max}} - 1]$. This results in an improved span (since the
-algorithm from Appendix \ref{secalg} has span only \\ $O(\log n \log \log
+algorithm from Appendix \ref{secalg} has span only $O(\log n \log \log
 n)$), while still incurring only $n (1 + o(1))$ cache misses (since
 the cache-inefficient algorithm from Appendix \ref{secalg} is only used
 on a small subarray of $A$). We analyze both the recursive version of
@@ -927,7 +929,7 @@ Suppose $b \le o(\log \log n)$. Then the Hybrid Smoothed Striding
 Algorithm using $\delta = \Theta\left(\sqrt{b/\log\log n}\right)$,
 achieves work $O(n)$, and with high probability in $n$, achieves
 span $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$
-cache misses.\\\\
+cache misses.
 \end{corollary}
 
 \begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
@@ -1468,6 +1470,8 @@ quicksort, and further improving the scaling.
 %% over the low-space algorithm, but also demonstrates its larger span by
 %% suffering on smaller inputs as the number of cores grows.
 
+\clearpage
+\appendix
 
 \section{Conclusion and Open Questions}\label{sec:open}
 
@@ -1522,10 +1526,6 @@ concurrent-read-exclusive-write memory) is an important direction of
 future work.
 
 
-
-
-\clearpage
-\appendix
 
 \section{An In-Place Algorithm with Span $O(\log n \log \log n)$}\label{secalg}
 
