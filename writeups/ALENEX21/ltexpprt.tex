@@ -971,7 +971,8 @@ any $i$ and $j$ is at most, $2bg + 2\delta n$. Thus,
 \end{align*}
 \end{proof}
 
-We use Proposition \ref{prop:generalResult} as a tool to analyze the Recursive and the Hybrid Smoothed Striding Algorithms.
+We use Proposition \ref{prop:generalResult} as a tool to analyze
+the Recursive and the Hybrid Smoothed Striding Algorithms.
 
 Rather than parameterizing the Partial Partition step in each
 algorithm by $s$, Proposition \ref{prop:generalResult} suggests
@@ -1002,69 +1003,26 @@ this issue by decreasing $\delta$ to, say, $1/16$.}. Optimizing
 $\delta$ further (after the first level of recursion) would only
 affect the number of undesired cache misses by a constant factor.
 
-
-%% $\delta = 1/8$ in order to at least halve the size of the problem size at each iteration. 
-%% % Using this higher value of $\delta$ is ok because the lower levels of recursion are small, so it doesn't matter a lot what you do with them.
-
-In Appendix \ref{sec:hybridandrecursivethmpfs} we prove the
-following Theorem regarding the Hybrid Smoothed Striding Algorithm:
-
-\begin{theorem}
-	\label{thm:fullPartition}
-	The Hybrid Smoothed Striding Algorithm using parameter $\delta\in(0,1/2)$ satisfying $\delta \ge 1/\polylog(n)$: has work $O(n)$; achieves span
-  $$O\left(\log n \log\log n +\frac{b\log n}{\delta^2}\right),$$
-with high probability in $n$; and incurs fewer than 
-$$(n+O(n\delta))/b$$
-cache misses with high probability in $n$.
-\end{theorem}
-
-%% note: b/loglogn > 1 in reality, but the constant factors make it so that delta is still < 1
-
-An interesting corollary of Theorem \ref{thm:fullPartition} concerns what
-happens when $b$ is small (e.g., constant) and we choose $\delta$
-to optimize span; the proof is in Appendix
-\ref{sec:hybridandrecursivethmpfs}.
-
-%% This can be done with an extreme setting of $\delta$.
-%% This is interesting because it shows that it is possible to achie
-%%ve low span along with a small number of cache misses.
-\begin{corollary}[Corollary of Theorem \ref{thm:fullPartition}]
-	\label{cor:fullPartition}
+Now we can establish the following regarding the Hybrid Smoothed
+Striding Algorithm:
+\begin{corollary}[(Corollary \ref{cor:fullPartition})]
 Suppose $b \le o(\log \log n)$. Then the Hybrid Smoothed Striding using $\delta
-= \Theta\big(\sqrt{b/\log\log n}\big)$, achieves work $O(n)$, and with high
+= \Theta\big(\sqrt{b/\log\log n}\big)$, has work $O(n)$, and with high
 probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than
 $(n+o(n))/b$ cache misses.
 \end{corollary}
 
-%%% Should make the distinction between n and the array size of subproblems more clear?
-%%% n always refers to the size of the top level
-%%% 2^{-i} delta n refers to an upper bound on the size of a subproblem
-
-In Appendix \ref{sec:hybridandrecursivethmpfs} we also analyze
-the Recursive Smoothed Striding Algorithm and prove the following
-theorem:
-
-\begin{theorem}
-	\label{thm:groupedPartitionAlg}
-	With high probability in $n$, the Recursive Smoothed Striding
-        algorithm using parameter $\delta \in(0,1/2)$ satisfying
-        $\delta \ge 1 / \polylog(n)$: achieves work $O(n)$, attains span
-	$$O\left(b\left(\log^2 n + \frac{\log n}{\delta^2}\right)\right),$$
-	and incurs $(n+O(n \delta))/b$ cache misses. 
-\end{theorem}
-
-A particularly natural parameter setting for the Recursive
-algorithm occurs at $\delta = 1 / \sqrt{\log n}$; the proof of
-Corollary \ref{cor:groupedPartitionAlg} is in Appendix
-\ref{sec:hybridandrecursivethmpfs}.
-\begin{corollary}[Corollary of Theorem \ref{thm:groupedPartitionAlg}]
-  \label{cor:groupedPartitionAlg}
-	With high probability in $n$, the Recursive Smoothed Striding Algorithm using parameter $\delta=1/\sqrt{\log n}$:
-  achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log n}))$ cache misses. 
+Similarly, for the Recursive Smoothed Striding Algorithm we have:
+\begin{corollary}[(Corollary \label{cor:groupedPartitionAlg})]
+  With high probability in $n$, the Recursive Smoothed Striding
+  Algorithm using parameter $\delta=1/\sqrt{\log n}$:
+  achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs
+  $n/b \cdot (1 + O(1 / \sqrt{\log n}))$ cache misses. 
 \end{corollary}
 
-% In addition to these desirable theoretical guarantees, these algorithms performs well in practice, as shown in the experimental section.
-% Also, because the Cache-Efficient Partial-Partition Algorithm achieves an optimal number of cache misses up to lower order terms, its bandwidth bound is optimal.
+The proofs of Corollary \ref{cor:fullPartition} and Corollary
+\ref{cor:groupedPartitionAlg} are straightforward, and can be
+found in Appendix \ref{sec:hybridandrecursivethmpfs}.
 
 \section{Performance Comparisons}\label{secexp}
 
@@ -1888,12 +1846,41 @@ phase. Lemma \ref{lem:bitstore2} can therefore used in place of Lemma
 \ref{lem:bitstore} in order to complete the proof of Theorem
 \ref{thminplace} for arrays $A$ that contain duplicate elements.
 
-\section{Recursive and Hybrid Smoothed Striding Algorithm
-Analysis}
+\section{Recursive and Hybrid Smoothed Striding Algorithm Analysis}
 \label{sec:hybridandrecursivethmpfs}
+In this section we analyze the Hybrid Smoothed Striding Algorithm
+and the Recursive Smoothed Striding Algorithm to prove Corollary
+\ref{cor:fullPartition} and Corollary \ref{cor:groupedPartitionAlg}.
+
+First we analyze the Hybrid Smoothed Striding Algorithm. We prove
+the following theorem:
+\begin{theorem}
+  \label{thm:fullPartition} The Hybrid Smoothed Striding
+  Algorithm using parameter $\delta\in(0,1/2)$ satisfying $\delta
+  \ge 1/\polylog(n)$: achieves work $O(n)$; achieves span
+  $$O\left(\log n \log\log n +\frac{b\log n}{\delta^2}\right),$$ with
+  high probability in $n$; and incurs fewer than
+  $$(n+O(n\delta))/b$$ cache misses with high probability in $n$.
+\end{theorem}
+
+%% note: b/loglogn > 1 in reality, but the constant factors make it so that delta is still < 1
+
+An interesting corollary of Theorem \ref{thm:fullPartition}
+concerns what happens when $b$ is small (e.g., constant) and we
+choose $\delta$ to optimize span:
+
+%% This can be done with an extreme setting of $\delta$.
+%% This is interesting because it shows that it is possible to achie
+%%ve low span along with a small number of cache misses.
+\begin{corollary}[Corollary of Theorem \ref{thm:fullPartition}]
+  \label{cor:fullPartition}
+Suppose $b \le o(\log \log n)$. Then the Hybrid Smoothed Striding
+using $\delta = \Theta\big(\sqrt{b/\log\log n}\big)$, achieves
+work $O(n)$, and with high probability in $n$, achieves span
+$O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.
+\end{corollary}
 
 \begin{proof}[Proof of Theorem \ref{thm:fullPartition}]
-  
   We analyze the Partial Partition Step using Proposition
   \ref{prop:generalResult}. Note that by our choice of $\epsilon$,
   $s=O\left(\frac{\log n}{\delta^2}\right)$.  The Partial Partition
@@ -1902,12 +1889,12 @@ Analysis}
   $$\frac{n}{b}+O\left(\frac{\log n}{b\delta^2}\right)+O(1)$$ 
   cache misses.
 
-  By Theorem \ref{thm:inplacesec}, the subproblem of partitioning of $A[v_{\text{min}} + 1], \ldots,
-   A[v_{\text{max}}]$ takes work $O(n)$. With high probability in $n$,
-  the subproblem has size less than $4n\delta$, which means that the subproblem
-  achieves span
-  $$O(\log n\delta \log\log n\delta) = O(\log n \log\log n),$$
-  and incurs at most $O(n \delta / b)$ cache misses.
+  By Theorem \ref{thminplace}, the subproblem of partitioning of
+  $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ takes work
+  $O(n)$. With high probability in $n$, the subproblem has size
+  less than $4n\delta$, which means that the subproblem achieves
+  span $$O(\log n\delta \log\log n\delta) = O(\log n \log\log
+  n),$$ and incurs at most $O(n \delta / b)$ cache misses.
 
   The total number of cache misses is therefore,
   $$\frac{n}{b}+O\left(\frac{\log n}{b\delta^2} +
@@ -1916,19 +1903,48 @@ Analysis}
   \delta)) / b,$ as desired.
 \end{proof}
 
-\begin{proof}[Proof of Corollary \ref{cor:fullPartition}] We use $\delta = \sqrt{b/\log\log n}$ in the result proved in Theorem \ref{thm:fullPartition}. \\
-	First note that the assumptions of Theorem \ref{thm:fullPartition} are satisfied because $O(\sqrt{b/\log\log n}) > 1 / \polylog(n).$
-	The algorithm achieves work $O(n)$. 
-	With high probability in $n$ the algorithm achieves span 
+\begin{proof}[Proof of Corollary \ref{cor:fullPartition}] We use
+  $\delta = \sqrt{b/\log\log n}$ in the result proved in Theorem
+  \ref{thm:fullPartition}. \\
+  First note that the assumptions of Theorem
+  \ref{thm:fullPartition} are satisfied because
+  $O(\sqrt{b/\log\log n}) > 1 / \polylog(n).$
+  The algorithm achieves work $O(n)$. 
+  With high probability in $n$ the algorithm achieves span 
   $$O\left(\log n \log\log n +\frac{b\log n}{\delta^2}\right) = O(\log n\log\log n).$$
-	With high probability in $n$ the algorithm incurs fewer than 
-	$$(n+O(n\delta))/b = (n+O(n\sqrt{b/\log\log n}))/b$$ 
-	cache misses.
-	By assumption $\sqrt{b/\log\log n} = o(1)$, so this reduces to 
-	$(n+o(n))/b$
-	cache misses, as desired.
-	%% explain why span and cache behavior are very good? (kind of already did before, but reiterating probably doesn't hurt...)
+  With high probability in $n$ the algorithm incurs fewer than 
+  $$(n+O(n\delta))/b = (n+O(n\sqrt{b/\log\log n}))/b$$ 
+  cache misses.
+  By assumption $\sqrt{b/\log\log n} = o(1)$, so this reduces to 
+  $(n+o(n))/b$
+  cache misses, as desired.
 \end{proof}
+
+
+%%% Should make the distinction between n and the array size of subproblems more clear?
+%%% n always refers to the size of the top level
+%%% 2^{-i} delta n refers to an upper bound on the size of a subproblem
+
+Next we analyze the Recursive Smoothed Striding Algorithm. We
+prove the following theorem:
+\begin{theorem}
+  \label{thm:groupedPartitionAlg}
+  With high probability in $n$, the Recursive Smoothed Striding
+        algorithm using parameter $\delta \in(0,1/2)$ satisfying
+        $\delta \ge 1 / \polylog(n)$: achieves work $O(n)$, attains span
+  $$O\left(b\left(\log^2 n + \frac{\log n}{\delta^2}\right)\right),$$
+  and incurs $(n+O(n \delta))/b$ cache misses. 
+\end{theorem}
+
+A particularly natural parameter setting for the Recursive
+Smoothed Striding algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
+\begin{corollary}[Corollary of Theorem \ref{thm:groupedPartitionAlg}]
+  \label{cor:groupedPartitionAlg} With high probability in $n$,
+  the Recursive Smoothed Striding Algorithm using parameter
+  $\delta=1/\sqrt{\log n}$: achieves work $O(n)$, attains span
+  $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log
+  n}))$ cache misses. 
+\end{corollary}
 
 \begin{proof}[Proof of Theorem \ref{thm:groupedPartitionAlg}]
   To avoid confusion, we use $\delta'$, rather than $\delta$, to
@@ -1937,7 +1953,7 @@ Analysis}
   
   
   By Proposition \ref{prop:generalResult}, the top level of the algorithm
-  has work $O(n)$, span $O\Big(b\frac{\log n}{\delta^2}\Big),$ and
+  has work $O(n)$, span $O\left(b\frac{\log n}{\delta^2}\right),$ and
   incurs $\frac{s+n}{b} + O(1)$ cache misses.  The recursion reduces
   the problem size by at least a factor of $4\delta$, with high
   probability in $n$.
@@ -1945,7 +1961,9 @@ Analysis}
   At lower layers of recursion, with high probability in $n$, the
   algorithm reduces the problem size by a factor of at least
   $1/2$ (since $\delta$ is set to be a sufficiently small
-  constant). For each $i > 1$, it follows that the size of the problem at the $i$-th level of recursion is at most $O(n \delta / 2^i)$.
+  constant). For each $i > 1$, it follows that the size of the
+  problem at the $i$-th level of recursion is at most $O(n \delta
+  / 2^i)$.
   
   The sum of the sizes of the problems after the first level of
   recursion is therefore bounded above by a geometric series summing to at most $O(n
@@ -1954,30 +1972,36 @@ Analysis}
 
   Recall that each level $i > 1$ uses $s =
   \frac{\ln(2^{-i}n\delta'/b)}{\delta'^2}$, where $\delta' =
-  \Theta(1)$. It follows that level $i$ uses $s \le O(\log n)$.  Thus,
-  by Proposition \ref{prop:generalResult}, level $i$ contributes
-  $O(b\cdot s)=O(b \log n)$ to the span.  Since there are at most  $O(\log n)$ levels of recursion, the total span in the lower levels
-  of recursion is at most $O(b\log^2 n)$, and the total span for the
-  algorithm is at most,
-	$$O\left(b\left(\log^2 n + \frac{\log n}{\delta^2}\right)\right).$$
+  \Theta(1)$. It follows that level $i$ uses $s \le O(\log n)$.
+  Thus, by Proposition \ref{prop:generalResult}, level $i$
+  contributes $O(b\cdot s)=O(b \log n)$ to the span.  Since there
+  are at most  $O(\log n)$ levels of recursion, the total span in
+  the lower levels of recursion is at most $O(b\log^2 n)$, and
+  the total span for the algorithm is at most,
+  $$O\left(b\left(\log^2 n + \frac{\log
+  n}{\delta^2}\right)\right).$$
         
-	To compute the total number of cache misses of the algorithm,
-        we add together $(n+s)/b+O(1)$ for the top level, and then, by
-        Proposition \ref{prop:generalResult}, at most
-        $$\sum_{0 \leq i< O(\log n)}\frac{1}{b}
-        O\left(2^{2-i}n\delta + \log n\right) \le O\left(\frac{1}{b} (n \delta + \log^2 n)\right).$$
-	for lower levels.
-	Thus the total number of cache misses for the algorithm is, 
-	$$\frac{1}{b}\left(n+\frac{\log n}{\delta^2 }\right) + O(n\delta + \log^2 n) / b = (n+O(n\delta))/b.$$
+  To compute the total number of cache misses of the algorithm,
+  we add together $(n+s)/b+O(1)$ for the top level, and then, by
+  Proposition \ref{prop:generalResult}, at most $$\sum_{0 \leq i<
+    O(\log n)}\frac{1}{b} O\left(2^{2-i}n\delta + \log n\right) \le
+  O\left(\frac{1}{b} (n \delta + \log^2 n)\right).$$ for lower
+  levels. Thus the total number of cache misses for the algorithm
+  is, $$\frac{1}{b}\left(n+\frac{\log n}{\delta^2 }\right) +
+  O(n\delta + \log^2 n) / b = (n+O(n\delta))/b.$$ 
 \end{proof}
 
-\begin{proof}[Proof of Corollary \ref{cor:groupedPartitionAlg}] By Theorem \ref{thm:groupedPartitionAlg}, with high probability in $n$, the algorithm has work $O(n)$, the algorithm has span
-	$$O\left(b\left(\log^2 n + \frac{\log
-    n}{\delta^2}\right)\right) = O(\log^2 n),$$ and the algorithm
-  incurs
-	$$(n+O(n\delta))/b = (n+O(n/\sqrt{\log n}))/b = (n+o(n))/b$$ 
-	cache misses.
+\begin{proof}[Proof of Corollary \ref{cor:groupedPartitionAlg}]
+  By Theorem \ref{thm:groupedPartitionAlg}, with high probability
+  in $n$, the algorithm has work $O(n)$, the algorithm has span
+  $$O\left(b\left(\log^2 n + \frac{\log
+  n}{\delta^2}\right)\right) = O(\log^2 n),$$ and the algorithm
+  incurs $$(n+O(n\delta))/b = (n+O(n/\sqrt{\log n}))/b =
+  (n+o(n))/b$$ cache misses.
 \end{proof}
+
+%% In addition to these desirable theoretical guarantees, these algorithms performs well in practice, as shown in the experimental section.
+%% Also, because the Cache-Efficient Partial-Partition Algorithm achieves an optimal number of cache misses up to lower order terms, its bandwidth bound is optimal.
 
 
 \section{Figures}\label{sec:figures}
