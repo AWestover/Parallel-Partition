@@ -1005,7 +1005,7 @@ affect the number of undesired cache misses by a constant factor.
 
 Now we can establish the following regarding the Hybrid Smoothed
 Striding Algorithm:
-\begin{corollary}[(Corollary \ref{cor:fullPartition})]
+\begin{corollary}[Corollary \ref{cor:fullPartition}]
 Suppose $b \le o(\log \log n)$. Then the Hybrid Smoothed Striding using $\delta
 = \Theta\big(\sqrt{b/\log\log n}\big)$, has work $O(n)$, and with high
 probability in $n$, achieves span $O(\log n \log\log n)$ and incurs fewer than
@@ -1013,7 +1013,7 @@ $(n+o(n))/b$ cache misses.
 \end{corollary}
 
 Similarly, for the Recursive Smoothed Striding Algorithm we have:
-\begin{corollary}[(Corollary \label{cor:groupedPartitionAlg})]
+\begin{corollary}[Corollary \ref{cor:groupedPartitionAlg}]
   With high probability in $n$, the Recursive Smoothed Striding
   Algorithm using parameter $\delta=1/\sqrt{\log n}$:
   achieves work $O(n)$, attains span $O(b\log^2 n)$, and incurs
@@ -1930,10 +1930,11 @@ prove the following theorem:
 \begin{theorem}
   \label{thm:groupedPartitionAlg}
   With high probability in $n$, the Recursive Smoothed Striding
-        algorithm using parameter $\delta \in(0,1/2)$ satisfying
-        $\delta \ge 1 / \polylog(n)$: achieves work $O(n)$, attains span
-  $$O\left(b\left(\log^2 n + \frac{\log n}{\delta^2}\right)\right),$$
-  and incurs $(n+O(n \delta))/b$ cache misses. 
+  algorithm using parameter $\delta \in(0,1/2)$ satisfying
+  $\delta \ge 1 / \polylog(n)$: achieves work $O(n)$, attains
+  span $$O\left(b\left(\log^2 n + \frac{\log
+  n}{\delta^2}\right)\right),$$ and incurs $(n+O(n \delta))/b$
+  cache misses. 
 \end{theorem}
 
 A particularly natural parameter setting for the Recursive
@@ -1942,8 +1943,7 @@ Smoothed Striding algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
   \label{cor:groupedPartitionAlg} With high probability in $n$,
   the Recursive Smoothed Striding Algorithm using parameter
   $\delta=1/\sqrt{\log n}$: achieves work $O(n)$, attains span
-  $O(b\log^2 n)$, and incurs $n/b \cdot (1 + O(1 / \sqrt{\log
-  n}))$ cache misses. 
+  $O(b\log^2 n)$, and incurs $(1 + o(1))n/b$ cache misses. 
 \end{corollary}
 
 \begin{proof}[Proof of Theorem \ref{thm:groupedPartitionAlg}]
@@ -1995,7 +1995,7 @@ Smoothed Striding algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
   By Theorem \ref{thm:groupedPartitionAlg}, with high probability
   in $n$, the algorithm has work $O(n)$, the algorithm has span
   $$O\left(b\left(\log^2 n + \frac{\log
-  n}{\delta^2}\right)\right) = O(\log^2 n),$$ and the algorithm
+  n}{\delta^2}\right)\right) = O(b\log^2 n),$$ and the algorithm
   incurs $$(n+O(n\delta))/b = (n+O(n/\sqrt{\log n}))/b =
   (n+o(n))/b$$ cache misses.
 \end{proof}
