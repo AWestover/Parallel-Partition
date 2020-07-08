@@ -145,7 +145,8 @@ primitive throughout parallel algorithms.\footnote{In several
 A parallel algorithm can be measured by its \defn{work}, the time
 needed to execute in serial, and its \defn{span}, the time to execute
 on infinitely many processors. There is a well-known algorithm for
-parallel partition on arrays of size $n$ with work $O(n)$ and span
+parallel partition on arrays of size $n$ that we call the
+\defn{Standard Algorithm} with work $O(n)$ and span
 $O(\log n)$ \cite{Blelloch96,AcarBl16}. Moreover, the algorithm uses
 only exclusive read/write shared memory variables (i.e., it is an
 \defn{EREW} algorithm). This eliminates the need for concurrency
@@ -158,14 +159,14 @@ the behavior of the algorithm will not differ from run to run, which
 makes test coverage, debugging, and reasoning about performance
 substantially easier \cite{BlellochFi12}.
 
-The parallel-partition algorithm suffers from using a large amount of
-auxiliary memory, however. Whereas the serial algorithm is typically
-implemented in place, the parallel algorithm relies on the use of multiple
-auxiliary arrays of size $n$. To the best of our knowledge, the only
-known linear-work and $\polylog(n)$-span algorithms for
-parallel partition that are in-place require the use of atomic
-operations (e.g, fetch-and-add)
-\cite{HeidelbergerNo90,AxtmannWi17,TsigasZh03}.
+The Standard Algorithm suffers from using a large amount of
+auxiliary memory, however. Whereas the serial partition algorithm
+is typically implemented in place, the Standard Algorithm relies
+on the use of multiple auxiliary arrays of size $n$. To the best
+of our knowledge, the only known linear-work and
+$\polylog(n)$-span algorithms for parallel partition that are
+in-place require the use of atomic operations (e.g,
+fetch-and-add) \cite{HeidelbergerNo90,AxtmannWi17,TsigasZh03}.
 
 An algorithm's memory efficiency can be critical on large inputs. The
 memory consumption of an algorithm determines the largest problem size
@@ -196,10 +197,10 @@ in certain applications on super computers, but suffers in general
 from requiring work $\Theta(n \log^2 n)$ rather than $O(n \log
 n)$. Parallel quicksort, on the other hand, despite the many efforts
 to optimize it \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03,
-  FrancisPa92, Frias08}, has eluded any in-place EREW (or CREW)
-algorithms due to its reliance on parallel partition.\footnote{In a
+  FrancisPa92, Frias08}, has eluded any in-place EREW (or CREW\footnote{In a
   \defn{CREW} algorithm, reads may be concurrent, but writes may
-  not. CREW stands for \emph{concurrent-read exclusive-write}.}
+  not. CREW stands for \emph{concurrent-read exclusive-write}.})
+algorithms due to its reliance on parallel partition.
 
 \paragraph{Results}
 We consider the problem of designing a theoretically efficient
@@ -209,7 +210,7 @@ read/write shared variables, and can be implemented using
 CILK parallel-for-loops without any additional concurrency considerations.
 
 We give a simple in-place parallel-partition algorithm called the
-\defn{Smoothed Striding Algorithm}, which incurs linear work and
+\defn{Smoothed Striding Algorithm}, with linear work and
 polylogarithmic span. Additionally, the algorithm exhibits provably
 optimal cache behavior up to low-order terms. In particular, if the
 input consists of $m$ cache lines, then the algorithm incurs at most
@@ -217,13 +218,13 @@ $m(1 + o(1))$ cache misses, with high probability in $m$.
 
 We also develop a suite of techniques for transforming the standard
 linear-space parallel partition algorithm into an in-place
-algorithm. The new algorithm, which we call the \defn{In-Place
-  Prefix-Sum Based Algorithm}, has work $O(n)$ and span
+algorithm. The new algorithm, which we call the
+\defn{Blocked-Prefix-Sum Partition Algorithm}, has work $O(n)$ and span
 $O(\log n \cdot \log \log n)$, which is within a $\log \log n$ factor
 of optimal. As an immediate consequence, we also get an in-place
 quicksort algorithm with work $O(n \log n)$ and span
 $O(\log^2 n \log \log n)$. Moreover, we show that, by using the
-In-Place Prefix-Sum Based Algorithm as a subroutine within the
+Blocked-Prefix-Sum Partition Algorithm as a subroutine within the
 Smoothed Striding Algorithm, one can combine the theoretical
 guarantees of the two algorithms, achieving a span of
 $O(\log n \log \log n)$, while also achieving optimal cache behavior
@@ -231,9 +232,9 @@ up to low-order terms.
 
 In addition to analyzing the algorithms, we experimentally evaluate
 their performances in practice. We find that an algorithm based on the
-In-Place Prefix-Sum Based Algorithm is able to achieve speedups over
+Blocked-Prefix-Sum Partition Algorithm is able to achieve speedups over
 the standard linear-space algorithm due to increased cache
-efficiency. The In-Place Prefix-Sum Based Algorithm does not exhibit
+efficiency. The Blocked-Prefix-Sum Partition Algorithm does not exhibit
 optimal cache behavior, however, and as we show in our experimental
 evaluation, the algorithm remains bottlenecked by memory
 throughput. In contrast, the cache-optimality of the Smoothed Striding
@@ -241,7 +242,7 @@ Algorithm eliminates the memory-throughput bottleneck, allowing for
 nearly perfect scaling on many processors.
 
 The memory-bandwidth bottleneck previously led researchers
-\cite{FrancisPa92, Frias08} to introduce the so-called \defn{Strided
+\cite{FrancisPa92, Frias08} to introduce the \defn{Strided
   Algorithm}, which has near optimal cache behavior in practice, but
 which exhibits theoretical guarantees only on certain random input
 arrays. The Smoothed Striding Algorithm is designed to have similar
@@ -297,17 +298,18 @@ number of threads.
 % large number of threads.
 
 \paragraph{Outline} We begin in Section \ref{secprelim} by discussing
-background on parallel algorithms and the Parallel Partition Problem. In
-Section \ref{sec:smoothing}, we present and analyze the Smoothed
-Striding Algorithm. In Section \ref{secalg} we give an alternative
-algorithm that achieves a nearly optimal span of
-$O(\log n \log \log n)$ but is not cache-optimal; this algorithm can
-be used as a subroutine within the Smoothed Striding Algorithm to
-achieve the same span. Section \ref{secexp} implements the algorithms
-from this paper, along with the Strided Algorithm and the standard
+background on parallel algorithms and the Parallel Partition
+Problem. In Section \ref{sec:smoothing}, we present and analyze
+the Smoothed Striding Algorithm. In Section \ref{secalg} we
+present and analyze the Blocked-Prefix-Sum Partition Algorithm,
+which achieves a nearly optimal span of $O(\log n \log \log n)$
+but is not cache-optimal; this algorithm can be used as a
+subroutine within the Smoothed Striding Algorithm to achieve the
+same span. Section \ref{secexp} implements the algorithms from
+this paper, along with the Strided Algorithm and the standard
 linear-space algorithm, in order to experimentally evaluate their
 performances. Finally, we conclude with open questions in Section
-\ref{sec:open}. We provide detailed pseudocode for our algorithms
+\ref{sec:open}. We also provide detailed pseudocode for our algorithms
 in Appendix \ref{sec:pseudocode}.
 
 \section{Preliminaries}\label{secprelim}
@@ -349,7 +351,7 @@ that an algorithm requires to execute on $p$ processors using a greedy
 online scheduler. If the scheduler is assumed to contribute no
 overhead, then Brent's Theorem \cite{Brent74} states that for any
 $p$,
-$$T_1 / p \le T_p \le T_1 / p + T_\infty.$$
+$$\max(T_1 / p, T_\infty) \le T_p \le T_1 / p + T_\infty.$$
 
 The work-stealing algorithms used in the Cilk extension of C/C++ realize
 the guarantee offered by Brent's Theorem within a constant factor
@@ -448,7 +450,7 @@ array $A$ into $p$ parts and assigns one part to each thread. Reducing
 the extra space below $o(n)$ has remained open until now, even when the
 number of threads is fixed.
 
-\section{An In-Place Algorithm with Span $O(\log n \log \log n)$}\label{secalg}
+\section{An In-Place Partition Algorithm with Span $O(\log n \log \log n)$}\label{secalg}
 
 In this section, we present an in-place algorithm for parallel
 partition with span $O(\log n \log \log n)$. Each thread in the
@@ -784,7 +786,7 @@ phase. Lemma \ref{lem:bitstore2} can therefore used in place of Lemma
 \ref{lem:bitstore} in order to complete the proof of Theorem
 \ref{thminplace} for arrays $A$ that contain duplicate elements.
 
-\section{A Cache Efficient In-Place Parallel Partition}\label{sec:smoothing}
+\section{A Cache-Efficient Partition Algorithm}\label{sec:smoothing}
 
 % In Section \ref{secexp}, we will see that, although the techniques
 % introduced in Section \ref{secalg} achieve speedups over the classic
@@ -832,8 +834,8 @@ for the sake of analysis that each cache is managed by the optimal
 off-line eviction strategy OPT (i.e. Furthest in the Future). This is
 because, up to resource augmentation, LRU eviction is $(1 + 1/\polylog
 n)$-competitive with OPT. Formally this is due to the following
-theorem by Sleator and Tarjan:
-\begin{theorem}[Resource Augmentation Theorem \cite{SleatorTa85}]
+theorem by Sleator and Tarjan \cite{SleatorTa85}:
+\begin{theorem}
   LRU operating on a cache of size $K\cdot M$ for some $K>1$ will incur at most
   $1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on
   a cache of size $M$, for the same series of memory accesses.
@@ -870,50 +872,45 @@ original algorithm; in doing so, we are able to provide provable
 performance guarantees for arbitrary inputs, and to add a
 recursion step that was previously impossible.
 
-The original \defn{Strided Algorithm} consists of two steps: 
-\begin{itemize}
-\item \textbf{The Partial Partition Step.} Let $g \in \mathbb{N}$ be a
-  parameter, and assume for simplicity that $gb \mid n$. Partition the
-  array $A$ into $\frac{n}{gb}$ chunks $C_1, \ldots, C_{n / gb}$,
-  each consisting of $g$ cache lines of size $b$.
-  %% \footnote{In this
-  %%   gection we zero-index arrays in order to enable modular arithmetic
-  %%   on array indices.}
-	For $i \in \{1, 2, \ldots, g\}$, define 
-  $P_i$ to consist of the $i$-th cache line from each of the
-  chunks $C_1, \ldots, C_{n / gb}$. One can think of the $P_i$'s
-	as forming a strided partition of array $A$, since
-  consecutive cache lines in $P_i$ are always separated by a fixed
-  stride of $g - 1$ other cache lines.
+The \defn{Strided Algorithm} consists of two steps: \\
+\textbf{The Partial Partition Step.} \\
+Let $g \in \mathbb{N}$ be a parameter, and assume for simplicity
+that $gb \mid n$. Logically partition the array $A$ into $n/(gb)$
+chunks $C_1, \ldots, C_{n / (gb)}$, each consisting of $g$ cache
+lines of size $b$. For $i \in \{1, 2, \ldots, g\}$, define $P_i$
+to consist of the $i$-th cache line from each of the chunks $C_1,
+\ldots, C_{n / (gb)}$. One can think of the $P_i$'s as forming a
+strided partition of array $A$, since consecutive cache lines in
+$P_i$ are always separated by a fixed stride of $g - 1$ other
+cache lines.\\
+The first step of the Strided Algorithm is to perform an in-place
+serial partition on each of the $P_i$'s, rearranging the
+elements within the $P_i$ so that the predecessors come first.
+This step requires work $\Theta(n)$ and span $\Theta(n/g)$.\\
+\textbf{The Serial Cleanup Step. }For each $P_i$, define
+the \defn{splitting position} $v_i$ to be the position in $A$
+of the first successor in (the already partitioned) $P_i$.
+Define $v_{\text{min}} = \min\{v_1, \ldots, v_{g}\}$ and define
+$v_{\text{max}} = \max\{v_1, \ldots, v_{g}\}$. \\
+The second step of the Strided Algorithm is to perform a serial partition on the
+sub-array $A[v_{\text{min}}],\ldots, A[v_{\text{max}}-1]$. This
+step has no parallelism, and thus has work and span of $\Theta(v_{\text{max}} -
+v_{\text{min}})$. 
 
-  The first step of the algorithm is to perform an in-place serial
-  partition on each of the $P_i$s, rearranging the elements within the
-  $P_i$ so that the predecessors come first. This step requires work
-  $\Theta(n)$ and span $\Theta(n/g)$.
-\item \textbf{The Serial Cleanup Step. }For each $P_i$, define the \defn{splitting position} $v_i$ to be
-  the position in $A$ of the first successor in (the already
-  partitioned) $P_i$. Define $v_{\text{min}} = \min\{v_1, \ldots,
-  v_{g}\}$ and define $v_{\text{max}} = \max\{v_1, \ldots, v_{g}\}$. Then the
-  second step of the algorithm is to perform a serial partition on the
-	sub-array $A[v_{\text{min}}],\ldots, A[v_{\text{max}}-1]$. This completes the   
-    full partition of $A$.
-\end{itemize}
-
-Note that the Cleanup Step of the Strided Algorithm has no
-parallelism, and thus has span $\Theta(v_{\text{max}} -
-v_{\text{min}})$.  In general, this results in an algorithm with
-linear-span (i.e., no parallelism guarantee).  When the number of
-predecessors in each of the $P_i$'s is close to equal, however, the
-quantity $v_{\text{max}} - v_{\text{min}}$ can be much smaller than
-$\Theta(n)$. For example, if $b = 1$, and if each element of $A$ is
-selected independently from some distribution, then one can use
-Chernoff bounds to prove that with high probability in $n$,
+In general, the lack of parallelism in the Serial Cleanup step
+results in an algorithm with linear-span (i.e., no parallelism
+guarantee).  When the number of predecessors in each of the
+$P_i$'s is close to equal, however, the quantity $v_{\text{max}}
+- v_{\text{min}}$ can be much smaller than $\Theta(n)$. For
+example, if $b = 1$, and if each element of $A$ is selected
+independently from some distribution, then one can use Chernoff
+bounds to prove that with high probability in $n$,
 $v_{\text{max}} - v_{\text{min}} \le O(\sqrt{n \cdot g \cdot \log
-  n})$.  The full span of the algorithm is then $\tilde{O}(n/g +
+n})$.  The full span of the algorithm is then $\tilde{O}(n/g +
 \sqrt{n \cdot g})$, which optimizes at $g = n^{1/3}$ to
-$\tilde{O}(n^{2/3})$. Since the Partial Partition Step incurs only $n
-/ b$ cache misses, the full algorithm incurs $n + \tilde{O}(n^{2/3})$ cache
-misses on a random array $A$.
+$\tilde{O}(n^{2/3})$. Since the Partial Partition Step incurs
+only $n / b$ cache misses, the full algorithm incurs $n +
+\tilde{O}(n^{2/3})$ cache misses on a random array $A$.
 
 
 Using Hoeffding's Inequality in place of Chernoff bounds, one can
@@ -966,32 +963,34 @@ no progress.
 
 The main challenge in designing the Smoothed Striding Algorithm
 becomes the construction of $U_1, \ldots, U_{g}$ without
-violating the in-place nature of the algorithm. A natural approach
-might be to store for each $U_i, C_j$ the index of the cache
-line in $C_j$ that $U_i$ contains. This would require the storage of
-$\Theta(n / b)$ numbers as metadata, however, preventing the algorithm
-from being in-place. To save space, the key insight is to select a
-random offset $X_j \in \{1, 2, \ldots, g\}$ within each $C_j$, and
-then to assign the $(X_j + i \pmod g) + 1$-th cache line of $C_j$ to
-$U_i$ for $i \in \{1, 2, \ldots, g\}$. This allows for us to construct
-the $U_i$'s using only $O(n/(gb))$ machine words
-storing the metadata $X_1, \ldots, X_{n / (gb)}$. By setting $g$ to
-be relatively large, so that $n/(gb) \le \polylog(n)$, we can obtain an in-place algorithm that
-incurs $(1 + o(1))n/b$ cache misses.
+violating the in-place nature of the algorithm. A natural
+approach might be to store for each $U_i, C_j$ the index of the
+cache line in $C_j$ that $U_i$ contains. This would require the
+storage of $\Theta(n / b)$ numbers as metadata, however,
+preventing the algorithm from being in-place. To save space, the
+key insight is to select a random offset $X_j \in \{1, 2, \ldots,
+g\}$ within each $C_j$, and then to assign the $(X_j + i \pmod g)
++ 1$-th cache line of $C_j$ to $U_i$ for $i \in \{1, 2, \ldots,
+g\}$. This allows for us to construct the $U_i$'s using only
+$O(n/(gb))$ machine words storing the metadata $X_1, \ldots, X_{n
+/ (gb)}$. By setting $g$ to be relatively large, so that $n/(gb)
+\le \polylog(n)$, we can obtain an in-place algorithm that incurs
+$(1 + o(1))n/b$ cache misses.
 
 The recursive structure of the Smoothed Striding Algorithm allows for
-the algorithm to achieve polylogarithmic span. As an alternative to
-recursing, one can also use the in-place algorithm from Section
-\ref{secalg} in order to partition $A[v_{\text{min}}], \ldots,
-  A[v_{\text{max}} - 1]$. This results in an improved span (since the
-algorithm from Section \ref{secalg} has span only $O(\log n \log \log
-n)$), while still incurring only $(1 + o(1))n/b$ cache misses (since
-the cache-inefficient algorithm from Section \ref{secalg} is only used
-on a small subarray of $A$). We analyze both the recursive version of
-the Smoothed Striding Algorithm, and the version which uses as a final
-step the algorithm from Section \ref{secalg}; one significant advantage
-of the recursive version is that it is simple to implement in
-practice.
+the algorithm to achieve polylogarithmic span. As an alternative
+to recursing, one can also use the Blocked-Prefix-Sum Partition
+Algorithm from Section \ref{secalg} in order to partition
+$A[v_{\text{min}}], \ldots, A[v_{\text{max}} - 1]$. This results
+in an improved span (since the algorithm from Section
+\ref{secalg} has span only $O(\log n \log \log n)$), while still
+incurring only $(1 + o(1))n/b$ cache misses (since the
+cache-inefficient algorithm from Section \ref{secalg} is only
+used on a small subarray of $A$). We analyze both the recursive
+version of the Smoothed Striding Algorithm, and the version which
+uses as a final step the Blocked-Prefix-Sum Partition Algorithm; one
+significant advantage of the recursive version is that it is
+simple to implement in practice.
 
 %% we randomly perturb the structure of each $P_i$.
 
@@ -1017,16 +1016,18 @@ practice.
 %% This means that after each $U_y$ is partitioned, $A$ will be partially partitioned, in the sense that $A[i]$ is a predecessor for all $i < \min_y{v_y}$, and $A[i]$ is a successor for all $i \ge \max_y{v_y}$.
 %% Furthermore, the size of the unpartitioned subarray $A[\min_y{v_y}],\ldots,A[\max_y{v_y}-1]$ will be very small relative to $n$. 
 
-\paragraph{Formal Algorithm Description} Let $b < n$ be the size of a cache line, let $A$ be an input array of size
-$n$, and let $g$ be a parameter. (One should think of $g$ as being
-relatively large, satisfying $\frac{n}{bg} \le
-\operatorname{polylog}(n)$.)  We assume for simplicity that that $n$
-is divisible by $gb$, and we define $s = \frac{n}{gb}$.
-\footnote{This assumption can be made without loss of generality by treating $A$ as
-an array of size $n' = n + {(gb - n \pmod {gb})}$, and then treating
-the final $gb - n \pmod {gb}$ elements of the array as being
-successors (which consequently the algorithm needs not explicitly
-access). Note that the extra $n' - n$ elements are completely virtual, meaning they do not physically exist or reside in memory.
+\paragraph{Formal Algorithm Description} Let $b < n$ be the size
+of a cache line, let $A$ be an input array of size $n$, and let
+$g$ be a parameter. (One should think of $g$ as being relatively
+large, satisfying $n/(gb) \le \polylog(n)$.) We assume for
+simplicity that that $n$ is divisible by $gb$, and we define $s =
+n/(gb)$. \footnote{This assumption can be made without loss of
+  generality by treating $A$ as an array of size $n' = n + {(gb -
+  n \pmod {gb})}$, and then treating the final $gb - n \pmod
+  {gb}$ elements of the array as being successors (which
+  consequently the algorithm needs not explicitly access). Note
+  that the extra $n' - n$ elements are completely virtual,
+  meaning they do not physically exist or reside in memory.
 
 %  %% TODO XXX ALEK ALEK ALEK  added an alternate explanation BILL CHECK THIS
 % {\color{red} We handle the case where $n\bmod gb \neq 0$ as follows: Let $r = n
@@ -1042,56 +1043,54 @@ access). Note that the extra $n' - n$ elements are completely virtual, meaning t
 }
 
 In the \defn{Partial Partition Step} the algorithm partitions the
-cache lines of $A$ into $g$ sets $U_1, \ldots, U_{g}$ of size
-$s = \frac{n}{gb}$ and then performs a serial partition on each $U_i$
-in parallel over the $U_i$'s. To determine the sets
-$U_1, \ldots, U_{g}$, the algorithm uses as metadata an array
-$X = X[1], \ldots, X[s]$, where each $X[i] \in \{1, \ldots,
-g\}$. 
+cache lines of $A$ into $g$ sets $U_1, \ldots, U_{g}$ where each
+$U_i$ contains $s$ cache lines, and then performs a serial
+partition on each $U_i$ in parallel over the $U_i$'s. To
+determine the sets $U_1, \ldots, U_{g}$, the algorithm uses as
+metadata an array $X = X[1], \ldots, X[s]$, where each $X[i] \in
+\{1, \ldots, g\}$. More specifically the algorithm does the
+following:
 
-Formally, the Partial Partition Step performs the following procedure:
-\begin{itemize}
-\item Set each of $X[1], \ldots, X[s]$ to be uniformly random and
-  independently selected elements of $\{1, 2, \ldots, g\}$. For each $i \in
-  \{1, 2, \ldots, g\}$, $j \in \{1, 2, \ldots, s\}$, define
-  $$G_i(j) = (X[j] + i \pmod g) + (j - 1)g + 1.$$ Using this
-  terminology, we define each $U_i$ for $i \in \{1, \ldots, g\}$ to
-  contain the $G_i(j)$-th cache line of $A$ for each $j \in \{1, 2,
-  \ldots, s\}$. That is, $G_i(j)$ denotes the index of the $j$-th
-  cache line from array $A$ contained in $U_i$.
+Set each of $X[1], \ldots, X[s]$ to be uniformly random and
+independently selected elements of $\{1, 2, \ldots, g\}$. For each $i \in
+\{1, 2, \ldots, g\}$, $j \in \{1, 2, \ldots, s\}$, define
+$$G_i(j) = (X[j] + i \pmod g) + (j - 1)g + 1.$$ Using this
+terminology, we define each $U_i$ for $i \in \{1, \ldots, g\}$ to
+contain the $G_i(j)$-th cache line of $A$ for each $j \in \{1, 2,
+\ldots, s\}$. That is, $G_i(j)$ denotes the index of the $j$-th
+cache line from array $A$ contained in $U_i$.
 
-  Note that, to compute the index of the $j$-th cache line in $U_i$,
-  one needs only the value of $X[j]$. Thus the only metadata needed by
-  the algorithm to determine $U_1, \ldots, U_g$ is the array
-  $X$. If $|X| = s = \frac{n}{gb} \le \polylog(n)$, then
-  the algorithm is in place.
+Note that, to compute the index of the $j$-th cache line in $U_i$,
+one needs only the value of $X[j]$. Thus the only metadata needed by
+the algorithm to determine $U_1, \ldots, U_g$ is the array
+$X$. If $|X| = s = \frac{n}{gb} \le \polylog(n)$, then
+the algorithm is in place.
   
-\item The algorithm performs an in-place (serial) partition on each
-  $U_i$ (and performs these partitions in parallel with one
-  another). In doing so, the algorithm, also collects
-  $v_{\text{min}}=\min_i{v_i}$, $v_{\text{max}}=\max_i{v_i}$, where
-	each $v_i$ with $i \in \{1, \ldots, g\}$ is defined to be the index
-  of the first successor in $A$ (or $n$ if no such successor
-  exists).\footnote{One can calculate $v_{\text{min}}$ and
-    $v_{\text{max}}$ without explicitly storing each of $v_1, \ldots,
-		v_{g}$ as follows. Rather than using a standard $g$-way parallel
-		for-loop to partition each of $U_1, \ldots, U_{g}$, one can
-    manually implement the parallel for-loop using a recursive
-    divide-and-conquer approach. Each recursive call in the
-    divide-and-conquer can then simply collect the maximum and minimum
-    $v_i$ for the $U_i$'s that are partitioned within that recursive
-    call. This adds $O(\log n)$ to the total span of the Partial
-    Partition Step, which does not affect the overall span
-    asymptotically. %% In practice, this can also be implemented using
-    %% CilkPlus Reducers (or OpenMP Reductions) \cite{FrigoLe09}, though
-    %% empirically we have found explicitly implementing the
-    %% divide-and-conquer structure to be worthwhile for performance.
-  }
-  
-  The array $A$ is now partially partitioned, i.e. $A[i]$ is a
-  predecessor for all $i \le v_{\text{min}}$, and $A[i]$ is a successor
-  for all $i > v_{\text{max}}$.
-\end{itemize}
+The algorithm performs an in-place (serial) partition on each
+$U_i$ (and performs these partitions in parallel with one
+another). In doing so, the algorithm, also collects
+$v_{\text{min}}=\min_i{v_i}$, $v_{\text{max}}=\max_i{v_i}$, where
+each $v_i$ with $i \in \{1, \ldots, g\}$ is defined to be the index
+of the first successor in $A$ (or $n$ if no such successor
+exists).\footnote{One can calculate $v_{\text{min}}$ and
+  $v_{\text{max}}$ without explicitly storing each of $v_1, \ldots,
+  v_{g}$ as follows. Rather than using a standard $g$-way parallel
+  for-loop to partition each of $U_1, \ldots, U_{g}$, one can
+  manually implement the parallel for-loop using a recursive
+  divide-and-conquer approach. Each recursive call in the
+  divide-and-conquer can then simply collect the maximum and minimum
+  $v_i$ for the $U_i$'s that are partitioned within that recursive
+  call. This adds $O(\log n)$ to the total span of the Partial
+  Partition Step, which does not affect the overall span
+  asymptotically. %% In practice, this can also be implemented using
+  %% CilkPlus Reducers (or OpenMP Reductions) \cite{FrigoLe09}, though
+  %% empirically we have found explicitly implementing the
+  %% divide-and-conquer structure to be worthwhile for performance.
+}
+
+The array $A$ is now ``partially partitioned", i.e. $A[i]$ is a
+predecessor for all $i \le v_{\text{min}}$, and $A[i]$ is a successor
+for all $i > v_{\text{max}}$.
 
 The second step of the Smoothed Striding Algorithm is to complete the
 partitioning of $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$. This can be done
@@ -1117,40 +1116,39 @@ be found in Appendix \ref{sec:pseudocode}.
   %% The 1/2's are necessary for the final line of the proof to easily go through.
   
   Let $\epsilon \in (0, 1/2)$ and $\delta \in (0, 1/2)$ such that
-  $\epsilon \ge \frac{1}{\poly(n)}$ and $\delta \ge
-  \frac{1}{\polylog(n)}$. Suppose $s > \frac{\ln
-    (n/\epsilon)}{\delta^2}$. Finally, suppose that each processor has
+  $\epsilon \ge 1/\poly(n)$ and $\delta \ge 1/\polylog(n)$. 
+  Suppose $s > \frac{\ln (n/\epsilon)}{\delta^2}$, and that each processor has
   a cache of size at least $s + c$ for a sufficiently large constant
   $c$.
 
   Then the Partial-Partition Algorithm achieves work $O(n)$; achieves
-  span $O\paren*{b \cdot s}$; incurs $\frac{s+n}{b} + O(1)$ cache
-  misses; and guarantees with probability $1 - \epsilon$ that
+  span $O(b \cdot s)$; incurs $\frac{s+n}{b} + O(1)$ cache
+  misses; and guarantees that with probability at least $1 -
+  \epsilon$,
   $$v_{\text{max}}-v_{\text{min}} < 4 n \delta.$$
 \end{proposition}
-
 
 \begin{proof}
 Since $\sum_i |U_i| = n$, and since the serial partitioning of each $U_i$
 takes time $O(|U_i|)$, the total work performed by the algorithm is
 $O(n)$.
 
-To analyze cache misses, we assume without loss of generality that
-array $X$ is pinned in each processor's cache (note, in particular,
-that $|X| = s \le \polylog(n)$, and so $X$ fits in cache). Thus we can
-ignore the cost of accesses to $X$. Note that each $U_i$ consists of
-$s = \polylog n$ cache lines, meaning that each $U_i$ fits entirely in
-cache. Thus the number of cache misses needed for a thread to
-partition a given $U_i$ is just $s$. Since there are $g =
-\frac{n}{sb}$ $U_i$s, the total number of cache misses needed to
-partition each $U_i$ is $g s = \frac{n}{b}$. Besides these, there are
-$s/b$ cache misses for instantiating the array $X$; and $O(1)$ cache
-misses for other instantiating costs. This sums
-to $$\frac{n+s}{b}+O(1).$$
+To analyze cache misses, we assume without loss of generality
+that array $X$ is pinned in each processor's cache (note, in
+particular, that $|X| = s \le \polylog(n)$, and so $X$ fits in
+cache). Thus we can ignore the cost of accesses to $X$. Note that
+each $U_i$ consists of $s = \polylog n$ cache lines, meaning that
+each $U_i$ fits entirely in cache. Thus the number of cache
+misses needed for a thread to partition a given $U_i$ is just
+$s$. Since there are $g$ of the $U_i's$, the total number of
+cache misses incurred in partitioning all of the $U_i$'s is $g s
+= n/b$. Besides these, there are $s/b$ cache misses for
+instantiating the array $X$; and $O(1)$ cache misses for other
+instantiating costs. This sums to $$\frac{n+s}{b}+O(1).$$
 
 The span of the algorithm is $O(n/g + s) = O(b\cdot s)$, since the
 each $U_i$ is of size $O(n / g)$, and because the initialization of
-array $X$ can trivially be performed in time $O(|X|) = O(s)$.
+array $X$ can be performed in time $O(|X|) = O(s)$.
 
 It remains to show that with probability $1-\epsilon$, $v_{\text{max}}
 - v_{\text{min}} < 4n\delta$. Let $\mu$ denote the fraction of
@@ -1212,25 +1210,38 @@ that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
 %% \alek{also, I think that the bounds that you get on $U_i(j)$ shouldn't be symmetric}
 %% \alek{in fact, here is what I think the derivation should look like: }
 %% \alek{
-  Recall that $G_i(j)$ denotes the index within $A$ of the $j$ th cache-line contained in $U_i$. By the definition of $G_i(j)$, $$(j - 1)g + 1 \le G_i(j) \le jg.$$ Note that $A[v_i]$ will occur in the $\lceil s\mu_i \rceil$-th cache-line of $U_i$ because $U_i$ is composed of $s$ cache lines. Hence $$(\lceil s\mu_i \rceil - 1) g b + 1 \le v_i \le \lceil s\mu_i \rceil g b,$$
-  which means that
-  $$s\mu_i g b - gb + 1 \le v_i \le s\mu_i g b + gb.$$ Since $sgb =
-  n$, it follows that $|v_i - n \mu_i| \le gb$. Therefore,
-  $$|v_i - n \mu| < gb + n\delta.$$
-  This
-implies that the maximum of $|v_i - v_j|$ for
-any $i$ and $j$ is at most, $2bg + 2\delta n$. Thus,
+  Recall that $G_i(j)$ denotes the index within $A$ of the $j$ th
+  cache-line contained in $U_i$. By the definition of $G_i(j)$,
+  $$(j - 1)g + 1 \le G_i(j) \le jg.$$ Note that $A[v_i]$ will
+  occur in the $\lceil s\mu_i \rceil$-th cache-line of $U_i$
+  because $U_i$ is composed of $s$ cache lines. Hence $$(\lceil
+  s\mu_i \rceil - 1) g b + 1 \le v_i \le \lceil s\mu_i \rceil g
+  b,$$ which means that $$s\mu_i g b - gb + 1 \le v_i \le s\mu_i
+  g b + gb.$$ Since $sgb = n$, it follows that $|v_i - n \mu_i|
+  \le gb$. Therefore, $$|v_i - n \mu| < gb + n\delta.$$ This
+  implies that the maximum of $|v_i - v_j|$ for any $i$ and $j$
+  is at most, $2bg + 2\delta n$. Thus,
 \begin{align*}
   v_{\text{max}} - v_{\text{min}} & \le 2n \left( \delta + \frac{bg}{n} \right)  = 2n \left( \delta + 1/s \right) \\
   & \le 2n \left(\delta + \frac{\delta^2}{\ln (n / \epsilon)}\right) < 4n\cdot\delta.
 \end{align*}
 \end{proof}
 
-We will use Proposition \ref{prop:generalResult} as a tool to analyze the Recursive and the Hybrid Smoothed Striding Algorithms.
+We use Proposition \ref{prop:generalResult} as a tool to analyze
+the Recursive and the Hybrid Smoothed Striding Algorithms.
 
-Rather than parameterizing the Partial Partition step in each algorithm by $s$, Proposition \ref{prop:generalResult} suggests that it is more natural to parameterize by $\epsilon$ and $\delta$, which then determine $s$.
+Rather than parameterizing the Partial Partition step in each
+algorithm by $s$, Proposition \ref{prop:generalResult} suggests
+that it is more natural to parameterize by $\epsilon$ and
+$\delta$, which then determine $s$.
 
-We will assume that both the hybrid and the recursive algorithms use $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high probability in $n$). Moreover, the Recursive Smoothed Striding Algorithm continues to use the same value of $\epsilon$ within recursive subproblems (i.e., the $\epsilon$ is chosen based on the size of the first subproblem in the recursion), so that the entire algorithm succeeds with high probability in $n$.
+We will assume that both the hybrid and the recursive algorithms
+use $\epsilon = 1/n^c$ for $c$ of our choice (i.e. with high
+probability in $n$). Moreover, the Recursive Smoothed Striding
+Algorithm continues to use the same value of $\epsilon$ within
+recursive subproblems (i.e., the $\epsilon$ is chosen based on
+the size of the first subproblem in the recursion), so that the
+entire algorithm succeeds with high probability in $n$.
 
 For both algorithms, the choice of $\delta$ results in a tradeoff
 between cache misses and span. For the Recursive algorithm, we
@@ -1266,7 +1277,7 @@ cache misses with high probability in $n$.
 
 %% note: b/loglogn > 1 in reality, but the constant factors make it so that delta is still < 1
 
-An interesting corollary of the above theorem concerns what happens when $b$ is small (e.g., constant) and we choose $\delta$ to optimize span. 
+An interesting corollary of Theorem \ref{thm:fullPartition} concerns what happens when $b$ is small (e.g., constant) and we choose $\delta$ to optimize span. 
 
 %% This can be done with an extreme setting of $\delta$.
 %% This is interesting because it shows that it is possible to achie
@@ -1289,12 +1300,12 @@ $(n+o(n))/b$ cache misses.
 	$$\frac{n}{b}+O\paren*{\frac{\log n}{b\delta^2}}+O(1)$$ 
   cache misses.
 
-  By Theorem \ref{thminplace}, the subproblem of partitioning of $A[v_{\text{min}} + 1], \ldots,
-   A[v_{\text{max}}]$ takes work $O(n)$. With high probability in $n$,
-  the subproblem has size less than $4n\delta$, which means that the subproblem
-  achieves span
-  $$O(\log n\delta \log\log n\delta) = O(\log n \log\log n),$$
-  and incurs at most $O(n \delta / b)$ cache misses.
+  By Theorem \ref{thminplace}, the subproblem of partitioning of
+  $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ takes work
+  $O(n)$. With high probability in $n$, the subproblem has size
+  less than $4n\delta$, which means that the subproblem achieves
+  span $$O(\log n\delta \log\log n\delta) = O(\log n \log\log
+  n),$$ and incurs at most $O(n \delta / b)$ cache misses.
 
   The total number of cache misses is therefore,
   	$$\frac{n}{b}+O\paren*{\frac{\log n}{b\delta^2} +
@@ -1335,7 +1346,8 @@ The next theorem analyzes the span of the Recursive Smoothed Striding Algorithm.
 	and incurs $(n+O(n \delta))/b$ cache misses. 
 \end{theorem}
 
-A particularly natural parameter setting for the Recursive algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
+A particularly natural parameter setting for the Recursive
+algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
 \begin{corollary}[Corollary of Theorem \ref{thm:groupedPartitionAlg}]
   \label{cor:groupedPartitionAlg}
 	With high probability in $n$, the Recursive Smoothed Striding Algorithm using parameter $\delta=1/\sqrt{\log n}$:
@@ -1868,7 +1880,7 @@ future work.
 
 \section{Pseudocode}\label{sec:pseudocode}
 
-\begin{figure*}[hb!]
+\begin{figure*}
   \caption{Section \ref{secalg}'s Prefix-Sum Based Parallel Partition Pseudocode: Helper Functions}
 	\label{alg:parallelPartition_prefixsumbased_helpers}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
@@ -1915,7 +1927,7 @@ future work.
     \State \textbf{Ensure: }  Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
     \Procedure{ImplicitParallelPrefixSum}{A, n}
       \State Pick $b \in \Theta(\log n)$ to be the "block size"
-      \Comment \emph{We now think of $A$ as being composed of blocks, with $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$}
+      \State Logically Partition $A$ into blocks, with $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
       \ForAll{$i \in \{1,2,\ldots,\lfloor n/b \rfloor\}$ in parallel}
         \State $v_i \gets 0$ \Comment{$v_i$ will store number of predecessors in $X_i$ } 
         \ForAll{$a \in X_i$ in serial}
@@ -1955,7 +1967,6 @@ future work.
       \If{$k < n/2$}
         \State Swap the role of successors and predecessors in the algorithm (i.e. change the decider function)
         \State At the end we consider $A'[i] = A[n-i+1]$, the logically reversed array, as output
-        \State This basically means that WLOG the number of successors in $A$ is greater than the number of predecessors in $A$
       \EndIf
 
       \State MakeSuccessorHeavy($A$, $n$) \Comment \emph{prepreocessing phase}
@@ -2014,7 +2025,7 @@ future work.
             \While{A[high] $>$ pivotValue}
               \State high $\gets$ high$-1$
               \If{high $\bmod b \equiv 1$} 
-                \Comment Perform a block decrement once high reaches the beginning of a block
+                \Comment Perform a block decrement once high reaches the start of a block
                 \State $k \gets $ number of block decrements so far (including this one)
                 \State $k' \gets n/(gb) - k$
                 \State high $\gets$ GetBlockStartIndex($X$, $g$,$b$,$i$,$k'$) $+b-1$
