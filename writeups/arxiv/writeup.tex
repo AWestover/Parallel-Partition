@@ -12,6 +12,8 @@
 \usepackage{enumitem}
 \usepackage{subcaption}
 
+\usepackage{float}
+
 \usepackage{tikz,pgfplots}
 \usepackage{etoolbox}
 %% This makes the colors annoyingly bright, but at least they're easy to distinguish.
@@ -309,8 +311,7 @@ same span. Section \ref{secexp} implements the algorithms from
 this paper, along with the Strided Algorithm and the standard
 linear-space algorithm, in order to experimentally evaluate their
 performances. Finally, we conclude with open questions in Section
-\ref{sec:open}. We also provide detailed pseudocode for our algorithms
-in Appendix \ref{sec:pseudocode}.
+\ref{sec:open}. 
 
 \section{Preliminaries}\label{secprelim}
 
@@ -510,10 +511,108 @@ $O(n / \log n)$ arithmetic operations on values that are implicitly
 encoded in blocks; since each such operation requires $O(\log n)$
 work, the total work remains linear.
 
-In the remainder of the section, we present the algorithm in detail,
-and prove the key properties of each phase of the algorithm. We also
-provide detailed pseudocode in Appendix \ref{sec:pseudocode}. The
-algorithm proceeds in three phases.
+In the remainder of the section, we present the algorithm in
+detail, and prove the key properties of each phase of the
+algorithm. We also provide detailed pseudocode in Figure
+\ref{alg:parallelPartition_prefixsumbased_helpers} and Figure
+\ref{alg:parallelPartition_prefixsumbased_main}. The algorithm
+proceeds in three phases.
+
+\begin{figure*}
+  \caption{Blocked-Prefix-Sum Partition Algorithm: Helper Functions}
+  \label{alg:parallelPartition_prefixsumbased_helpers}
+  \begin{algorithmic} % add [1] to get line numbers (if you want)
+    \Procedure{WriteToBlock}{$A$, $b$, $i$, $v$} \Comment Write value $v$ to the $i$-th block $X_i$ of $A$, where $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
+      \ForAll{$j \in \{1,2,\ldots, \lfloor b/2 \rfloor \}$ in parallel}
+      \If{$\mathds{1}_{X_i[2j] < X_i[2j+1]} \not= $ (the $j$-th binary digit of $v$)}
+          \State Swap $X_i[2j]$ and $X_i[2j+1]$
+        \EndIf
+      \EndFor
+    \EndProcedure
+    \State
+
+    \Procedure{ReadFromBlock}{$A$, $i$, $j$} \Comment Reads the value $v$ stored in $A[i], A[i+1], \ldots, A[j]$
+      \If{$j-i=2$}
+        \State \Return $\mathds{1}_{A[i] < A[i+1]}$
+      \Else
+        \State \emph{Parallel-Spawn} $v_0 \gets $ ReadFromBlock($A$, $i$, $i+(j-i)/2$)
+        \State \emph{Parallel-Spawn} $v_f \gets $ ReadFromBlock($A$, $i+(j-i)/2+1$, $j$)
+        \State \emph{Parallel-Sync}
+        \State \Return $v_f\cdot 2^\frac{j-i}{4} + v_0$
+      \EndIf
+    \EndProcedure
+    \State
+
+    \State \textbf{Require: } $A$ has more successors than predecessors
+    \State \textbf{Ensure: }  Each prefix of $A$ is ``successor heavy''
+    \Procedure{MakeSuccessorHeavy}{$A$, $n$}
+      \ForAll{$i \in \{1,2,\ldots,\lfloor n/2 \rfloor\}$ in parallel}
+        \If{$A[i]$ is a predecessor and $A[n-i+1]$ is a successor}
+          \State Swap $A[i]$ and $A[n-i+1]$
+        \EndIf
+      \EndFor
+      \State MakeSuccessorHeavy($A$, $\lceil n/2 \rceil$)
+      \Comment Recurse on $A[1],A[2], \ldots, A[\lceil n/2 \rceil]$
+    \EndProcedure
+  \end{algorithmic}	
+\end{figure*}
+
+\begin{figure*}
+  \caption{Blocked-Prefix-Sum Partition Algorithm: Main Functions}
+  \label{alg:parallelPartition_prefixsumbased_main}
+  \begin{algorithmic} % add [1] to get line numbers (if you want)
+    \State \textbf{Require: } Each prefix of $A$ is ``successor heavy''
+    \State \textbf{Ensure: }  Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
+    \Procedure{ImplicitParallelPrefixSum}{A, n}
+      \State Pick $b \in \Theta(\log n)$ to be the "block size"
+      \State Logically Partition $A$ into blocks, with $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
+      \ForAll{$i \in \{1,2,\ldots,\lfloor n/b \rfloor\}$ in parallel}
+        \State $v_i \gets 0$ \Comment{$v_i$ will store number of predecessors in $X_i$ } 
+        \ForAll{$a \in X_i$ in serial}
+          \If{$a$ is a predecessor}
+            \State $v_i \gets v_i + 1$
+          \EndIf
+        \EndFor
+        \State WriteToBlock($A$, $b$, $i$, $v_i$)
+        \Comment Now we encode the value $v_i$ in the block $X_i$
+      \EndFor
+      \State Perform a parallel prefix sum on the values $v_i$ stored in the $X_i$'s
+   \EndProcedure
+    \State
+
+  \State \textbf{Require: } Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
+  \State \textbf{Ensure: }  $A$ is partitioned
+    \Procedure{Reorder}{$A$, $n$}
+      \State $t \gets $ least integer such that $t\cdot b > n\cdot 4/5$
+      \State Reorder($A$, $t$)
+      \Comment Recurse on $A[1], A[2], \ldots, A[t]$
+      \ForAll{$i \in \{t+1, t+2, \ldots, \lfloor n/b \rfloor\}$}
+      \State $v_i \gets$ ReadFromBlock($A$, $b\cdot i+1$, $b\cdot(i+1)$) 
+        \State Instantiate an array $Y_i$ with $|Y_i| = |X_i| \in \Theta(\log n)$, 
+        \State In parallel, set $Y_i[j] \gets 1$ if $X_i[j]$ is a predecessor, and $Y_i[j] \gets 0$ otherwise.
+        \State Perform a parallel prefix sum on $Y_i$, and add $v_i$ to each $Y_i[j]$
+        \ForAll{$j \in \{1,2,\ldots, b\}$}
+          \If{$X_i[j]$ is a predecessor}
+            \State Swap $X_i[j]$ and $A[Y_i[j]]$
+          \EndIf
+        \EndFor
+      \EndFor
+    \EndProcedure
+    \State
+
+    \Procedure{ParallelPartition}{$A$, $n$}
+      \State $k \gets$ count number of successors in $A$ in parallel
+      \If{$k < n/2$}
+        \State Swap the role of successors and predecessors in the algorithm (i.e. change the decider function)
+        \State At the end we consider $A'[i] = A[n-i+1]$, the logically reversed array, as output
+      \EndIf
+
+      \State MakeSuccessorHeavy($A$, $n$) \Comment \emph{prepreocessing phase}
+      \State ImplicitParallelPrefixSum($A$, $n$) \Comment \emph{Implicit Parallel Prefix Sum}
+      \State Reorder($A$, $n$) \Comment \emph{In-Place Reordering Phase}
+    \EndProcedure
+  \end{algorithmic}	
+\end{figure*}
 
 \paragraph{A Preprocessing Phase}
 The goal of the Preprocessing phase is to make every prefix of $A$
@@ -1107,7 +1206,71 @@ simple to implement as fully in-place, and still achieves
 polylogarithmic span. We analyze both algorithms in this section.
 
 Detailed pseudocode for the Recursive Smoothed Striding Algorithm can
-be found in Appendix \ref{sec:pseudocode}.
+be found in Figure \ref{alg:parallelPartition_smoothedStriding}.
+
+\begin{figure*}
+  \caption{Smoothed Striding Algorithm}
+  \label{alg:parallelPartition_smoothedStriding}
+  \begin{algorithmic}% [1] for line numbers
+    \State \textbf{Recall:} 
+    \State $A$ is the array to be partitioned, of length $n$. 
+    \State We break $A$ into chunks, each consisting of $g$ cache lines of size $b$.
+    \State We create $g$ groups $U_1,\ldots, U_g$ that each contain a single cache line from each chunk,
+    \State $U_i$'s $j$-th cache line is the $(X[j]+i \bmod g + 1)$-th cache line in the $j$-th chunk of $A$.
+    \State
+
+    \Procedure{Get Block Start Index}{$X$, $g$, $b$, $i$, $j$}
+      \Comment This procedure returns the index in $A$ of the start of $U_i's$ $j$-th block.
+      \State\Return $b\cdot ((X[j] + i \bmod g) +(j-1)\cdot g)+1$
+    \EndProcedure
+    \State
+
+    \Procedure{ParallelPartition}{$A$, $n$, $g$, $b$}
+      \If{$g<2$}
+        \State serial partition $A$
+      \Else
+        \For{$j \in \{1,2,\ldots,n/(gb)\}$}
+          \State $X[j] \gets$ a random integer from $[1,g]$ 
+        \EndFor
+
+        % \State // \emph{We implement the following parallel for-loop with recursive spawns}
+        % \State // \emph{This facilitates computing $v_{min}$, $v_{max}$ without storing $v_y$'s}
+        \ForAll{$ i \in \{1,2,\ldots,g\}$ in parallel} \Comment We perform a serial partition on all $U_i$'s in parallel
+
+          \State low $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$1$)
+          \Comment low $\gets$ index of the first element in $U_i$
+          \State high $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$n/(gb)$) + $b-1$
+          \Comment high $\gets$ index of the last element in $U_i$
+
+          \While{low $<$ high} 
+            \While{A[low] $\leq$ pivotValue}
+              \State low $\gets$ low$+1$
+              \If{low $\bmod b \equiv 0$ } 
+                \Comment Perform a block increment once low reaches the end of a block
+                \State $k \gets $ number of block increments so far (including this one)
+                \State low $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$k$)
+                \Comment Increase low to start of block $k$ of $G_i$
+              \EndIf
+            \EndWhile
+            \While{A[high] $>$ pivotValue}
+              \State high $\gets$ high$-1$
+              \If{high $\bmod b \equiv 1$} 
+                \Comment Perform a block decrement once high reaches the start of a block
+                \State $k \gets $ number of block decrements so far (including this one)
+                \State $k' \gets n/(gb) - k$
+                \State high $\gets$ GetBlockStartIndex($X$, $g$,$b$,$i$,$k'$) $+b-1$
+                \Comment Decrease high to end of block $k'$ of $G_i$
+              \EndIf
+            \EndWhile
+            \State Swap $A[\text{low}]$ and $A[\text{high}]$
+          \EndWhile
+        \EndFor
+        \State Recurse on $A[v_{min}],\ldots,A[v_{max}-1]$
+      \EndIf
+    \EndProcedure
+  \end{algorithmic}	
+\end{figure*}
+
 
 %% note: g > s should hold
 \paragraph{Algorithm Analysis} Our first proposition analyzes the Partial Partition Step.
@@ -1880,176 +2043,7 @@ use only exclusive-read-write memory (or
 concurrent-read-exclusive-write memory) is an important direction of
 future work.
 
-\appendix
-
-\section{Pseudocode}\label{sec:pseudocode}
-
-\begin{figure*}
-  \caption{Blocked-Prefix-Sum Partition Algorithm: Helper Functions}
-	\label{alg:parallelPartition_prefixsumbased_helpers}
-  \begin{algorithmic} % add [1] to get line numbers (if you want)
-    \Procedure{WriteToBlock}{$A$, $b$, $i$, $v$} \Comment Write value $v$ to the $i$-th block $X_i$ of $A$, where $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
-      \ForAll{$j \in \{1,2,\ldots, \lfloor b/2 \rfloor \}$ in parallel}
-      \If{$\mathds{1}_{X_i[2j] < X_i[2j+1]} \not= $ (the $j$-th binary digit of $v$)}
-          \State Swap $X_i[2j]$ and $X_i[2j+1]$
-        \EndIf
-      \EndFor
-    \EndProcedure
-    \State
-
-    \Procedure{ReadFromBlock}{$A$, $i$, $j$} \Comment Reads the value $v$ stored in $A[i], A[i+1], \ldots, A[j]$
-      \If{$j-i=2$}
-        \State \Return $\mathds{1}_{A[i] < A[i+1]}$
-      \Else
-        \State \emph{Parallel-Spawn} $v_0 \gets $ ReadFromBlock($A$, $i$, $i+(j-i)/2$)
-        \State \emph{Parallel-Spawn} $v_f \gets $ ReadFromBlock($A$, $i+(j-i)/2+1$, $j$)
-        \State \emph{Parallel-Sync}
-        \State \Return $v_f\cdot 2^\frac{j-i}{4} + v_0$
-      \EndIf
-    \EndProcedure
-    \State
-
-    \State \textbf{Require: } $A$ has more successors than predecessors
-    \State \textbf{Ensure: }  Each prefix of $A$ is ``successor heavy''
-    \Procedure{MakeSuccessorHeavy}{$A$, $n$}
-      \ForAll{$i \in \{1,2,\ldots,\lfloor n/2 \rfloor\}$ in parallel}
-        \If{$A[i]$ is a predecessor and $A[n-i+1]$ is a successor}
-          \State Swap $A[i]$ and $A[n-i+1]$
-        \EndIf
-      \EndFor
-      \State MakeSuccessorHeavy($A$, $\lceil n/2 \rceil$)
-      \Comment Recurse on $A[1],A[2], \ldots, A[\lceil n/2 \rceil]$
-    \EndProcedure
-	\end{algorithmic}	
-\end{figure*}
-
-\begin{figure*}
-  \caption{Blocked-Prefix-Sum Partition Algorithm: Main Functions}
-	\label{alg:parallelPartition_prefixsumbased_main}
-  \begin{algorithmic} % add [1] to get line numbers (if you want)
-    \State \textbf{Require: } Each prefix of $A$ is ``successor heavy''
-    \State \textbf{Ensure: }  Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
-    \Procedure{ImplicitParallelPrefixSum}{A, n}
-      \State Pick $b \in \Theta(\log n)$ to be the "block size"
-      \State Logically Partition $A$ into blocks, with $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
-      \ForAll{$i \in \{1,2,\ldots,\lfloor n/b \rfloor\}$ in parallel}
-        \State $v_i \gets 0$ \Comment{$v_i$ will store number of predecessors in $X_i$ } 
-        \ForAll{$a \in X_i$ in serial}
-          \If{$a$ is a predecessor}
-            \State $v_i \gets v_i + 1$
-          \EndIf
-        \EndFor
-        \State WriteToBlock($A$, $b$, $i$, $v_i$)
-        \Comment Now we encode the value $v_i$ in the block $X_i$
-      \EndFor
-      \State Perform a parallel prefix sum on the values $v_i$ stored in the $X_i$'s
-   \EndProcedure
-    \State
-
-  \State \textbf{Require: } Each block $X_i$ stores how many predecessors occur in $X_1 \circ X_2 \circ \cdots \circ X_i$
-  \State \textbf{Ensure: }  $A$ is partitioned
-    \Procedure{Reorder}{$A$, $n$}
-      \State $t \gets $ least integer such that $t\cdot b > n\cdot 4/5$
-      \State Reorder($A$, $t$)
-      \Comment Recurse on $A[1], A[2], \ldots, A[t]$
-      \ForAll{$i \in \{t+1, t+2, \ldots, \lfloor n/b \rfloor\}$}
-      \State $v_i \gets$ ReadFromBlock($A$, $b\cdot i+1$, $b\cdot(i+1)$) 
-        \State Instantiate an array $Y_i$ with $|Y_i| = |X_i| \in \Theta(\log n)$, 
-        \State In parallel, set $Y_i[j] \gets 1$ if $X_i[j]$ is a predecessor, and $Y_i[j] \gets 0$ otherwise.
-        \State Perform a parallel prefix sum on $Y_i$, and add $v_i$ to each $Y_i[j]$
-        \ForAll{$j \in \{1,2,\ldots, b\}$}
-          \If{$X_i[j]$ is a predecessor}
-            \State Swap $X_i[j]$ and $A[Y_i[j]]$
-          \EndIf
-        \EndFor
-      \EndFor
-    \EndProcedure
-    \State
-
-    \Procedure{ParallelPartition}{$A$, $n$}
-      \State $k \gets$ count number of successors in $A$ in parallel
-      \If{$k < n/2$}
-        \State Swap the role of successors and predecessors in the algorithm (i.e. change the decider function)
-        \State At the end we consider $A'[i] = A[n-i+1]$, the logically reversed array, as output
-      \EndIf
-
-      \State MakeSuccessorHeavy($A$, $n$) \Comment \emph{prepreocessing phase}
-      \State ImplicitParallelPrefixSum($A$, $n$) \Comment \emph{Implicit Parallel Prefix Sum}
-      \State Reorder($A$, $n$) \Comment \emph{In-Place Reordering Phase}
-    \EndProcedure
-	\end{algorithmic}	
-\end{figure*}
-
-
-
-\begin{figure*}
-  \caption{Smoothed Striding Algorithm}
-	\label{alg:parallelPartition_smoothedStriding}
-	\begin{algorithmic}% [1] for line numbers
-    \State \textbf{Recall:} 
-    \State $A$ is the array to be partitioned, of length $n$. 
-    \State We break $A$ into chunks, each consisting of $g$ cache lines of size $b$.
-    \State We create $g$ groups $U_1,\ldots, U_g$ that each contain a single cache line from each chunk,
-    \State $U_i$'s $j$-th cache line is the $(X[j]+i \bmod g + 1)$-th cache line in the $j$-th chunk of $A$.
-    \State
-
-    \Procedure{Get Block Start Index}{$X$, $g$, $b$, $i$, $j$}
-      \Comment This procedure returns the index in $A$ of the start of $U_i's$ $j$-th block.
-      \State\Return $b\cdot ((X[j] + i \bmod g) +(j-1)\cdot g)+1$
-    \EndProcedure
-    \State
-
-    \Procedure{ParallelPartition}{$A$, $n$, $g$, $b$}
-      \If{$g<2$}
-        \State serial partition $A$
-      \Else
-        \For{$j \in \{1,2,\ldots,n/(gb)\}$}
-          \State $X[j] \gets$ a random integer from $[1,g]$ 
-        \EndFor
-
-        % \State // \emph{We implement the following parallel for-loop with recursive spawns}
-        % \State // \emph{This facilitates computing $v_{min}$, $v_{max}$ without storing $v_y$'s}
-        \ForAll{$ i \in \{1,2,\ldots,g\}$ in parallel} \Comment We perform a serial partition on all $U_i$'s in parallel
-
-          \State low $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$1$)
-          \Comment low $\gets$ index of the first element in $U_i$
-          \State high $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$n/(gb)$) + $b-1$
-          \Comment high $\gets$ index of the last element in $U_i$
-
-          \While{low $<$ high} 
-            \While{A[low] $\leq$ pivotValue}
-              \State low $\gets$ low$+1$
-              \If{low $\bmod b \equiv 0$ } 
-                \Comment Perform a block increment once low reaches the end of a block
-                \State $k \gets $ number of block increments so far (including this one)
-                \State low $\gets$ GetBlockStartIndex($X$,$g$,$b$,$i$,$k$)
-                \Comment Increase low to start of block $k$ of $G_i$
-              \EndIf
-            \EndWhile
-            \While{A[high] $>$ pivotValue}
-              \State high $\gets$ high$-1$
-              \If{high $\bmod b \equiv 1$} 
-                \Comment Perform a block decrement once high reaches the start of a block
-                \State $k \gets $ number of block decrements so far (including this one)
-                \State $k' \gets n/(gb) - k$
-                \State high $\gets$ GetBlockStartIndex($X$, $g$,$b$,$i$,$k'$) $+b-1$
-                \Comment Decrease high to end of block $k'$ of $G_i$
-              \EndIf
-            \EndWhile
-            \State Swap $A[\text{low}]$ and $A[\text{high}]$
-          \EndWhile
-        \EndFor
-        \State Recurse on $A[v_{min}],\ldots,A[v_{max}-1]$
-      \EndIf
-    \EndProcedure
-	\end{algorithmic}	
-\end{figure*}
-
-\clearpage
-\clearpage
-
 \bibliographystyle{plain}
 \bibliography{paper}
-
 
 \end{document}
