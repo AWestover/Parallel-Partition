@@ -651,8 +651,8 @@ partition on the sub-array $A[v_{\text{min}}],\ldots,
 A[v_{\text{max}}-1]$. This step has no parallelism, and thus has
 work and span $\Theta(v_{\text{max}} - v_{\text{min}})$.
 
-In general, the lack of parallelism in the Serial Cleanup step
-this results in an algorithm with linear-span (i.e., no
+In general, the lack of parallelism in the Serial Cleanup step 
+results in an algorithm with linear-span (i.e., no
 parallelism guarantee).  When the number of predecessors in each
 of the $P_i$'s is close to equal, however, the quantity
 $v_{\text{max}} - v_{\text{min}}$ can be much smaller than
@@ -2054,7 +2054,7 @@ See figures below.
 \end{figure*}
 
 \begin{figure*}
-  \caption{The Smoothed Striding Algorithm}
+  \caption{Smoothed Striding Algorithm}
 	\label{alg:parallelPartition_smoothedStriding}
 	\begin{algorithmic}% [1] for line numbers
     \State \textbf{Recall:} 
@@ -2117,7 +2117,7 @@ See figures below.
 \end{figure*}
 
 \begin{figure*}
-  \caption{Section \ref{secalg}'s Prefix-Sum Based Parallel Partition Pseudocode: Helper Functions}
+  \caption{Blocked-Prefix-Sum Partition Algorithm: Helper Functions}
 	\label{alg:parallelPartition_prefixsumbased_helpers}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \Procedure{WriteToBlock}{$A$, $b$, $i$, $v$} \Comment Write value $v$ to the $i$-th block $X_i$ of $A$, where $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
@@ -2156,7 +2156,7 @@ See figures below.
 \end{figure*}
 
 \begin{figure*}
-  \caption{Section \ref{secalg}'s Prefix-Sum Based Parallel Partition Pseudocode: Main Functions}
+  \caption{Blocked-Prefix-Sum Partition Algorithm: Main Functions}
 	\label{alg:parallelPartition_prefixsumbased_main}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \State \textbf{Require: } Each prefix of $A$ is ``successor heavy''
