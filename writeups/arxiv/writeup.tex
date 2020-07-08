@@ -1881,7 +1881,7 @@ future work.
 \section{Pseudocode}\label{sec:pseudocode}
 
 \begin{figure*}
-  \caption{Section \ref{secalg}'s Prefix-Sum Based Parallel Partition Pseudocode: Helper Functions}
+  \caption{Blocked-Prefix-Sum Partition Algorithm: Helper Functions}
 	\label{alg:parallelPartition_prefixsumbased_helpers}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \Procedure{WriteToBlock}{$A$, $b$, $i$, $v$} \Comment Write value $v$ to the $i$-th block $X_i$ of $A$, where $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
@@ -1920,7 +1920,7 @@ future work.
 \end{figure*}
 
 \begin{figure*}
-  \caption{Section \ref{secalg}'s Prefix-Sum Based Parallel Partition Pseudocode: Main Functions}
+  \caption{Blocked-Prefix-Sum Partition Algorithm: Main Functions}
 	\label{alg:parallelPartition_prefixsumbased_main}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \State \textbf{Require: } Each prefix of $A$ is ``successor heavy''
@@ -1979,7 +1979,7 @@ future work.
 
 
 \begin{figure*}
-  \caption{The Smoothed Striding Algorithm}
+  \caption{Smoothed Striding Algorithm}
 	\label{alg:parallelPartition_smoothedStriding}
 	\begin{algorithmic}% [1] for line numbers
     \State \textbf{Recall:} 
