@@ -18,11 +18,30 @@
       <div style="width:50vw; float:left ">
         <h2>Parallel Partition Visualization</h2>
         <h4>Alek Westover</h4>
-        <p><strong>What is this?</strong> <br> I was accepted into <a href="http://math.mit.edu/research/highschool/primes/index.php">MIT PRIMES</a>, and worked on a Computer Science research project with the help of my mentor Bill. Specifically, I considered the problem of creating a fast algorithm with good theoretical guarantees for the "Parallel Partition Problem". This website is a nice visualization that I made of a parallel partition algorithm. </p>
-        <p>For more information, see <a href="#poster">my poster below</a> or for <b>a lot</b> of information see <a href="https://github.com/awestover/Parallel-Partition/blob/master/visualizations/parallelPartitionProblemWriteupAlek.pdf">a draft of my paper on github</a></p>
-      <p>This is a visualization of the parallel step of the strided / smoothed striding algorithm. Rectangles heights correspond to the values in the array A that we are partitioning. There are t levels that are interleaved. These are the P_i in the strided algorithm. A rectangle is colored red if it is currently being processed, black if it was processed and did not need to be swapped, yellow if it was processed and did need to be swapped, and white if it has not yet been processed. The fact that the different levels tend to end up at about the same index is evidence that the strided algorithm works (i.e. all the P_is have about the same middle, so the recursive subproblem is small). </p>
-      <p>The top array is the whole array, and below it are the subarrays that each processor gets to work on. This allows for inspection of what is happening in the entire array based on what happens in the subarrays. </p>
-      <p>Note how the randomization in the smoothed striding algorithm makes it so that the "adversarial" input (adversarial for the strided algorithm) is just like any other case. </p>
+        <p><strong>What is this?</strong> <br> As part of <a
+          href="http://math.mit.edu/research/highschool/primes/index.php">MIT
+          PRIMES</a>, I worked on a Computer Science research project with the
+        help of my mentor Bill. We considered the problem of creating a fast
+        algorithm with good theoretical guarantees for the "Parallel Partition
+        Problem". This website contains a visualization of two parallel
+        partition algorithms: the Strided Algorithm, and the Smoothed Striding
+        Algorithm (the algorithm we created). </p>
+        <p>For more information, see <a href="#poster">the poster below</a>, see <a href="">our implementation of our algorithms on GitHub</a> and see see <a href="https://arxiv.org/abs/2004.12532">our paper on ArXiv</a></p>
+      <p>In this visualization Rectangle heights correspond to the values in
+      the array A that we are partitioning. Below the array A are multiple
+      subarrays, which correspond to the U_i / P_i of the Smoothed Striding /
+      Strided Algorithms. In the visualization a rectangle is
+      colored red if it is currently being processed, black if it was processed
+      and did not need to be swapped, yellow if it was processed and did need
+      to be swapped, and white if it has not yet been processed. The fact that
+      the different levels tend to end up at about the same index is evidence
+      that algorithms. </p>
+      <p>The visualization allows you to watch the algorithms execute on
+      different inputs. It is especially interesting to see how the
+      randomization in the Smoothed Striding algorithm makes it so that the
+      "adversarial" input, which is constructed to be adversarial for the
+      Strided algorithm, is treated just like any other case, whereas the
+      Strided Algorithm performs very poorly on the adversarial input. </p> 
       </div>
     </div>
 		<div style="padding-left: 3%; padding-right: 3%; width: 40vw; float: left">
