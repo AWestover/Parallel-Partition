@@ -1,0 +1,53 @@
+This is BibTeX, Version 0.99d (TeX Live 2019)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: writeup.aux
+The style file: siam.bst
+Database file #1: paper.bib
+Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
+while executing---line 991 of file siam.bst
+Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
+while executing---line 1034 of file siam.bst
+Warning--empty journal in AcarBl00
+Warning--can't use both volume and number fields in BlellochFi12
+You've used 30 entries,
+            2030 wiz_defined-function locations,
+            715 strings with 8827 characters,
+and the built_in function-call counts, 11621 in all, are:
+= -- 1151
+> -- 464
+< -- 0
++ -- 191
+- -- 152
+* -- 864
+:= -- 1722
+add.period$ -- 30
+call.type$ -- 30
+change.case$ -- 165
+chr.to.int$ -- 0
+cite$ -- 32
+duplicate$ -- 552
+empty$ -- 900
+format.name$ -- 152
+if$ -- 2543
+int.to.chr$ -- 0
+int.to.str$ -- 30
+missing$ -- 30
+newline$ -- 93
+num.names$ -- 60
+pop$ -- 165
+preamble$ -- 1
+purify$ -- 136
+quote$ -- 0
+skip$ -- 479
+stack$ -- 0
+substring$ -- 875
+swap$ -- 243
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 118
+warning$ -- 2
+while$ -- 133
+width$ -- 32
+write$ -- 276
+(There were 2 error messages)
