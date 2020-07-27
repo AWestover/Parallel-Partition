@@ -14,6 +14,7 @@
 \newcommand{\polylog}{\operatorname{polylog}}
 \newcommand{\defn}[1]{{\textit{\textbf{\boldmath #1}}}}
 \renewcommand{\paragraph}[1]{\vspace{0.09in}\noindent{\bf \boldmath #1.}} 
+\usepackage{authblk}
 
 \newtheorem{thm}{Theorem}[section]
 \newtheorem{lem}[thm]{Lemma}
@@ -66,11 +67,14 @@ red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamo
 
 \begin{document}
 
-\title{\Large In-Place Parallel-Partition Algorithms \\using Exclusive-Read-and-Write Memory} 
-  %\thanks{Supported by a Hertz Fellowship and a NSF GRFP Fellowship.}}
-% \subtitle{An In-Place Algorithm With Provably Optimal Cache Behavior}
-\author{Anonymous}
-% \author{William Kuszmaul\thanks{Massachusetts Institute of Technology} \and Alek Westover\thanks{Massachusetts Institute of Technology}}
+\title{\Large In-Place Parallel-Partition Algorithms \\using
+Exclusive-Read-and-Write Memory}
+\author[1]{William Kuszmaul\thanks{Supported by a Hertz
+Fellowship and a NSF GRFP Fellowship.}}
+\author[1]{Alek Westover\thanks{Supported by Massachusetts Institute of Technology}}
+\affil[ ]{\textit{kuszmaul@mit.edu and alek.westover@gmail.com}}
+\affil[1]{Massachusetts Institute of Technology}
+
 \date{}
 
 \maketitle
@@ -101,6 +105,8 @@ Pannan, Frias, and Petit, which is the previous state-of-the art for
 parallel EREW sorting algorithms, but which lacks theoretical
 guarantees on its span and cache behavior.
 \end{abstract}
+
+\clearpage
 
 \section{Introduction}
 
