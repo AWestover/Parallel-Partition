@@ -112,13 +112,13 @@ guarantees on its span and cache behavior.
 
 A \defn{parallel partition} operation rearranges the elements in an
 array so that the elements satisfying a particular \defn{pivot
-  property} appear first. In addition to playing a central role in
+property} appear first. In addition to playing a central role in
 parallel quicksort, the parallel partition operation is used as a
 primitive throughout parallel algorithms.\footnote{In several
-  well-known textbooks and surveys on parallel algorithms
-  \cite{AcarBl16,Blelloch96}, for example, parallel partitions are
-  implicitly used extensively to perform what are referred to as
-  \emph{filter} operations.}
+well-known textbooks and surveys on parallel algorithms
+\cite{AcarBl16,Blelloch96}, for example, parallel partitions are
+implicitly used extensively to perform what are referred to as
+\emph{filter} operations.}
 
 A parallel algorithm can be measured by its \defn{work}, the time
 needed to execute in serial, and its \defn{span}, the time to execute
@@ -221,7 +221,7 @@ nearly perfect scaling on many processors.
 
 The memory-bandwidth bottleneck previously led researchers
 \cite{FrancisPa92, Frias08} to introduce the \defn{Strided
-  Algorithm}, which has near optimal cache behavior in practice, but
+Algorithm}, which has near optimal cache behavior in practice, but
 which exhibits theoretical guarantees only on certain random input
 arrays. The Smoothed Striding Algorithm is designed to have similar
 empirical performance to the Strided Algorithm, while achieving both
@@ -235,60 +235,25 @@ up to small-order factors for all inputs. In practice, the Smoothed Striding
 Algorithm performs within 15\% of the Strided Algorithm on a large
 number of threads.
 
-
-
-% We show that parallel partition can be implemented in place, and
-% without the use of concurrency mechanisms. All of the algorithms
-% considered in this paper use only exclusive read/write shared
-% variables, and can be implemented using parallel-for-loops without any
-% additional concurrency considerations. 
-
-% Our first result is a set of techniques that allows us to adapt the
-% standard parallel partition algorithm to be fully in place. The new
-% algorithm has work $O(n)$ and span $O(\log n \cdot \log \log
-% n)$. As an immediate consequence, we also get a
-% simple in-place quicksort algorithm with work $O(n \log n)$ and span
-% $O(\log^2 n \log \log n)$.
-
-% Using our algorithmic techniques, we implement and optimize a
-% space-efficient parallel partition. Because the in-place algorithm
-% eliminates the use of large auxiliary arrays, the algorithm is able to
-% achieve a significant reduction in cache misses over its out-of-place
-% counterpart, resulting in performance improvements both in serial and
-% in parallel over the standard parallel partition algorithm.
-
-% The in-place algorithm remains bottlenecked by memory bandwidth,
-% however, due to the fact that multiple passes over the input array are
-% required. The memory-bandwidth bottleneck has led past researchers
-% \cite{FrancisPa92, Frias08} to introduce the so-called \defn{Strided
-%   Algorithm}, which has near optimal cache behavior in practice, but
-% which exhibits theoretical guarantees only on certain random input
-% arrays.
-
-% Our second main result is an algorithm that we call the \defn{Smoothed
-%   Striding Algorithm}. By randomly perturbing the internal structure
-% of the Strided Algorithm, and adding a recursion step that was
-% previously not possible, we arrive at a new algorithm with provably
-% good span and cache behavior. The Smoothed Striding Algorithm is
-% in-place, has polylogarithmic span, and exhibits provably optimal
-% cache behavior up to small-order factors. In practice, the Smoothed
-% Striding Algorithm performs within 15\% of the Strided Algorithm on a
-% large number of threads.
-
 \paragraph{Outline} We begin in Section \ref{secprelim} by
 discussing background on parallel algorithms and the Parallel
-Partition Problem. In Section \ref{sec:smoothing}, we present and
-analyze the Smoothed Striding Algorithm. In Section
-\ref{sec:blockedprefixsumpartitionalg} we present and analyze the
-Blocked-Prefix-Sum Partition Algorithm. The Blocked-Prefix-Sum Partition Algorithm
-achieves a nearly optimal span of $O(\log n \log \log n)$ but is
-not cache-optimal; this algorithm can be used as a subroutine
-within the Smoothed Striding Algorithm to achieve the same span.
-In Appendix \ref{secexp} we experimentally evaluate the
-performance of implements of the algorithms from this paper,
-along with the Strided Algorithm and the standard linear-space
-algorithm. Finally, we conclude with open questions in
-Section \ref{sec:open}. Figures and pseudocode are deferred to
+Partition Problem. In Section~\ref{sec:recursiveSmoothedStriding}
+we present the Smoothed Striding Algorithm and analyze a simple
+version of the Smoothed Striding Algorithm which recursively
+calls itself: the Recursive Smoothed Striding Algorithm. In
+Section \ref{sec:blockedprefixsumpartitionalg} we present and
+analyze the Blocked-Prefix-Sum Partition Algorithm. The
+Blocked-Prefix-Sum Partition Algorithm achieves a nearly optimal
+span of $O(\log n \log \log n)$ but is not cache-optimal. In
+Section~\ref{sec:hybridSmoothedStriding} we show that by using
+the Blocked-Prefix-Sum Partition Algorithm as a subroutine within
+the Smoothed Striding Algorithm we get an algorithm that
+simultaneously attains provably optimal cache behavior and span
+$O(\log n \log \log n)$. In Appendix~\ref{secexp} we
+experimentally evaluate the performance of implements of the
+algorithms from this paper, along with the Strided Algorithm and
+the Standard Algorithm. Finally, we conclude with open questions
+in Section \ref{sec:open}. Figures and pseudocode are included in
 Appendices \ref{sec:figures} and \ref{sec:pseudocode}.
 
 \section{Preliminaries}\label{secprelim}
@@ -432,13 +397,14 @@ number of threads is fixed.
 \label{sec:recursiveSmoothedStriding}
 
 In this section we present the \defn{Smoothed Striding
-Algorithm}, in particular a variant which we call the
-\defn{Recursive Smoothed Striding Algorithm}, which exhibits
-provably optimal cache behavior (up to small-order factors). The
-Smoothed Striding Algorithm is fully in-place and has
-polylogarithmic span. In particular, this means that the total
-amount of auxiliary memory allocated at a given moment in the
-execution never exceeds $\polylog n$ per active worker.
+Algorithm}, which exhibits provably optimal cache behavior (up to
+small-order factors). The Smoothed Striding Algorithm is fully
+in-place and has polylogarithmic span. In particular, this means
+that the total amount of auxiliary memory allocated at a given
+moment in the execution never exceeds $\polylog n$ per active
+worker. In this section we also analyze a version of the Smoothed
+Striding Algorithm, called the Recursive Smoothed Striding
+Algorithm, that is remarkably simple.
 
 \paragraph{Modeling Cache Misses}
 We treat memory as consisting of fixed-size cache lines, each of some
@@ -551,8 +517,8 @@ for $b \in \polylog(n)$, the optimal span remains
 $\tilde{O}(n^{2/3})$ and the number of cache misses becomes $n /
 b + \tilde{O}(n^{2/3} / b)$ on an array $A$ consisting of
 randomly sampled elements.\footnote{The original algorithm of
-  Francis and Pannan \cite{FrancisPa92} does not consider the
-  cache-line size $b$. Frias and Petit later introduced the
+Francis and Pannan \cite{FrancisPa92} does not consider the
+cache-line size $b$. Frias and Petit later introduced the
 parameter $b$ \cite{Frias08}, and showed that by setting $b$
 appropriately, one obtains an algorithm whose empirical
 performance is close to the state-of-the-art.}
@@ -565,14 +531,14 @@ randomly perturb the internal structure of each of the $P_i$'s. Define
 $U_1, \ldots, U_{g}$ (which play a role analogous to $P_1,
 \ldots, P_g$ in the Strided Algorithm) so that each $U_i$ contains one
 randomly selected cache line from each of $C_1, \ldots, C_{n /
-  gb}$ (rather than containing the $i$-th cache line of each
+gb}$ (rather than containing the $i$-th cache line of each
 $C_j$). This ensures that the number of predecessors in each $U_i$ is
 a sum of independent random variables with values in $\{0, 1, \ldots,
 n/g\}$.
 
 By Hoeffding's Inequality, with high probability in $n$, the number of
 predecessors in each $U_i$ is tightly concentrated around $\frac{\mu
-  n}{g}$, where $\mu$ is the fraction of elements in $A$ that are
+n}{g}$, where $\mu$ is the fraction of elements in $A$ that are
 predecessors. It follows that, if we perform in-place partitions of
 each $U_i$ in parallel, and then define $v_i$ to be the position in
 $A$ of the first successor in (the already partitioned) $U_i$, then
@@ -607,9 +573,10 @@ be relatively large, so that $n/(gb) \le \polylog(n)$, we can
 obtain an in-place algorithm that incurs $(1 + o(1))n/b$ cache
 misses.
 
-The recursive structure of the Smoothed Striding Algorithm allows for
-the algorithm to achieve polylogarithmic span, and makes the
-algorithm very simple to implement in practice. 
+We remark that the recursive structure of the Smoothed Striding
+Algorithm allows for the algorithm to achieve polylogarithmic
+span, and makes the algorithm very simple to implement in
+practice. 
 
 \paragraph{Formal Algorithm Description} Let $b < n$ be the size
 of a cache line, let $A$ be an input array of size $n$, and let
@@ -677,20 +644,23 @@ A[v_{\text{max}}]$. The \defn{Recursive Smoothed Striding
 Algorithm} partitions $A[v_{\text{min}} + 1], \ldots,
 A[v_{\text{max}}]$ recursively using the same algorithm (and
 resorts to a serial base case when the subproblem is small enough
-that $g \le O(1)$). In Section \ref{sec:hybridSmoothedStriding}
-we discuss the \defn{Hybrid Smoothed Striding Algorithm}, which
-instead of recursing partitions $A[v_{\text{min}} + 1], \ldots,
+that $g \le O(1)$). In Section~\ref{sec:hybridSmoothedStriding}
+we discuss a different variant of the Smoothed Striding
+Algorithm, called the \defn{Hybrid Smoothed Striding Algorithm},
+which partitions $A[v_{\text{min}} + 1], \ldots,
 A[v_{\text{max}}]$ using the in-place algorithm given in
-Theorem~\ref{thminplace} with span $O(\log n \log \log n)$. In
-general, the Hybrid algorithm yields better theoretical
-guarantees on span than the recursive version; on the other hand,
-the recursive version has the advantage that it is simple to
-implement as fully in-place, and still achieves polylogarithmic
-span. Detailed pseudocode for the Recursive Smoothed Striding
-Algorithm can be found in Appendix \ref{sec:pseudocode}.
+Theorem~\ref{thminplace} instead of recursing. In general, the
+Hybrid algorithm yields better theoretical guarantees on span
+than the recursive version; on the other hand, the recursive
+version has the advantage that it is simple to implement as fully
+in-place, and still achieves polylogarithmic span. Detailed
+pseudocode for the Recursive Smoothed Striding Algorithm can be
+found in Appendix \ref{sec:pseudocode}. 
 
 %% note: g > s should hold
-\paragraph{Algorithm Analysis} Our first proposition analyzes the Partial Partition Step.
+\paragraph{Algorithm Analysis} 
+Our first proposition analyzes the Partial Partition Step of the
+Smoothed Striding Algorithm.
 \begin{proposition}
   \label{prop:generalResult}
   %% The 1/2's are necessary for the final line of the proof to easily go through.
@@ -765,7 +735,6 @@ Since $s > \frac{\ln (n/\epsilon)}{\delta^2} \ge \frac{\ln (2n /
 %% $$\Pr\Big[\bigvee_{y=0}^{g-1} |\mu_y - \mu| \geq \delta\Big] \leq \sum_{y=0}^{g-1} \Pr[|\mu_y - \mu| \geq \delta] < \epsilon.$$
 %% Thus the event occurs with probability bounded above by $\epsilon$, the specified failure probability.
 
-
 To complete the proof we will show that the occurrence of the event
 that all $\mu_y$ simultaneously satisfy $|\mu - \mu_y| < \delta$ implies
 that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
@@ -819,16 +788,16 @@ $\epsilon$ is chosen based on the size of the first subproblem in
 the recursion), so that the entire algorithm succeeds with high
 probability in $n$.
 
-The choice of $\delta$ results in a trade-off
-between cache misses and span. For the Recursive algorithm, we
-allow for $\delta$ to be chosen arbitrarily at the top level of
+The choice of $\delta$ results in a trade-off between cache
+misses and span. For the Recursive Smoothed Striding Algorithm we
+allow $\delta$ to be chosen arbitrarily at the top level of
 recursion, and then fix $\delta  = \Theta(1)$ to be a
 sufficiently small constant at all levels of recursion after the
 first; this guarantees that we at least halve the size of the
 problem between recursive iterations\footnote{In general, setting
-$\delta = 1/8$ will result in the problem size being halved.
-However, this relies on the assumption that $gb \mid n$, which is
-only without loss of generality by allowing for the size of
+  $\delta = 1/8$ will result in the problem size being halved.
+  However, this relies on the assumption that $gb \mid n$, which
+  is only without loss of generality by allowing for the size of
 subproblems to be sometimes artificially increased by a small
 amount (i.e., a factor of $1 + gb / n = 1 + 1/s$). One can handle
 this issue by decreasing $\delta$ to, say, $1/16$.}. Optimizing
@@ -910,23 +879,24 @@ Smoothed Striding algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
   (n+o(n))/b$$ cache misses.
 \end{proof}
 
-%% In addition to these desirable theoretical guarantees, these algorithms performs well in practice, as shown in the experimental section.
-%% Also, because the Cache-Efficient Partial-Partition Algorithm achieves an optimal number of cache misses up to lower order terms, its bandwidth bound is optimal.
-
 \section{An $O(\log n \log \log n)$-Span Parallel Partition}
 \label{sec:blockedprefixsumpartitionalg}
 
-In this section, we present an in-place algorithm for parallel
+In this section, we present an in-place algorithm, called the
+\defn{Blocked-Prefix-Sum Partition Algorithm}, for parallel
 partition with span $O(\log n \log \log n)$. Each thread in the
-algorithm requires memory at most $O(\log n)$.
-The algorithm we describe here is useful as a subroutine in our main algorithm,
-the Smoothed Striding Algorithm, which is discussed in Section \ref{sec:smoothing}.
-The algorithm we discuss here has poor cache behavior, and so
-performs poorly in practice. However, using it as a subroutine on
-a small subproblem in the Smoothed Striding Algorithm will allow
+algorithm requires memory at most $O(\log n)$. 
+
+In addition to being theoretically interesting on its own, the
+Blocked-Prefix-Sum Partition Algorithm is useful as a subroutine
+in the Smoothed Striding Algorithm. The Blocked-Prefix-Sum
+Partition Algorithm has poor cache behavior, and so performs
+somewhat poorly in practice. However, using it as a subroutine on
+a small subproblem in the Smoothed Striding Algorithm allows
 the Smoothed Striding Algorithm to achieve span $O(\log n
-\log\log n)$ without sacrificing its cache behavior.
-We now describe the algorithm. 
+\log\log n)$ without sacrificing its cache behavior; we discuss
+this in detail in Section~\ref{sec:hybridSmoothedStriding}. We now
+describe the Blocked-Prefix-Sum Partition Algorithm. 
 
 Prior to beginning the algorithm, the first implicit step of the
 algorithm is to count the number of predecessors in the array, in
@@ -1238,10 +1208,10 @@ parallel-for-loop incurs span $O(\log \log n)$.
 Combining the phases, the full algorithm has work $O(n)$ and span
 $O(\log \log n)$. Thus we have:
 \begin{theorem}
+  \label{thminplace}
   There exists an in-place algorithm using exclusive-read-write
   variables that performs parallel-partition with work $O(n)$ and span
   $O(\log n \cdot \log \log n)$.
-  \label{thminplace}
 \end{theorem}
 
 \paragraph{Allowing for Repeated Elements}
@@ -1312,21 +1282,23 @@ phase. Lemma \ref{lem:bitstore2} can therefore used in place of Lemma
 \ref{lem:bitstore} in order to complete the proof of Theorem
 \ref{thminplace} for arrays $A$ that contain duplicate elements.
 
+
+% hybrid
 \section{A Cache-Efficient $O(\log n \log \log n)$-Span Parallel Partition}
 \label{sec:hybridSmoothedStriding}
-As an alternative to recursing in the Smoothed Striding Algorithm
-from Section \ref{sec:recursiveSmoothedStriding}, one can also
-use the Blocked-Prefix-Sum Partition Algorithm from Section
-\ref{sec:blockedprefixsumpartitionalg} to partition
-$A[v_{\text{min}}], \ldots, A[v_{\text{max}} - 1]$. This results
-in an improved span (since the Blocked-Prefix-Sum Partition
-Algorithm has span only $O(\log n \log \log n)$), while still
-incurring only $(1 + o(1))n/b$ cache misses (since the
+
+In this section we analyze the \defn{Hybrid Smoothed Striding
+Algorithm}, which, after the Partial Partition Step of the
+Smoothed Strided Algorithm, partitions the sub-array using the
+Blocked-Prefix-Sum Partition Algorithm. We show that doing so
+results in an improved span (since the Blocked-Prefix-Sum
+Partition Algorithm has span only $O(\log n \log \log n)$), while
+still incurring only $(1 + o(1))n/b$ cache misses (since the
 cache-inefficient algorithm from Section
 \ref{sec:blockedprefixsumpartitionalg} is only used on a small
 subarray of $A$). 
 
-Now we analyze the Hybrid Smoothed Striding Algorithm. We prove
+We now analyze the Hybrid Smoothed Striding Algorithm. We prove
 the following theorem:
 \begin{theorem}
   \label{thm:fullPartition} The Hybrid Smoothed Striding
@@ -1395,7 +1367,7 @@ $O(\log n \log\log n)$ and incurs fewer than $(n+o(n))/b$ cache misses.
 \end{proof}
 
 
-
+% conclusion
 \section{Conclusion and Open Questions}\label{sec:open}
 
 Parallel partition is a fundamental primitive in parallel algorithms
@@ -1456,7 +1428,7 @@ future work.
 
 In this section, we implement the techniques from
 Section~\ref{sec:blockedprefixsumpartitionalg} and 
-Section~\ref{sec:smoothing} to build space-efficient and
+Section~\ref{sec:recursiveSmoothedStriding} to build space-efficient and
 in-place parallel-partition functions.
 
 Each implementation considers an array of $n$ 64-bit integers, and
