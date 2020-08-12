@@ -1,11 +1,13 @@
 \begin{thebibliography}{10}
 
-\bibitem{AcarBl00}
-{\sc B.~Acar and Blumofe}, {\em The data locality of work stealing},  (2000).
-
 \bibitem{AcarBl16}
 {\sc U.~A. Acar and G.~Blelloch}, {\em Algorithm design: Parallel and
   sequential}, 2016.
+
+\bibitem{AcarBl00}
+{\sc U.~A. Acar, G.~E. Blelloch, and R.~D. Blumofe}, {\em The data locality of
+  work stealing}, in Proceedings of the twelfth annual ACM symposium on
+  Parallel algorithms and architectures, 2000, pp.~1--12.
 
 \bibitem{AlbersHa97}
 {\sc S.~Albers and T.~Hagerup}, {\em Improved parallel integer sorting without

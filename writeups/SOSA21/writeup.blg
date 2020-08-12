@@ -3,51 +3,46 @@ Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: writeup.aux
 The style file: siam.bst
 Database file #1: paper.bib
-Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
-while executing---line 991 of file siam.bst
-Name 1 in "Acar, Blelloch, and Blumofe" has a comma at the end for entry AcarBl00
-while executing---line 1034 of file siam.bst
-Warning--empty journal in AcarBl00
 Warning--can't use both volume and number fields in BlellochFi12
 You've used 30 entries,
             2030 wiz_defined-function locations,
-            715 strings with 8827 characters,
-and the built_in function-call counts, 11621 in all, are:
-= -- 1151
-> -- 464
+            716 strings with 8943 characters,
+and the built_in function-call counts, 11786 in all, are:
+= -- 1169
+> -- 469
 < -- 0
-+ -- 191
-- -- 152
-* -- 864
-:= -- 1722
++ -- 193
+- -- 154
+* -- 872
+:= -- 1741
 add.period$ -- 30
 call.type$ -- 30
-change.case$ -- 165
+change.case$ -- 166
 chr.to.int$ -- 0
-cite$ -- 32
-duplicate$ -- 552
-empty$ -- 900
-format.name$ -- 152
-if$ -- 2543
+cite$ -- 31
+duplicate$ -- 560
+empty$ -- 919
+format.name$ -- 154
+if$ -- 2588
 int.to.chr$ -- 0
 int.to.str$ -- 30
 missing$ -- 30
 newline$ -- 93
 num.names$ -- 60
-pop$ -- 165
+pop$ -- 168
 preamble$ -- 1
-purify$ -- 136
+purify$ -- 137
 quote$ -- 0
-skip$ -- 479
+skip$ -- 485
 stack$ -- 0
-substring$ -- 875
-swap$ -- 243
+substring$ -- 894
+swap$ -- 247
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 118
-warning$ -- 2
-while$ -- 133
+warning$ -- 1
+while$ -- 136
 width$ -- 32
-write$ -- 276
-(There were 2 error messages)
+write$ -- 278
+(There was 1 warning)
