@@ -9,3 +9,5 @@ This repo has the code we used for our experiments. as well as all of the docume
 
 See how-to-use.txt for more information.
 
+![partition.png](partition.png)
+
