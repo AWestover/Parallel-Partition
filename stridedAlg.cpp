@@ -1,4 +1,3 @@
-
 // AUTHOR: Alek Westover
 // Strided Algorithm
 //

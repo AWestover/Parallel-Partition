@@ -1,6 +1,7 @@
 
 // AUTHOR: Alek Westover
-// Grouped Partition Algorithm (and Cache-Efficient Partial-Partition Algorithm)
+// Smoothed Striding Algorithm
+// AKA Grouped Partition Algorithm (and Cache-Efficient Partial-Partition Algorithm)
 // 
 // Parameters to toggle in experiments:
 // * delta 
