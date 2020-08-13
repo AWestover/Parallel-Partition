@@ -13,8 +13,7 @@
 \newcommand{\poly}{\operatorname{poly}}
 \newcommand{\polylog}{\operatorname{polylog}}
 \newcommand{\defn}[1]{{\textit{\textbf{\boldmath #1}}}}
-\renewcommand{\paragraph}[1]{\vspace{0.09in}\noindent{\bf \boldmath #1.}}
-\usepackage{url}
+\renewcommand{\paragraph}[1]{\vspace{0.09in}\noindent{\bf \boldmath #1.}} 
 \usepackage{authblk}
 
 \newtheorem{thm}{Theorem}[section]
@@ -80,233 +79,195 @@ Fellowship and a NSF GRFP Fellowship.}}
 
 \maketitle
 \begin{abstract} 
-  We present a simple in-place algorithm for the parallel partition
-  problem that has linear work and polylogarithmic span. The algorithm
-  uses only exclusive read/write shared memory variables, and can be
-  implemented using parallel-for-loops without any additional
-  concurrency considerations. A key feature of the algorithm is that
-  it exhibits provably optimal cache behavior, up to small-order
-  factors.
+We present a simple in-place algorithm for the parallel partition problem
+that has linear work and polylogarithmic span. The algorithm uses only
+exclusive read/write shared variables, and can be implemented using
+parallel-for-loops without any additional concurrency considerations
+(i.e., the algorithm is EREW). A key feature of the algorithm is that
+it exhibits provably optimal cache behavior, up to small-order factors.
 
-  We also present a second in-place EREW algorithm that has linear
-  work and span $O(\log n \cdot \log \log n)$. This second algorithm
-  has nearly optimal span but does not exhibit optimal cache behavior.
+We also present a second in-place EREW algorithm that has linear work
+and span $O(\log n \cdot \log \log n)$, which is within an
+$O(\log\log n)$ factor of the optimal span. By using this low-span
+algorithm as a subroutine within the cache-friendly algorithm, we are
+able to obtain a single EREW algorithm that combines their theoretical
+guarantees: the algorithm achieves span $O(\log n \cdot \log \log n)$ and
+optimal cache behavior. As an immediate consequence, we also get an
+in-place EREW quicksort algorithm with work $O(n \log n)$, span
+$O(\log^2 n \cdot \log \log n)$.
 
-  By using this low-span algorithm as a subroutine within the
-  cache-friendly algorithm, we are able to obtain a single algorithm
-  that combines their theoretical guarantees: the algorithm achieves
-  span $O(\log n \cdot \log \log n)$ and optimal cache behavior. As an
-  immediate consequence, we also get an in-place quicksort algorithm
-  with work $O(n \log n)$, span $O(\log^2 n \cdot \log \log n)$.
+Whereas the standard EREW algorithm for parallel partitioning is
+memory-bandwidth bound on large numbers of cores, our cache-friendly
+algorithm is able to achieve near-ideal scaling in practice by
+avoiding the memory-bandwidth bottleneck. The algorithm's performance
+is comparable to that of the Blocked Strided Algorithm of Francis,
+Pannan, Frias, and Petit, which is the previous state-of-the art for
+parallel EREW sorting algorithms, but which lacks theoretical
+guarantees on its span and cache behavior.
 \end{abstract}
 
 \clearpage
 
 \section{Introduction}
 
-A \defn{partition} operation rearranges the elements in an array so
-that the elements satisfying a particular \defn{pivot property} appear
-first. In addition to playing a central role in quicksort, the
-partition operation is used (often implicitly) as a primitive
-throughout both sequential and parallel algorithms\footnote{In several
-  well-known textbooks and surveys on parallel algorithms
-  \cite{AcarBl16,Blelloch96}, for example, parallel partitions are
-  implicitly used extensively to perform what are referred to as
-  \emph{filter} operations.}, and is arguably one of the simplest and
-most basic computational operations.
+A \defn{parallel partition} operation rearranges the elements in an
+array so that the elements satisfying a particular \defn{pivot
+property} appear first. In addition to playing a central role in
+parallel quicksort, the parallel partition operation is used as a
+primitive throughout parallel algorithms.\footnote{In several
+well-known textbooks and surveys on parallel algorithms
+\cite{AcarBl16,Blelloch96}, for example, parallel partitions are
+implicitly used extensively to perform what are referred to as
+\emph{filter} operations.}
 
-The partition operation is straightforward to implement efficiently
-(and in-place) in serial. Designing fast parallel algorithms is more
-difficult, however. Although there has been a great deal of empirical
-work on parallel partitioning (see, e.g., \cite{HeidelbergerNo90,
-  AxtmannWi17, TsigasZh03, FrancisPa92, Frias08}), several fundamental
-theoretical questions remain unanswered.
-
-In this paper we consider the following basic question: does there
-exist an \emph{in-place} parallel algorithm for the partition
-operation? And, more generally, does there exist a parallel algorithm
-with optimal cache behavior?
-
-\paragraph{The Classic Sum-and-Swap Algorithm}
 A parallel algorithm can be measured by its \defn{work}, the time
 needed to execute in serial, and its \defn{span}, the time to execute
-on infinitely many processors. A classic algorithm for parallel
-partitioning is the \defn{Sum-and-Swap Algorithm}, which achieves
-optimal bounds of $O(n)$ work and $O(\log n)$ span
-\cite{Blelloch96,AcarBl16}. 
+on infinitely many processors. There is a well-known algorithm for
+parallel partition on arrays of size $n$ that we call the
+\defn{Standard Algorithm} with work $O(n)$ and span
+$O(\log n)$ \cite{Blelloch96,AcarBl16}. Moreover, the algorithm uses
+only exclusive read/write shared memory variables (i.e., it is an
+\defn{EREW} algorithm). This eliminates the need for concurrency
+mechanisms such as locks and atomic variables, and ensures good
+behavior even if the time to access a location is a function of the
+number of threads trying to access it (or its cache line)
+concurrently. EREW algorithms also have the advantage that their
+behavior is internally deterministic, meaning that
+the behavior of the algorithm will not differ from run to run, which
+makes test coverage, debugging, and reasoning about performance
+substantially easier \cite{BlellochFi12}.
 
-The Sum-and-Swap Algorithm has several appealing properties. The
-algorithm can be implemented in the recursive fork-join parallel
-programming model \cite{BlumofeLe99, FrigoLeRa98, AroraBlPl98,
-  BlumofeJo96, CLRS, FengLe99, Cilkmem, ForkJoin1, Forkjoin2}, and uses
-parallel for loops as its only concurrency mechanism. This means that
-the algorithm is straightforward to implement in languages such as
-Cilk \cite{FrigoLeRa98, Leiserson10, IntelCilkPlus10}, Fortress
-\cite{AllenChHa+08}, and OpenMP \cite{OpenMP08, AyguadeCoDu09}, and
-that randomized work-stealing schedulers \cite{BlumofeLe99,
-  FrigoLeRa98, AroraBlPl98, BlumofeJo96} can execute the algorithm
-with provably good parallelism.
+The Standard Algorithm suffers from using a large amount of
+auxiliary memory, however. Whereas the serial partition algorithm is typically
+implemented in place, the Standard Algorithm relies on the use of multiple
+auxiliary arrays of size $n$. To the best of our knowledge, the only
+known linear-work and $\polylog(n)$-span algorithms for
+parallel partition that are in-place require the use of atomic
+operations (e.g, fetch-and-add)
+\cite{HeidelbergerNo90,AxtmannWi17,TsigasZh03}.
 
-Additionally, the Sum-and-Swap Algorithm is \defn{race-free}
-\cite{FengLe99, NetzerMi92}, meaning that whenever a processor $p$ is
-writing to a memory address, it is guaranteed that no other processor
-$p'$ is trying to concurrently read or write the same address. In
-addition to being an appealing theoretical property, being race-free
-ensures that every program execution on a given input performs the
-same set of operations, regardless of scheduling, which makes test
-coverage, debugging, and reasoning about performance substantially
-easier \cite{BlellochFi12}.
+An algorithm's memory efficiency can be critical on large inputs. The
+memory consumption of an algorithm determines the largest problem size
+that can be executed in memory. Many external memory algorithms (i.e.,
+algorithms for problems too large to fit in memory) perform large
+subproblems in memory; the size of these subproblems is again
+bottlenecked by the algorithm's memory-overhead \cite{Vitter08}. In
+multi-user systems, processes with larger memory-footprints can hog
+the cache and the memory bandwidth, slowing down other processes.
 
-The Sum-and-Swap Algorithm is \emph{not} in-place, however, and
-requires large auxiliary arrays for both the Summing and Swapping
-phases of the algorithm. Additionally, the Sum-and-Swap Algorithm
-requires multiple passes over the input array, causing further cache
-inefficiency.
+For sorting algorithms, in particular, special attention to memory
+efficiency is often given. This is because (a) a user calling the sort
+function may already be using almost all of the memory in the system;
+and (b) sorting algorithms, and especially parallel sorting
+algorithms, are often bottlenecked by memory bandwidth. The latter
+property, in particular, means that any parallel sorting algorithm
+that wishes to achieve state-of-the art performance on a large
+multi-processor machine must be (at least close to) in place.
 
-\paragraph{Why Cache Efficiency Matters}
-In addition to being of theoretical interest, the problem of designing
-in-place algorithms for parallel partitioning is also of practical
-importance.
+Currently the only practical in-place parallel sorting algorithms either rely
+heavily on concurrency mechanisms such as atomic operations
+\cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03}, or abstain from
+theoretical guarantees \cite{FrancisPa92}. Parallel merge sort
+\cite{Hagerup89} was made in-place by Katajainen \cite{Katajainen93},
+but has proven too sophisticated for practical applications. Bitonic
+sort \cite{BlellochLe98} is naturally in-place, and can be practical
+in certain applications on super computers, but suffers in general
+from requiring work $\Theta(n \log^2 n)$ rather than $O(n \log
+n)$. Parallel quicksort, on the other hand, despite the many efforts
+to optimize it \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03,
+  FrancisPa92, Frias08}, has eluded any in-place EREW (or CREW\footnote{In a
+  \defn{CREW} algorithm, reads may be concurrent, but writes may
+  not. CREW stands for \emph{concurrent-read exclusive-write}.})
+algorithms due to its reliance on parallel partition.
 
-One of the most widely used applications of the partition operation is
-in sorting. In library implementations of sorting, an in-place
-algorithm is needed to handle cases where there is not enough free
-memory in the system to allocate auxiliary arrays \cite{gnu,
-  openbsd}. One consequence of this is that, even sorting
-implementations that use mergesort as their baseline algorithm often
-resort to quicksort as a backup when memory allocation fails (see,
-e.g., \cite{gnu}). But parallel quicksort requires the parallel
-partition operation, which until now has not yielded to in-place
-race-free parallel algorithms with theoretical guarantees on span.
+\paragraph{Results}
+We consider the problem of designing a theoretically efficient
+parallel-partition algorithm that also performs well in practice. All
+of the algorithms considered in this paper use only exclusive
+read/write shared variables, and can be implemented using
+CILK parallel-for-loops without any additional concurrency considerations.
 
-The problem of designing cache-efficient algorithms, in general, is
-important for practical performance. This is especially true for
-parallel algorithms, since multiple processors may share a single
-memory bus which can cause parallel algorithms to become
-memory-bandwidth limited even when their sequential counterparts were
-not (see, e.g., discussion in \cite{DeakinPrMa18, NiDME09}).
-
-\paragraph{Our Results}
-We give an in-place parallel-partition algorithm called the
+We give a simple in-place parallel-partition algorithm called the
 \defn{Smoothed Striding Algorithm}, with linear work and
 polylogarithmic span. Additionally, the algorithm exhibits provably
 optimal cache behavior up to low-order terms. In particular, if the
 input consists of $m$ cache lines, then the algorithm incurs at most
-$m(1 + o(1))$ cache misses, with high probability in $m$. The Smoothed
-Striding Algorithm is both simple and straightforward to implement,
-and has the potential to be useful in practice.
+$m(1 + o(1))$ cache misses, with high probability in $m$.
 
-We also develop a suite of techniques for transforming the
-Sum-and-Swap Algorithm into an in-place algorithm. The new algorithm,
-which we call the \defn{In-Place Sum-and-Swap Algorithm}, has work
-$O(n)$ and span $O(\log n \log \log n)$, which is within a
-$\log \log n$ factor of optimal (and better than the polylogarithmic
-span of the Smoothed Striding Algorithm). The In-Place Sum-and-Swap
-Algorithm does not exhibit optimal cache behavior, however.
+We also develop a suite of techniques for transforming the standard
+linear-space parallel partition algorithm into an in-place
+algorithm. The new algorithm called the
+\defn{Blocked-Prefix-Sum Partition Algorithm} has work $O(n)$ and span
+$O(\log n \log \log n)$, which is within a $\log \log n$ factor
+of optimal. As an immediate consequence, we also get an in-place
+quicksort algorithm with work $O(n \log n)$ and span
+$O(\log^2 n \log \log n)$. Moreover, we show that, by using the
+Blocked-Prefix-Sum Partition Algorithm as a subroutine within the
+Smoothed Striding Algorithm, one can combine the theoretical
+guarantees of the two algorithms, achieving a span of
+$O(\log n \log \log n)$, while also achieving optimal cache behavior
+up to low-order terms.
 
-Finally, by considering a hybrid of two algorithms, we are able to
-achieve the best of both worlds: we obtain a single algorithm with
-work $O(n)$, span $O(\log n \log \log n)$ (assuming a cache-line size
-of $O(1)$) and nearly optimal cache behavior. As an immediate
-consequence, we also get an in-place and cache-efficient quicksort
-algorithm with work $O(n \log n)$ and span $O(\log^2 n \log \log n)$.
+In addition to analyzing the algorithms, we experimentally evaluate
+their performances in practice. We find that an algorithm based on the
+Blocked-Prefix-Sum Partition Algorithm is able to achieve speedups over
+the standard linear-space algorithm due to increased cache
+efficiency. The Blocked-Prefix-Sum Partition Algorithm does not exhibit
+optimal cache behavior, however, and as we show in our experimental
+evaluation, the algorithm remains bottlenecked by memory
+throughput. In contrast, the cache-optimality of the Smoothed Striding
+Algorithm eliminates the memory-throughput bottleneck, allowing for
+nearly perfect scaling on many processors.
 
-Like the original Sum-and-Swap Algorithm, all of our algorithms are
-fork-join parallel, can be implemented using standard parallel for
-loops, and are race free.
+The memory-bandwidth bottleneck previously led researchers
+\cite{FrancisPa92, Frias08} to introduce the \defn{Strided
+Algorithm}, which has near optimal cache behavior in practice, but
+which exhibits theoretical guarantees only on certain random input
+arrays. The Smoothed Striding Algorithm is designed to have similar
+empirical performance to the Strided Algorithm, while achieving both
+theoretical guarantees on work/span and on cache-optimality. This is
+achieved by randomly perturbing the internal structure of the Strided
+Algorithm, and adding a recursion step that was previously not
+possible. Whereas the Strided Algorithm comes with theoretical
+guarantees only for certain inputs, the Smoothed Striding Algorithm 
+has polylogarithmic span, and exhibits provably optimal cache behavior
+up to small-order factors for all inputs. In practice, the Smoothed Striding
+Algorithm performs within 15\% of the Strided Algorithm on a large
+number of threads.
 
-\paragraph{Related Work}
-Our core algorithm, the Smoothed Striding Algorithm, borrows much of
-its basic structure from a previous algorithm, known as the
-\defn{Strided Algorithm} \cite{FrancisPa92, Frias08}. The Strided
-Algorithm has near optimal cache behavior in practice, but exhibits
-theoretical guarantees on span and cache behavior only on certain
-\emph{random} input arrays. In contrast, the Smoothed Striding
-Algorithm achieves theoretical guarantees on all of work, span, and
-cache-optimality. This is achieved by randomly perturbing the internal
-structure of the Strided Algorithm, and adding a recursion step that
-was previously not possible. These random perturbations are
-reminiscent of smoothed analysis \cite{Smoothed1, Smoothed2,
-  Smoothed3, Smoothed4, Smoothed5, Smoothed6}, hence of the name of our
-algorithm. However, whereas classical smoothed analysis is performed
-by randomly perturbing the \emph{input} to an algorithm, and then
-analyzing the performance on the perturbed input, our application
-instead randomly perturbs the \emph{algorithm}, and analyzes the
-algorithm on a worst-case input.
-
-In addition to theoretical work, there has been substantial empirical
-work on developing efficient implementations of parallel partitions
-\cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03, FrancisPa92,
-  Frias08}. Often, practical implementations of parallel partition
-leverage concurrency mechanisms such as locks or atomic operations
-(see, e.g., \cite{HeidelbergerNo90,AxtmannWi17,TsigasZh03}). Such
-mechanisms have the benefit of offering substantial additional power
-to the programmer, but also have several drawbacks, making it
-difficult to reason about the scalability of an algorithm, the
-performance of the underlying scheduler, and the interactions between
-caches (e.g., elements of one processor's cache being invalidated due
-to writes in another).
-
-The parallel partition problem is closely related to parallel
-sorting. Currently the only practical in-place parallel sorting
-algorithms either rely heavily on concurrency mechanisms such as
-atomic operations \cite{HeidelbergerNo90, AxtmannWi17, TsigasZh03}, or
-abstain from theoretical guarantees \cite{FrancisPa92}. Parallel merge
-sort \cite{Hagerup89} was made in-place by Katajainen
-\cite{Katajainen93}, but has proven too sophisticated for practical
-applications. Bitonic sort \cite{BlellochLe98} is naturally in-place,
-and can be practical in certain applications on super computers, but
-suffers in general from requiring work $\Theta(n \log^2 n)$ rather
-than $O(n \log n)$. Parallel quicksort, on the other hand, despite the
-many efforts to optimize it \cite{HeidelbergerNo90, AxtmannWi17,
-  TsigasZh03, FrancisPa92, Frias08}, has eluded any in-place race-free
-algorithms due to its reliance on parallel partition. Our algorithms
-suggest one natural (and potentially practical) way to make parallel
-quicksort in-place.
-
-The general problem of designing parallel algorithms with good cache
-behavior has been studied for many problems
-\cite{blelloch2020improved, ParallelCacheAlg1, ParallelCacheAlg2,
-  ParallelCacheAlg3, ParallelCacheAlg4, ParallelCacheAlg5,
-  ParallelCacheAlg6} besides parallel partition. The problem is also
-closely related to the study of of parallel algorithms on asymmetric
-and persistent memories (see, e.g.,
-\cite{blelloch2018parallel,ben2016parallel,blelloch2015sorting,gu2018survey,blelloch2018parallel2},
-or the survey by Gu \cite{gu2018survey}), and exploring parallel
-partition further in these contexts is an interesting direction for
-future work.
-
-
-% \paragraph{Outline} We begin in Section \ref{secprelim} by
-% discussing background on parallel algorithms and the Parallel
-% Partition Problem. In Section~\ref{sec:recursiveSmoothedStriding}
-% we present the Smoothed Striding Algorithm and analyze a simple
-% version of the Smoothed Striding Algorithm which recursively
-% calls itself: the Recursive Smoothed Striding Algorithm. In
-% Section \ref{sec:blockedprefixsumpartitionalg} we present and
-% analyze the Blocked-Prefix-Sum Partition Algorithm. The
-% Blocked-Prefix-Sum Partition Algorithm achieves a nearly optimal
-% span of $O(\log n \log \log n)$ but is not cache-optimal. In
-% Section~\ref{sec:hybridSmoothedStriding} we show that by using
-% the Blocked-Prefix-Sum Partition Algorithm as a subroutine within
-% the Smoothed Striding Algorithm we get an algorithm that
-% simultaneously attains provably optimal cache behavior and span
-% $O(\log n \log \log n)$.
+\paragraph{Outline} We begin in Section \ref{secprelim} by
+discussing background on parallel algorithms and the Parallel
+Partition Problem. In Section~\ref{sec:recursiveSmoothedStriding}
+we present the Smoothed Striding Algorithm and analyze a simple
+version of the Smoothed Striding Algorithm which recursively
+calls itself: the Recursive Smoothed Striding Algorithm. In
+Section \ref{sec:blockedprefixsumpartitionalg} we present and
+analyze the Blocked-Prefix-Sum Partition Algorithm. The
+Blocked-Prefix-Sum Partition Algorithm achieves a nearly optimal
+span of $O(\log n \log \log n)$ but is not cache-optimal. In
+Section~\ref{sec:hybridSmoothedStriding} we show that by using
+the Blocked-Prefix-Sum Partition Algorithm as a subroutine within
+the Smoothed Striding Algorithm we get an algorithm that
+simultaneously attains provably optimal cache behavior and span
+$O(\log n \log \log n)$. In Appendix~\ref{secexp} we
+experimentally evaluate the performance of implements of the
+algorithms from this paper, along with the Strided Algorithm and
+the Standard Algorithm. Finally, we conclude with open questions
+in Section \ref{sec:open}. Figures and pseudocode are included in
+Appendices \ref{sec:figures} and \ref{sec:pseudocode}.
 
 \section{Preliminaries}\label{secprelim}
 
 We begin by describing the parallelism and memory model used in
 the paper, and by presenting background on the parallel partition problem.
 
-\paragraph{Fork-Join Parallelism} In this paper we study parallel programs
-in the recursive fork-join programming model \cite{BlumofeLe99,
-  FrigoLeRa98, AroraBlPl98, BlumofeJo96, CLRS, FengLe99, Cilkmem,
-  ForkJoin1, Forkjoin2}. Following conventions similar to past work
-\cite{Blelloch96,AcarBl16,CLRS}, we express the parallelism of our
-algorithms in terms of \defn{parallel-for-loops}; function calls
-within the inner loop then allow for more complicated recursive
-fork-join parallel structures. Our algorithms can also be implemented
-in the CREW PRAM model \cite{Blelloch96, AcarBl16}.
+\paragraph{Workflow Model} We consider a simple language-based model of
+parallelism in which algorithms achieve parallelism through the use of
+\defn{parallel-for-loops} (see, e.g.,
+\cite{Blelloch96,AcarBl16,CLRS}); function calls within the inner loop
+then allow for more complicated parallel structures (e.g., recursion). Our
+algorithms can also be implemented in the PRAM model \cite{Blelloch96,
+AcarBl16}.
 
 Formally, a parallel-for-loop is given a range size $R \in \mathbb{N}$, a
 constant number of arguments $\arg_1, \arg_2, \ldots, \arg_c$, and a
@@ -342,89 +303,42 @@ constant factor \cite{BlumofeJo96,BlumofeLe99}, with the added
 caveat that parallel-for-loops typically induce an additional
 additive overhead of $O(\log R)$. 
 
-\paragraph{Race-Free Algorithms}
-In this paper, we require algorithms to be \defn{race free}, meaning
-that no processor $p$ ever reads/writes a memory address being
-concurrently written by another processor $p'$. Note that processors
-are not in lockstep (i.e., they may progress at arbitrary different
-speeds), and the property of being race-free must hold for any
-possible parallel execution.
+\paragraph{Memory Model}
+Memory is \defn{exclusive-read} and \defn{exclusive-write}. That is,
+no two threads are ever permitted to attempt to read or write to the
+same variable concurrently.  The exclusive-read exclusive-write memory
+model is sometime referred to as the \defn{EREW model} (see, e.g.,
+\cite{Hagerup89}). 
+Note that threads are not in lockstep (i.e., they may progress at arbitrary
+different speeds), and thus the EREW model requires algorithms to be data-race
+free in order to avoid the possibility of non-exclusive data accesses.
 
-\paragraph{In-Place Algorithms}
-In order for an algorithm to be in-place, it must not rely on large
-auxiliary arrays. Formally, in an in-place algorithm, each thread is
-given $O(\polylog n)$ memory upon creation that is deallocated when
-the thread dies.\footnote{Note that $\Omega(\log n)$ memory is
-  necessary just for a thread to store its stack in a
-  divide-and-conquer recursion.} This memory can be shared with other
-threads via pointers.
+In an \defn{in-place} algorithm, each thread is given $O(\polylog n)$
+memory upon creation that is deallocated when the thread dies. This
+memory can be shared with the thread's children. However, the depth of
+the parent-child tree is not permitted to exceed $O(\polylog n)$.
 
-\paragraph{Modeling Cache Behavior}
-For sequential algorithms, cache behavior can be modeled using the
-\defn{External Memory Model} \cite{Vitter08, AggarwalVi88}. The
-External Memory Model (sometimes also called the Disk-Access Model)
-treats memory as consisting of $M$ fixed-size cache lines, each of
-some size $b$. A cache miss occurs in a cache whenever the line being
-accessed is not currently in cache, in which case some other line is
-evicted from cache to make room for the new entry\footnote{As is
-  standard, we will make the simplifying assumption that all
-  fixed-size (i.e., non-array) local variables are automatically in
-  cache. Under this simplifying assumption, cache misses can only
-  occur when accessing addresses not in the current stack frame.}. In
-this paper, we allow for the program to control the eviction
-strategy. This assumption is justified by the fact that standard
-eviction strategies such as LRU, coupled with $\omega(1)$ resource
-augmentation, are $(1 + o(1))$-competitive with the optimal eviction
-strategy \cite{SleatorTa85}.
+Whereas the EREW memory model prohibits concurrent accesses to memory,
+on the other side of the spectrum are CRCW
+(concurrent-read-concurrent-write) models, which allow for both reads
+and writes to be performed concurrently (and in some variants even
+allow for atomic operations)
+\cite{Blelloch96,AcarBl16,MatiasVi95}. One approach to designing
+efficient EREW algorithms is to simulate efficient CRCW algorithms in
+the EREW model \cite{MatiasVi95}. The known simulation techniques
+require substantial space overhead, however, preventing the design of
+in-place algorithms \cite{MatiasVi95}.\footnote{The known simulation
+  techniques also increase the total work in the original algorithm,
+  although this can be acceptable if only a small number of atomic
+  operations need to be simulated.}
 
-A natural approach to analyzing the cache behavior of a
-\emph{parallel} algorithm (see, e.g., \cite{ParallelCacheAlg2}) is to
-analyze the behavior of a \emph{serial execution} of the algorithm in
-the External Memory Model (see, e.g., \cite{ParallelCacheAlg2}). In
-this paper, we take a slightly more fine-grained approach to measuring
-the cache performance. In particular, we explicitly model the
-behavior of each processor's cache.
-
-We assume that threads are scheduled using work stealing
-\cite{AcarBl00, BlumofeLe99, FrigoLeRa98, AroraBlPl98, BlumofeJo96},
-and that the work-stealing itself has no cache-miss overhead. We
-further assume that \emph{each} processor has a cache of size
-$M = \polylog n$ (for a polylog of our choice) that is analyzed using
-the External Memory Model.
-
-In order to keep our analysis of cache misses independent of the
-number of processors, we will ignore the cost of warming up each
-processor's cache (i.e., the first $M$ cache misses in each cache are
-free).  All subsequent cache misses are counted, however, including
-any cache misses necessary to warm up the cache after a
-steal.\footnote{We continue to follow the convention that local
-  variables, such as those passed to a thread via the arguments of a
-  parallel for loop or function, do not incur cache misses, however.}
-Finally, if a processor $p$ writes to a cache line, then the cache
-line is automatically invalidated in (i.e., removed from) all other
-processors' caches.
-
-% Whereas the EREW memory model prohibits concurrent accesses to memory,
-% on the other side of the spectrum are CRCW
-% (concurrent-read-concurrent-write) models, which allow for both reads
-% and writes to be performed concurrently (and in some variants even
-% allow for atomic operations)
-% \cite{Blelloch96,AcarBl16,MatiasVi95}. One approach to designing
-% efficient EREW algorithms is to simulate efficient CRCW algorithms in
-% the EREW model \cite{MatiasVi95}. The known simulation techniques
-% require substantial space overhead, however, preventing the design of
-% in-place algorithms \cite{MatiasVi95}.\footnote{The known simulation
-%   techniques also increase the total work in the original algorithm,
-%   although this can be acceptable if only a small number of atomic
-%   operations need to be simulated.}
-
-% In addition to being the first in-place and polylogarithmic-span EREW
-% algorithms for the parallel-partition problem, our algorithms are also
-% the first such CREW algorithms. In a \defn{CREW} algorithm, reads may
-% be concurrent, but writes may not -- CREW stands for
-% \emph{concurrent-read exclusive-write}. In practice, the important
-% property of our algorithms is that they avoid concurrent writes (which
-% can lead to non-determinacy and cache ping-pong effects).
+In addition to being the first in-place and polylogarithmic-span EREW
+algorithms for the parallel-partition problem, our algorithms are also
+the first such CREW algorithms. In a \defn{CREW} algorithm, reads may
+be concurrent, but writes may not -- CREW stands for
+\emph{concurrent-read exclusive-write}. In practice, the important
+property of our algorithms is that they avoid concurrent writes (which
+can lead to non-determinacy and cache ping-pong effects).
 
 %% HERE: Is where we can talk about the more powerful alternative to EREW, and there relationship, and why we can't just simulate CRCW (or, more importantly, ERCW). Make it clear that the Exclusive Read part is not actually very important -- it's the exclusive write part that's hard.
 
@@ -444,42 +358,40 @@ behavior of the parallel partition is to reorder the elements in the
 array $A$ so that the predecessors appear before the successors. Note
 that, in this paper, we will always treat arrays as 1-indexed.
 
-\paragraph{The Sum-and-Swap Algorithm} The Sum-and-Swap Algorithm for
-parallel partitioning consists of two phases \cite{Blelloch96,AcarBl16}:
+\paragraph{The (Standard) Linear-Space Parallel Partition} The linear-space
+implementation of parallel partition consists of two phases
+\cite{Blelloch96,AcarBl16}:
 
-\noindent\emph{The Sum Phase: }In this phase, the algorithm first
-creates an array $D$ whose $i$-th element $D[i] = \dec(A[i])$. Then
-the algorithm constructs an array $S$ whose $i$-th element
-$S[i] = \sum_{j = 1}^i D[i]$ is the number of predecessors in the
-first $i$ elements of $A$. The transformation from $D$ to $S$ is
-called a \defn{parallel prefix sum} and can be performed with $O(n)$
-work and $O(\log n)$ span using a simple recursive algorithm: (1)
-First construct an array $D'$ of size $n / 2$ with
-$D'[i] = D[2i - 1] + D[2i]$; (2) Recursively construct a parallel
-prefix sum $S'$ of $D'$; (3) Build $S$ by setting each
-$S[i] = S'[\lfloor i / 2 \rfloor] + A[i]$ for odd $i>1$ and
-$S[i] = S'[i / 2]$ for even $i$, and $S[1] = A[1]$.
+\noindent\emph{The Parallel-Prefix Phase: }In this phase, the algorithm first
+creates an array $D$ whose $i$-th element $D[i] = \dec(A[i])$. Then the
+algorithm constructs an array $S$ whose $i$-th element $S[i] = \sum_{j = 1}^i
+D[i]$ is the number of predecessors in the first $i$ elements of $A$. The
+transformation from $D$ to $S$ is called a \defn{parallel prefix sum} and can
+be performed with $O(n)$ work and $O(\log n)$ span using a simple recursive
+algorithm: (1) First construct an array $D'$ of size $n / 2$ with $D'[i] = D[2i
+- 1] + D[2i]$; (2) Recursively construct a parallel prefix sum $S'$ of $D'$;
+(3) Build $S$ by setting each $S[i] = S'[\lfloor i / 2 \rfloor] + A[i]$ for odd
+$i>1$ and $S[i] = S'[i / 2]$ for even $i$, and $S[1] = A[1]$. 
 
-\noindent\emph{The Swap Phase: }In this phase, the algorithm constructs
-an output-array $C$ by placing each predecessor $A[i] \in A$ in
-position $S[i]$ of $C$. If there are $t$ predecessors in $A$, then the
-first $t$ elements of $C$ will now contain those $t$ predecessors in
-the same order that they appear in $A$. The algorithm then places each
-successor $A[i] \in A$ in position $t + i - S[i]$. Since $i - S[i]$ is
-the number of successors in the first $i$ elements of $A$, this places
-the successors in $C$ in the same order that they appear in
-$A$. Finally, the algorithm copies $C$ into $A$, completing the
+\noindent\emph{The Reordering Phase: }In this phase, the algorithm constructs
+an output-array $C$ by placing each predecessor $A[i] \in A$ in position $S[i]$
+of $C$. If there are $t$ predecessors in $A$, then the first $t$ elements of
+$C$ will now contain those $t$ predecessors in the same order that they appear
+in $A$. The algorithm then places each successor $A[i] \in A$ in position $t +
+i - S[i]$. Since $i - S[i]$ is the number of successors in the first $i$
+elements of $A$, this places the successors in $C$ in the same order that they
+appear in $A$. Finally, the algorithm copies $C$ into $A$, completing the
 parallel partition.
 
 Both phases can be implemented with $O(n)$ work and $O(\log n)$
 span. Like its serial out-of-place counterpart, the algorithm is
-stable but not in place. The algorithm uses multiple auxiliary arrays
-of size $n$ (one in each phase). Kiu, Knowles, and Davis
-\cite{LiuKn05} were able to reduce the extra space consumption to
-$n + p$ under the assumption that the number of processors $p$ is
-hard-coded; their algorithm breaks the array $A$ into $p$ parts and
-assigns one part to each thread. Reducing the extra space below $o(n)$
-has remained open until now, even when the number of threads is fixed.
+stable but not in place. The algorithm uses multiple auxiliary arrays of
+size $n$. Kiu, Knowles, and Davis \cite{LiuKn05} were able to reduce
+the extra space consumption to $n + p$ under the assumption that the
+number of processors $p$ is hard-coded; their algorithm breaks the
+array $A$ into $p$ parts and assigns one part to each thread. Reducing
+the extra space below $o(n)$ has remained open until now, even when the
+number of threads is fixed.
 
 \section{A Cache-Efficient Parallel Partition}
 \label{sec:recursiveSmoothedStriding}
@@ -493,6 +405,57 @@ moment in the execution never exceeds $\polylog n$ per active
 worker. In this section we also analyze a version of the Smoothed
 Striding Algorithm, called the Recursive Smoothed Striding
 Algorithm, that is remarkably simple.
+
+\paragraph{Modeling Cache Misses}
+We treat memory as consisting of fixed-size cache lines, each of some
+size $b$. Each processor is assumed to have a small cache of
+$\polylog(n)$ cache lines.  A cache miss occurs on a
+processor when the line being accessed is not currently in cache, in
+which case some other line is evicted from cache to make room for the
+new entry.  Each cache is managed with a LRU (Least Recently Used)
+eviction policy.
+
+We assume that threads are scheduled using work stealing \cite{AcarBl00},
+and that the work-stealing itself has no cache-miss overhead. Note
+that caches belong to processors, not threads, meaning that when a
+processor takes a new thread (i.e., performs work stealing), the
+processor's cache contents are a function of what the processor was
+previously executing. In order to keep our analysis of cache misses
+independent of the number of processors, we will ignore the cost of
+warming up each processor's cache. In particular, if there are
+$\polylog n$ global variables that each processor must access many
+times, we do not consider the initial $p \cdot \polylog n$ cost of
+loading those global variables into the caches (where $p$ is the
+number of processors). In practice, $p \ll n$ on large inputs, making
+the cost of warming up caches negligible.
+
+Although each cache is managed with LRU eviction, we may assume
+for the sake of analysis that each cache is managed by the optimal
+off-line eviction strategy OPT (i.e. Furthest in the Future). This is
+because, up to resource augmentation, LRU eviction is $(1 + 1/\polylog
+n)$-competitive with OPT. Formally this is due to the following
+theorem by Sleator and Tarjan\cite{SleatorTa85}:
+\begin{theorem}
+  LRU operating on a cache of size $K\cdot M$ for some $K>1$ will incur at most
+  $1+\frac{1}{K-1}$ times the number of times cache misses of OPT operating on
+  a cache of size $M$, for the same series of memory accesses.
+  \label{thm:augmentation}
+\end{theorem}
+
+Recall that each processor has a cache of size $\log^c n$ for $c$ a
+constant of our choice.  Up to changes in $c$ LRU incurs no more than
+a $1+\frac{1}{\polylog(n)}$ factor more cache misses
+than OPT incurs. Thus, up to a $1 + \frac{1}{\polylog(n)}$
+multiplicative change in cache misses, and a $\polylog(n)$ factor change in
+cache size, we may assume without loss of generality that cache
+eviction is performed by OPT.
+
+Because each processor's cache is managed by OPT (without loss of
+generality), we can assume that each processor \defn{pins} certain
+small arrays to cache (i.e., the elements of those arrays are never
+evicted). In fact, this is the only property of OPT we will use; that
+is, our analyses will treat non-pinned contents of the cache as being
+managed via LRU.
 
 \paragraph{The Strided Algorithm \cite{FrancisPa92}}
 The Smoothed Striding Algorithm borrows several structural ideas
@@ -508,9 +471,8 @@ Algorithm by randomly perturbing the internal structure of the
 original algorithm; in doing so, we are able to provide provable
 performance guarantees for arbitrary inputs, and to add a
 recursion step that was previously impossible. \\
-The \defn{Strided Algorithm} consists of two steps:
-
-\noindent\emph{The Partial Partition Step: }
+The \defn{Strided Algorithm} consists of two steps: \\
+\textbf{The Partial Partition Step.} \\ 
 Let $g \in \mathbb{N}$ be a parameter, and assume for simplicity
 that $gb \mid n$. Logically partition the array $A$ into
 $\frac{n}{gb}$ chunks $C_1, \ldots, C_{n / gb}$, each consisting
@@ -519,17 +481,16 @@ define $P_i$ to consist of the $i$-th cache line from each of the
 chunks $C_1, \ldots, C_{n / gb}$. The $P_i$'s 
 form a strided partition of array $A$, since consecutive cache
 lines in $P_i$ are always separated by a fixed stride of $g - 1$
-other cache lines.
+other cache lines.\\
 The first step of the Strided Algorithm is to perform an in-place
 serial partition on each of the $P_i$'s, rearranging the elements
 within the $P_i$ so that the predecessors come first. This step
-requires work $\Theta(n)$ and span $\Theta(n/g)$.
-
-\noindent\emph{The Serial Cleanup Step: } For each $P_i$, define the
+requires work $\Theta(n)$ and span $\Theta(n/g)$.\\
+\textbf{The Serial Cleanup Step.} \\ For each $P_i$, define the
 \defn{splitting position} $v_i$ to be the position in $A$ of the
 first successor in (the already partitioned) $P_i$. Define
 $v_{\text{min}} = \min\{v_1, \ldots, v_{g}\}$ and define
-$v_{\text{max}} = \max\{v_1, \ldots, v_{g}\}$. 
+$v_{\text{max}} = \max\{v_1, \ldots, v_{g}\}$. \\
 The second step of the Strided Algorithm is to 
 partition the sub-array ${A[v_{\text{min}}],\ldots,
 A[v_{\text{max}}-1]}$ in serial. This step has no parallelism, and thus has
@@ -631,21 +592,22 @@ n/(gb)$. \footnote{This assumption can be made without loss of
   meaning they do not physically exist or reside in memory.
 }
 
-In the \defn{Partial Partition Step} the algorithm divides the
+In the \defn{Partial Partition Step} the algorithm partitions the
 cache lines of $A$ into $g$ sets $U_1, \ldots, U_{g}$ where each
 $U_i$ contains $s$ cache lines, and then performs a serial
-partition on each $U_i$ in parallel over the $U_i$'s. To
-determine the sets $U_1, \ldots, U_{g}$, the algorithm uses as
+partition on each $U_i$ in parallel over the $U_i$'s. 
+To determine the sets $U_1, \ldots, U_{g}$, the algorithm uses as
 metadata an array $X = X[1], \ldots, X[s]$, where each $X[i] \in
-\{1, \ldots, g\}$; in particular each of $X[1], \ldots, X[s]$ is
-a uniformly random and independently selected element of $\{1, 2,
-\ldots, g\}$. For each $i \in \{1, 2, \ldots, g\}$, $j \in \{1,
-2, \ldots, s\}$, define $$G_i(j) = (X[j] + i \pmod g) + (j - 1)g
-+ 1.$$ Using this terminology, we define each $U_i$ for $i \in
-\{1, \ldots, g\}$ to contain the $G_i(j)$-th cache line of $A$
-for each $j \in \{1, 2, \ldots, s\}$. That is, $G_i(j)$ denotes
-the index of the $j$-th cache line from array $A$ contained in
-$U_i$.
+\{1, \ldots, g\}$. In particular the algorithm does the following:
+
+Set each of $X[1], \ldots, X[s]$ to be uniformly random and
+independently selected elements of $\{1, 2, \ldots, g\}$. For each $i \in
+\{1, 2, \ldots, g\}$, $j \in \{1, 2, \ldots, s\}$, define
+$$G_i(j) = (X[j] + i \pmod g) + (j - 1)g + 1.$$ Using this
+terminology, we define each $U_i$ for $i \in \{1, \ldots, g\}$ to
+contain the $G_i(j)$-th cache line of $A$ for each $j \in \{1, 2,
+\ldots, s\}$. That is, $G_i(j)$ denotes the index of the $j$-th
+cache line from array $A$ contained in $U_i$.
 
 Note that, to compute the index of the $j$-th cache line in $U_i$,
 one needs only the value of $X[j]$. Thus the only metadata needed by
@@ -719,22 +681,18 @@ Since $\sum_i |U_i| = n$, and since the serial partitioning of each $U_i$
 takes time $O(|U_i|)$, the total work performed by the algorithm is
 $O(n)$.
 
-To analyze cache misses, we assume without loss of generality that
-array $X$ is pinned in each processor's cache (note, in particular,
-that $|X| = s \le \polylog(n)$, and so $X$ fits in cache), and that
-$X$ is loaded into each processor's cache as the cache is warmed
-up. Thus we can ignore the cost of accesses to $X$, and treat all
-other accesses as being in a $\polylog n$ cache managed using
-LRU.
-
-Note that each $U_i$ consists of $s = \polylog n$ cache lines,
-meaning that each $U_i$ fits entirely in cache. Thus the number of
-cache misses needed for a thread to partition a given $U_i$ is just
-$s$. Since there are $g$ of the $U_i's$, the total number of cache
-misses incurred in partitioning all of the $U_i$'s is $g s =
-n/b$. Besides these, there are $s/b$ cache misses for instantiating
-the array $X$; and $O(1)$ cache misses for other instantiating
-costs. This sums to $$\frac{n+s}{b}+O(1).$$
+To analyze cache misses, we assume without loss of generality
+that array $X$ is pinned in each processor's cache (note, in
+particular, that $|X| = s \le \polylog(n)$, and so $X$ fits in
+cache). Thus we can ignore the cost of accesses to $X$. Note that
+each $U_i$ consists of $s = \polylog n$ cache lines, meaning that
+each $U_i$ fits entirely in cache. Thus the number of cache
+misses needed for a thread to partition a given $U_i$ is just
+$s$. Since there are $g$ of the $U_i's$, the total number of
+cache misses incurred in partitioning all of the $U_i$'s is $g s
+= n/b$. Besides these, there are $s/b$ cache misses for
+instantiating the array $X$; and $O(1)$ cache misses for other
+instantiating costs. This sums to $$\frac{n+s}{b}+O(1).$$
 
 The span of the algorithm is $O(n/g + s) = O(b\cdot s)$, since the
 each $U_i$ is of size $O(n / g)$, and because the initialization of
@@ -806,18 +764,13 @@ that $v_{\text{max}} - v_{\text{min}} \le 4n\delta$.
   $$s\mu_i g b - gb + 1 \le v_i \le s\mu_i g b + gb.$$ Since $sgb = n$, 
   it follows that $|v_i - n \mu_i| \le gb$. Therefore,
   $$|v_i - n \mu| < gb + n\delta.$$
-  This implies that the maximum of $|v_i - v_j|$ for
+  This
+implies that the maximum of $|v_i - v_j|$ for
 any $i$ and $j$ is at most, $2bg + 2\delta n$. Thus,
-
-$$v_{\text{max}} - v_{\text{min}} \le 2n \left( \delta +
-\frac{bg}{n} \right)  = 2n \left( \delta + 1/s \right) \le
-2n \left(\delta + \frac{\delta^2}{\ln (n / \epsilon)}\right) <
-4n\cdot\delta.$$
-
-% \begin{align*}
-%   v_{\text{max}} - v_{\text{min}} & \le 2n \left( \delta + \frac{bg}{n} \right)  = 2n \left( \delta + 1/s \right) \\
-%   & \le 2n \left(\delta + \frac{\delta^2}{\ln (n / \epsilon)}\right) < 4n\cdot\delta.
-% \end{align*}
+\begin{align*}
+  v_{\text{max}} - v_{\text{min}} & \le 2n \left( \delta + \frac{bg}{n} \right)  = 2n \left( \delta + 1/s \right) \\
+  & \le 2n \left(\delta + \frac{\delta^2}{\ln (n / \epsilon)}\right) < 4n\cdot\delta.
+\end{align*}
 \end{proof}
 
 We use Proposition~\ref{prop:generalResult} as a tool to analyze
@@ -930,20 +883,20 @@ Smoothed Striding algorithm occurs at $\delta = 1 / \sqrt{\log n}$.
 \label{sec:blockedprefixsumpartitionalg}
 
 In this section, we present an in-place algorithm, called the
-\defn{In-Place Sum-and-Swap Algorithm}, for parallel
+\defn{Blocked-Prefix-Sum Partition Algorithm}, for parallel
 partition with span $O(\log n \log \log n)$. Each thread in the
 algorithm requires memory at most $O(\log n)$. 
 
 In addition to being theoretically interesting on its own, the
-In-Place Sum-and-Swap Algorithm is useful as a subroutine in the
-Smoothed Striding Algorithm. The In-Place Sum-and-Swap Algorithm
-has poor cache behavior, and so performs somewhat poorly in
-practice. However, using it as a subroutine on a small subproblem
-in the Smoothed Striding Algorithm allows the Smoothed Striding
-Algorithm to achieve span $O(\log n \log\log n)$ without
-sacrificing its cache behavior; we discuss this in detail in
-Section~\ref{sec:hybridSmoothedStriding}. We now describe the
-In-Place Sum-and-Swap Algorithm. 
+Blocked-Prefix-Sum Partition Algorithm is useful as a subroutine
+in the Smoothed Striding Algorithm. The Blocked-Prefix-Sum
+Partition Algorithm has poor cache behavior, and so performs
+somewhat poorly in practice. However, using it as a subroutine on
+a small subproblem in the Smoothed Striding Algorithm allows
+the Smoothed Striding Algorithm to achieve span $O(\log n
+\log\log n)$ without sacrificing its cache behavior; we discuss
+this in detail in Section~\ref{sec:hybridSmoothedStriding}. We now
+describe the Blocked-Prefix-Sum Partition Algorithm. 
 
 Prior to beginning the algorithm, the first implicit step of the
 algorithm is to count the number of predecessors in the array, in
@@ -1337,12 +1290,13 @@ phase. Lemma \ref{lem:bitstore2} can therefore used in place of Lemma
 In this section we analyze the \defn{Hybrid Smoothed Striding
 Algorithm}, which, after the Partial Partition Step of the
 Smoothed Strided Algorithm, partitions the sub-array using the
-In-Place Sum-and-Swap Algorithm. We show that doing so results in
-an improved span (since the In-Place Sum-and-Swap Algorithm has
-span only $O(\log n \log \log n)$), while still incurring only
-$(1 + o(1))n/b$ cache misses (since the cache-inefficient
-In-Place Sum-and-Swap Algorithm is only used on a small subarray
-of $A$). 
+Blocked-Prefix-Sum Partition Algorithm. We show that doing so
+results in an improved span (since the Blocked-Prefix-Sum
+Partition Algorithm has span only $O(\log n \log \log n)$), while
+still incurring only $(1 + o(1))n/b$ cache misses (since the
+cache-inefficient algorithm from Section
+\ref{sec:blockedprefixsumpartitionalg} is only used on a small
+subarray of $A$). 
 
 We now analyze the Hybrid Smoothed Striding Algorithm. We prove
 the following theorem:
@@ -1429,23 +1383,21 @@ mechanisms tend to scale more reliably (and with less dependency on
 the particulars of the underlying hardware).
 
 In this paper, we have shown that, somewhat surprisingly, one can
-adapt the classic parallel algorithm to completely eliminate the
-use of auxiliary memory, while still using only exclusive
-read/write shared variables, and maintaining a polylogarithmic
-span. Although the superior cache performance of the low-space
-algorithm results in practical speedups over its out-of-place
-counterpart, both algorithms remain far from the state-of-the art
-due to memory bandwidth bottlenecks. To close this gap, we also
+adapt the classic parallel algorithm to completely eliminate the use
+of auxiliary memory, while still using only exclusive read/write
+shared variables, and maintaining a polylogarithmic span. Although the
+superior cache performance of the low-space algorithm results in
+practical speedups over its out-of-place counterpart, both algorithms
+remain far from the state-of-the art due to memory bandwidth bottlenecks. To close this gap, we also
 presented a second in-place algorithm, the Smoothed Striding
 Algorithm, which achieves polylogarithmic span while guaranteeing
 provably optimal cache performance up to low-order factors. The
-Smoothed Striding Algorithm introduces randomization techniques
-to the previous (blocked) Striding Algorithm of \cite{Frias08,
-FrancisPa92}, which was known to perform well in practice but
-which previously exhibited poor theoretical guarantees. Our
-implementation of the Smoothed Striding Algorithm is fully
-in-place, exhibits polylogarithmic span, and has optimal cache
-performance.
+Smoothed Striding Algorithm introduces randomization techniques to the
+previous (blocked) Striding Algorithm of \cite{Frias08, FrancisPa92},
+which was known to perform well in practice but which previously
+exhibited poor theoretical guarantees. Our implementation of the
+Smoothed Striding Algorithm is fully in-place, exhibits
+polylogarithmic span, and has optimal cache performance.
 
 Our work prompts several theoretical questions. Can fast
 space-efficient algorithms with polylogarithmic span be found for
@@ -1472,350 +1424,350 @@ future work.
 
 \appendix
 
-% \section{Performance Comparisons}\label{secexp}
+\section{Performance Comparisons}\label{secexp}
 
-% In this section, we implement the techniques from
-% Section~\ref{sec:blockedprefixsumpartitionalg} and 
-% Section~\ref{sec:recursiveSmoothedStriding} to build space-efficient and
-% in-place parallel-partition functions.
+In this section, we implement the techniques from
+Section~\ref{sec:blockedprefixsumpartitionalg} and 
+Section~\ref{sec:recursiveSmoothedStriding} to build space-efficient and
+in-place parallel-partition functions.
 
-% Each implementation considers an array of $n$ 64-bit integers, and
-% partitions them based on a pivot. The integers in the array are
-% initially generated so that each is randomly either larger or smaller
-% than the pivot.
+Each implementation considers an array of $n$ 64-bit integers, and
+partitions them based on a pivot. The integers in the array are
+initially generated so that each is randomly either larger or smaller
+than the pivot.
 
-% In Subsection~\ref{subsecclassic}, we evaluate the techniques in
-% Section~\ref{sec:blockedprefixsumpartitionalg} for transforming the standard
-% parallel-prefix-based partition algorithm into an in-place
-% algorithm. We compare the performance of three parallel-partition
-% implementations: (1) The \defn{high-space} implementation which
-% follows the standard parallel-partition algorithm exactly; (2) a
-% \defn{medium-space} implementation which reduces the space used for
-% the Parallel-Prefix phase; and (3) a \defn{low-space} implementation
-% which further eliminates the auxiliary space used in the Reordering
-% phase of the algorithm. The low-space implementation still uses a
-% small amount of auxiliary memory for the parallel-prefix, storing
-% every $O(\log n)$-th element of the parallel-prefix array explicitly
-% rather than using the implicit-storage approach in Section~\ref{sec:blockedprefixsumpartitionalg}. 
-% Nonetheless the space consumption is several orders of
-% magnitude smaller than the original algorithm.
+In Subsection~\ref{subsecclassic}, we evaluate the techniques in
+Section~\ref{sec:blockedprefixsumpartitionalg} for transforming the standard
+parallel-prefix-based partition algorithm into an in-place
+algorithm. We compare the performance of three parallel-partition
+implementations: (1) The \defn{high-space} implementation which
+follows the standard parallel-partition algorithm exactly; (2) a
+\defn{medium-space} implementation which reduces the space used for
+the Parallel-Prefix phase; and (3) a \defn{low-space} implementation
+which further eliminates the auxiliary space used in the Reordering
+phase of the algorithm. The low-space implementation still uses a
+small amount of auxiliary memory for the parallel-prefix, storing
+every $O(\log n)$-th element of the parallel-prefix array explicitly
+rather than using the implicit-storage approach in Section~\ref{sec:blockedprefixsumpartitionalg}. 
+Nonetheless the space consumption is several orders of
+magnitude smaller than the original algorithm.
 
-% In addition to achieving a space-reduction, the better cache-behavior
-% of the low-space implementation allows for it to achieve a speed
-% advantage over its peers, in some cases completing roughly twice as
-% fast as the medium-space implementation and four times as fast as the
-% low-space implementation. We show that all three implementations are
-% bottlenecked by memory throughput, however, suggesting that the cache-optimal Smoothed Striding Algorithm can do better.
+In addition to achieving a space-reduction, the better cache-behavior
+of the low-space implementation allows for it to achieve a speed
+advantage over its peers, in some cases completing roughly twice as
+fast as the medium-space implementation and four times as fast as the
+low-space implementation. We show that all three implementations are
+bottlenecked by memory throughput, however, suggesting that the cache-optimal Smoothed Striding Algorithm can do better.
 
-% In Subsection \ref{subsecstrided}, we evaluate the performance of the
-% Recursive Smoothed Striding Algorithm and the Strided
-% Algorithm. Unlike the algorithms described above, the implementations
-% of both of these algorithms are fully in-place, meaning that the total
-% space overhead is only $\polylog n$. The cache efficiency of these two
-% algorithms allows for them to achieve substantially better scaling
-% than their parallel-prefix-based counterparts. The Strided Algorithm
-% tends to slightly outperform the Smoothed Striding Algorithm, though
-% on 18 threads their performance is within 15\% of one-another. We
-% conclude that the Smoothed Striding Algorithm allows for one to obtain
-% empirical performance comparable to that of the Strided Algorithm,
-% while simultaneously achieving the provable guarantees on span and
-% cache-efficiency missing from the original Strided Algorithm.
-
-
-% %% In Subsection \ref{subsechighspan}, we present a fourth
-% %% parallel-partition algorithm which we call the \defn{two-layer
-% %%   algorithm}, and which runs fully in place but has a polynomial span
-% %% of $\Theta(\sqrt{n \log n})$. The polynomial span of the algorithm
-% %% makes it so that a naive implementation performs poorly. Nonetheless,
-% %% we show that by tuning the algorithm to the number of worker threads,
-% %% further speedup can often be achieved over the low-space algorithm.
-
-% %% The two-layer algorithm has the advantage that is very simple to
-% %% implement, and runs in serial at almost the same speed as GNU Libc
-% %% quicksort's serial algorithm. On the other hand the algorithm's
-% %% performance is much more sensitive to input size and number of cores
-% %% than is the low-space implementation. On a machine with sufficiently
-% %% many cores (and sufficiently large memory bandwidth), the
-% %% polylogarithmic span of the low-space implementation is desirable.
+In Subsection \ref{subsecstrided}, we evaluate the performance of the
+Recursive Smoothed Striding Algorithm and the Strided
+Algorithm. Unlike the algorithms described above, the implementations
+of both of these algorithms are fully in-place, meaning that the total
+space overhead is only $\polylog n$. The cache efficiency of these two
+algorithms allows for them to achieve substantially better scaling
+than their parallel-prefix-based counterparts. The Strided Algorithm
+tends to slightly outperform the Smoothed Striding Algorithm, though
+on 18 threads their performance is within 15\% of one-another. We
+conclude that the Smoothed Striding Algorithm allows for one to obtain
+empirical performance comparable to that of the Strided Algorithm,
+while simultaneously achieving the provable guarantees on span and
+cache-efficiency missing from the original Strided Algorithm.
 
 
-% \paragraph{Machine Details}
-% Our experiments are performed on a two-socket machine with eighteen
-% 2.9 GHz Intel Xeon E5-2666 v3 processors. To maximize the memory
-% bandwidth of the machine, we use a NUMA memory-placement policy in
-% which memory allocation is spread out evenly across the nodes of the
-% machine; this is achieved using the \emph{interleave=all} option in
-% the Linux \emph{numactl} tool \cite{Kleen05}. Worker threads in our
-% experiments are each given their own core, with hyperthreading
-% disabled.
+%% In Subsection \ref{subsechighspan}, we present a fourth
+%% parallel-partition algorithm which we call the \defn{two-layer
+%%   algorithm}, and which runs fully in place but has a polynomial span
+%% of $\Theta(\sqrt{n \log n})$. The polynomial span of the algorithm
+%% makes it so that a naive implementation performs poorly. Nonetheless,
+%% we show that by tuning the algorithm to the number of worker threads,
+%% further speedup can often be achieved over the low-space algorithm.
 
-% Our algorithms are implemented using the CilkPlus task parallelism
-% library in C++. The implementations avoid the use of concurrency
-% mechanisms and atomic operations, but do allow for concurrent reads to
-% be performed on shared values such as $n$ and the pointer to the input
-% array. Our code is compiled using g++ 7.3.0, with \emph{march=native}
-% and at optimization level three. 
-
-% Our implementations are available on GitHub.
+%% The two-layer algorithm has the advantage that is very simple to
+%% implement, and runs in serial at almost the same speed as GNU Libc
+%% quicksort's serial algorithm. On the other hand the algorithm's
+%% performance is much more sensitive to input size and number of cores
+%% than is the low-space implementation. On a machine with sufficiently
+%% many cores (and sufficiently large memory bandwidth), the
+%% polylogarithmic span of the low-space implementation is desirable.
 
 
-% \subsection{Comparing Parallel-Prefix-Based Algorithms}\label{subsecclassic}
+\paragraph{Machine Details}
+Our experiments are performed on a two-socket machine with eighteen
+2.9 GHz Intel Xeon E5-2666 v3 processors. To maximize the memory
+bandwidth of the machine, we use a NUMA memory-placement policy in
+which memory allocation is spread out evenly across the nodes of the
+machine; this is achieved using the \emph{interleave=all} option in
+the Linux \emph{numactl} tool \cite{Kleen05}. Worker threads in our
+experiments are each given their own core, with hyperthreading
+disabled.
 
-% In this section, we compare four partition implementations,
-% incorporating the techniques from Section~\ref{sec:blockedprefixsumpartitionalg} in order to
-% achieve space efficiency:
-% \begin{itemize}[leftmargin = .15in]
-% \item \emph{A Serial Baseline:} This uses the serial in-place
-%   partition implementation from GNU Libc quicksort, with minor
-%   adaptations to optimize it for the case of sorting 64-bit integers
-%   (i.e., inlining the comparison function, etc.).
-% \item \emph{The High-Space Parallel Implementation:} This uses the
-%   standard parallel partition algorithm \cite{Blelloch96,AcarBl16}, as
-%   described in Section \ref{secprelim}. The space overhead is roughly
-%   $2n$ eight-byte words.
-% \item \emph{The Medium-Space Parallel Implementation:} Starting with
-%   the high-space implementation, we reduce the space used by the
-%   Parallel-Prefix phase by only constructing every $O(\log n)$-th
-%   element of the prefix-sum array $B$, as in Section~\ref{sec:blockedprefixsumpartitionalg}. (Here $O(\log n)$ is hard-coded as 64.) The array $B$
-%   is initialized to be of size $n / 64$, with each component equal to
-%   $\sum_{i=1}^{64} \dec(A[64 (i-1)+1])$, and then a parallel prefix sum is computed on
-%   the array $B$. Rather than implicitly encoding the elements of $B$ in
-%   $A$, we use an auxiliary array of size $n / 64$ to explicitly store
-%   the prefix sums.
+Our algorithms are implemented using the CilkPlus task parallelism
+library in C++. The implementations avoid the use of concurrency
+mechanisms and atomic operations, but do allow for concurrent reads to
+be performed on shared values such as $n$ and the pointer to the input
+array. Our code is compiled using g++ 7.3.0, with \emph{march=native}
+and at optimization level three. 
 
-%   %% \footnote{We suspect that an implementation in which
-%   %%   the values are implicitly stored could also be made fast. In
-%   %%   particular, the value 64 can be increased to compensate for
-%   %%   whatever constant overhead is induced by the implicit storage of
-%   %%   values. Nonetheless, the auxiliary array is already quite small
-%   %%   relative to the input and is more practical to implement.}
-%   The algorithm
-%   has a space overhead of $\frac{n}{32} + n$ eight-byte
-%   words.\footnote{In addition to the auxiliary array of size $n / 64$,
-%     we use a series of smaller arrays of sizes $n / 128, n / 256,
-%     \ldots$ in the recursive computation of the prefix sum. The
-%     alternative of performing the parallel-prefix sum in place, as in
-%     Section~\ref{sec:blockedprefixsumpartitionalg}, tends to be less cache-friendly in
-%     practice.}
-% \item \emph{The Low-Space Parallel Implementation:}
-% Starting with the medium-space implementation, we make the reordering
-% phase completely in-place using the preprocessing technique in Section~\ref{sec:blockedprefixsumpartitionalg}.
-% \footnote{Depending on whether the majority of elements
-%   are predecessors or successors, the algorithm goes down separate
-%   (but symmetric) code paths. In our timed experiments we test only
-%   with inputs containing more predecessors than successors, since this
-%   the slower of the two cases (by a very slight amount) for our
-%   implementation.} The only space overhead in this implementation is
-% the $\frac{n}{32}$ additional 8-byte words used in the prefix sum.
-% \end{itemize}
-
-% %% All three parallel-implementations have work $O(n)$ The high- and
-% %% medium- space implementations have span $O(\log n)$, while the
-% %% low-space implementation has span $O(\log^2 n)$ (due to the fact that
-% %% for convenience of implementation parallel-for-loops are broken into
-% %% chunks of size $64 = O(\log n)$).
-
-% We remark that the ample parallelism of the low-space algorithm makes
-% it so that for large inputs the value $64$ can easily be increased
-% substantially without negatively effecting algorithm performance. For
-% example, on an input of size $2^{28}$, increasing it to $4096$ has
-% essentially no effect on the empirical runtime while bringing the
-% auxiliary space-consumption down to a $\frac{1}{2048}$-fraction of the
-% input size. (In fact, the increase from 64 to 4096 results in roughly
-% a 5\% speedup.)
-
-% \paragraph{An Additional Optimization for The High-Space Implementation}
-% The optimization of reducing the prefix-sum by a factor of $O(\log n)$
-% at the top level of recursion, rather than simply by a factor of two,
-% can also be applied to the standard parallel-prefix algorithm when
-% constructing a prefix-sum array of size $n$. Even without the space
-% reduction, this reduces the (constant) overhead in the parallel prefix
-% sum, while keeping the overall span of the parallel-prefix operation
-% at $O(\log n)$. We perform this optimization in the high-space
-% implementation.
-
-% \paragraph{Performance Comparison}
-% Figure \ref{tablecilk} graphs the speedup of the each of the parallel
-% algorithms over the serial algorithm, using varying numbers of worker
-% threads on an 18-core machine with a fixed input size of $n =
-% 2^{30}$. Both space optimizations result in performance improvements,
-% with the low-space implementation performing almost twice as well as
-% the medium-space implementation on eighteen threads, and almost four
-% times as well as the high-space implementation. %% Similar speedups are
-% %% achieved on smaller inputs; see Figure \ref{tablecilk2}, which graphs
-% %% speedup for input sizes starting at $2^{23}$.
-
-% Figure \ref{tableserial} compares the performances of the
-% implementations in serial. Parallel-for-loops are replaced with serial
-% for-loops to eliminate scheduler overhead. As the input-size varies,
-% the ratios of the runtimes vary only slightly. The low-space
-% implementation performs within a factor of roughly 1.9 of the serial
-% implementation. As in Figure \ref{tablecilk},
-% both space optimizations result in performance improvements.
-
-% \paragraph{The Source of the Speedup}
-% If we compare the number of instructions performed by the three
-% parallel implementations, then the medium-space algorithm would seem
-% to be the clear winner. Using Cachegrind to profile the number of
-% instructions performed in a (serial) execution on an input of size
-% $2^{28}$,\footnote{This smaller problem size is used to compensate for the fact that Cachegrind can be somewhat slow.} the high-space, medium-space, and low-space implementations
-% perform 4.4 billion, 2.9 billion, and 4.6 billion instructions,
-% respectively.
-
-% Cache misses tell a different story, however. Using Cachegrind to
-% profile the number of top-level cache misses in a (serial) execution
-% on an input of size $2^{28}$, the high-space, medium-space, and
-% low-space implementations incur 305 million, 171 million, and 124
-% million cache misses, respectively.
-
-% To a first approximation, the number of cache misses by each algorithm
-% is proportional to the number of times that the algorithm scans
-% through a large array. By eliminating the use of large auxiliary
-% arrays, the low-space implementation has the opportunity to achieve a
-% reduction in the number of such scans. Additionally, the low-space
-% algorithm allows for steps from adjacent phases of the algorithm to
-% sometimes be performed in the same pass. For example, the enumeration
-% of the number of predecessors and the top level of the Preprocessing
-% phase can be performed together in a single pass on the input
-% array. Similarly, the later levels of the Preprocessing phase (which
-% focus on only one half of the input array) can be combined with the
-% construction of (one half of) the auxiliary array used in the Parallel
-% Prefix Sum phase, saving another half of a pass.
+Our implementations are available on GitHub.
 
 
-% %% There are additional slightly more tricky potential optimizations
-% %% that we did not make. One could, for example, also combine the
-% %% construction of the other half of the auxiliary array used in the
-% %% Parallel Prefix Sum Phase with the top level of the Preprocessing
-% %% Phase; this is made more subtle by the fact that when performing the
-% %% top level of the Preprocessing Phase, we do not know yet whether we
-% %% will be recursing on the left or right half of the array. One could
-% %% also implement the later levels of the Preprocessing Phase to have a
-% %% more cache-friendly recursive structure, starting with the final step
-% %% of the Preprocessing Phase and recursively working backwards to
-% %% perform the entire phase in a depth-first recursive tree. Evaluating
-% %% these optimizations would be an interesting direction of future work.
+\subsection{Comparing Parallel-Prefix-Based Algorithms}\label{subsecclassic}
 
-% \paragraph{The Memory-Bandwidth Limitation}
-% The comparison of cache misses suggests that performance is
-% bottlenecked by memory bandwidth. To evaluate whether this is the
-% case, we measure for each $t \in \{1, \ldots, 18\}$ the memory
-% throughput of $t$ threads attempting to scan through disjoint portions
-% of a large array in parallel. We measure two types of bandwidth, the
-% \defn{read-bandwidth}, in which the threads are simply trying to read
-% from the array, and the \defn{read/write bandwidth}, in which the
-% threads are attempting to immediately overwrite entries to the array
-% after reading them. Given read-bandwidth $r$ bytes/second and
-% read/write bandwidth $w$ bytes/second, the time needed for the
-% low-space algorithm to perform its memory operations on an input of
-% $m$ bytes will be roughly $3.5 m / w + .5m / r$ seconds.\footnote{A naive implementation of the algorithm would require roughly $m / r$ time to count the number of predecessors, followed by $2m / w$ time to perform the Preprocessing Phase, followed by roughly $m / r$ time to perform the Parallel Prefix Sum Phase, and then roughly $1.5 m/w$ time for the In-Place Reordering Phase. As described in the previous paragraph, however, the counting of predecessors and the Parallel Prefix Sum phase can both be overlapped with the Preprocessing phase so that their total added contribution to the Memory-Bandwidth Limitation is only $.5 m / r$.}  We call this
-% the \defn{bandwidth constraint}. No matter how optimized the
-% implementation of the low-space algorithm is, the bandwidth constraint
-% serves as a hard lower bound for the running
-% time.\footnote{Empirically, on an array of size $n = 2^{28}$, the total number of cache misses is within
-%   $8\%$ of what this assumption would predict, suggesting that the
-%   bandwidth constraint is within a small amount of the true
-%   bandwidth-limited runtime.}
+In this section, we compare four partition implementations,
+incorporating the techniques from Section~\ref{sec:blockedprefixsumpartitionalg} in order to
+achieve space efficiency:
+\begin{itemize}[leftmargin = .15in]
+\item \emph{A Serial Baseline:} This uses the serial in-place
+  partition implementation from GNU Libc quicksort, with minor
+  adaptations to optimize it for the case of sorting 64-bit integers
+  (i.e., inlining the comparison function, etc.).
+\item \emph{The High-Space Parallel Implementation:} This uses the
+  standard parallel partition algorithm \cite{Blelloch96,AcarBl16}, as
+  described in Section \ref{secprelim}. The space overhead is roughly
+  $2n$ eight-byte words.
+\item \emph{The Medium-Space Parallel Implementation:} Starting with
+  the high-space implementation, we reduce the space used by the
+  Parallel-Prefix phase by only constructing every $O(\log n)$-th
+  element of the prefix-sum array $B$, as in Section~\ref{sec:blockedprefixsumpartitionalg}. (Here $O(\log n)$ is hard-coded as 64.) The array $B$
+  is initialized to be of size $n / 64$, with each component equal to
+  $\sum_{i=1}^{64} \dec(A[64 (i-1)+1])$, and then a parallel prefix sum is computed on
+  the array $B$. Rather than implicitly encoding the elements of $B$ in
+  $A$, we use an auxiliary array of size $n / 64$ to explicitly store
+  the prefix sums.
 
-% Figure \ref{tablebandwidth} compares the time taken by the low-space
-% algorithm to the bandwidth constraint as the number of threads $t$
-% varies from $1$ to $18$. As the number of threads grows, the algorithm
-% becomes bandwidth limited, achieving its best possible parallel
-% performance on the machine. The algorithm scales particularly well on
-% the first socket of the machine, achieving a speedup on nine cores of
-% roughly six times better than its performance on a single core, and
-% then scales more poorly on the second socket as it becomes
-% bottlenecked by memory bandwidth.
+  %% \footnote{We suspect that an implementation in which
+  %%   the values are implicitly stored could also be made fast. In
+  %%   particular, the value 64 can be increased to compensate for
+  %%   whatever constant overhead is induced by the implicit storage of
+  %%   values. Nonetheless, the auxiliary array is already quite small
+  %%   relative to the input and is more practical to implement.}
+  The algorithm
+  has a space overhead of $\frac{n}{32} + n$ eight-byte
+  words.\footnote{In addition to the auxiliary array of size $n / 64$,
+    we use a series of smaller arrays of sizes $n / 128, n / 256,
+    \ldots$ in the recursive computation of the prefix sum. The
+    alternative of performing the parallel-prefix sum in place, as in
+    Section~\ref{sec:blockedprefixsumpartitionalg}, tends to be less cache-friendly in
+    practice.}
+\item \emph{The Low-Space Parallel Implementation:}
+Starting with the medium-space implementation, we make the reordering
+phase completely in-place using the preprocessing technique in Section~\ref{sec:blockedprefixsumpartitionalg}.
+\footnote{Depending on whether the majority of elements
+  are predecessors or successors, the algorithm goes down separate
+  (but symmetric) code paths. In our timed experiments we test only
+  with inputs containing more predecessors than successors, since this
+  the slower of the two cases (by a very slight amount) for our
+  implementation.} The only space overhead in this implementation is
+the $\frac{n}{32}$ additional 8-byte words used in the prefix sum.
+\end{itemize}
 
-% \paragraph{Implementation Details}
-% In each implementation, the parallelism is achieved through simple
-% parallel-for-loops, with one exception at the beginning of the
-% low-space implementation, when the number of predecessors in the input
-% array is computed. Although CilkPlus Reducers (or OpenMP Reductions)
-% could be used to perform this parallel summation within a
-% parallel-for-loop \cite{FrigoLe09}, we found a slightly more ad-hoc
-% approach to be faster: Using a simple recursive structure, we manually
-% implemented a parallel-for-loop with Cilk Spawns and Syncs, allowing
-% for the summation to be performed within the recursion.
+%% All three parallel-implementations have work $O(n)$ The high- and
+%% medium- space implementations have span $O(\log n)$, while the
+%% low-space implementation has span $O(\log^2 n)$ (due to the fact that
+%% for convenience of implementation parallel-for-loops are broken into
+%% chunks of size $64 = O(\log n)$).
+
+We remark that the ample parallelism of the low-space algorithm makes
+it so that for large inputs the value $64$ can easily be increased
+substantially without negatively effecting algorithm performance. For
+example, on an input of size $2^{28}$, increasing it to $4096$ has
+essentially no effect on the empirical runtime while bringing the
+auxiliary space-consumption down to a $\frac{1}{2048}$-fraction of the
+input size. (In fact, the increase from 64 to 4096 results in roughly
+a 5\% speedup.)
+
+\paragraph{An Additional Optimization for The High-Space Implementation}
+The optimization of reducing the prefix-sum by a factor of $O(\log n)$
+at the top level of recursion, rather than simply by a factor of two,
+can also be applied to the standard parallel-prefix algorithm when
+constructing a prefix-sum array of size $n$. Even without the space
+reduction, this reduces the (constant) overhead in the parallel prefix
+sum, while keeping the overall span of the parallel-prefix operation
+at $O(\log n)$. We perform this optimization in the high-space
+implementation.
+
+\paragraph{Performance Comparison}
+Figure \ref{tablecilk} graphs the speedup of the each of the parallel
+algorithms over the serial algorithm, using varying numbers of worker
+threads on an 18-core machine with a fixed input size of $n =
+2^{30}$. Both space optimizations result in performance improvements,
+with the low-space implementation performing almost twice as well as
+the medium-space implementation on eighteen threads, and almost four
+times as well as the high-space implementation. %% Similar speedups are
+%% achieved on smaller inputs; see Figure \ref{tablecilk2}, which graphs
+%% speedup for input sizes starting at $2^{23}$.
+
+Figure \ref{tableserial} compares the performances of the
+implementations in serial. Parallel-for-loops are replaced with serial
+for-loops to eliminate scheduler overhead. As the input-size varies,
+the ratios of the runtimes vary only slightly. The low-space
+implementation performs within a factor of roughly 1.9 of the serial
+implementation. As in Figure \ref{tablecilk},
+both space optimizations result in performance improvements.
+
+\paragraph{The Source of the Speedup}
+If we compare the number of instructions performed by the three
+parallel implementations, then the medium-space algorithm would seem
+to be the clear winner. Using Cachegrind to profile the number of
+instructions performed in a (serial) execution on an input of size
+$2^{28}$,\footnote{This smaller problem size is used to compensate for the fact that Cachegrind can be somewhat slow.} the high-space, medium-space, and low-space implementations
+perform 4.4 billion, 2.9 billion, and 4.6 billion instructions,
+respectively.
+
+Cache misses tell a different story, however. Using Cachegrind to
+profile the number of top-level cache misses in a (serial) execution
+on an input of size $2^{28}$, the high-space, medium-space, and
+low-space implementations incur 305 million, 171 million, and 124
+million cache misses, respectively.
+
+To a first approximation, the number of cache misses by each algorithm
+is proportional to the number of times that the algorithm scans
+through a large array. By eliminating the use of large auxiliary
+arrays, the low-space implementation has the opportunity to achieve a
+reduction in the number of such scans. Additionally, the low-space
+algorithm allows for steps from adjacent phases of the algorithm to
+sometimes be performed in the same pass. For example, the enumeration
+of the number of predecessors and the top level of the Preprocessing
+phase can be performed together in a single pass on the input
+array. Similarly, the later levels of the Preprocessing phase (which
+focus on only one half of the input array) can be combined with the
+construction of (one half of) the auxiliary array used in the Parallel
+Prefix Sum phase, saving another half of a pass.
 
 
-% \subsection{Comparing the Smoothed Striding and Strided Algorithms} \label{subsecstrided}
+%% There are additional slightly more tricky potential optimizations
+%% that we did not make. One could, for example, also combine the
+%% construction of the other half of the auxiliary array used in the
+%% Parallel Prefix Sum Phase with the top level of the Preprocessing
+%% Phase; this is made more subtle by the fact that when performing the
+%% top level of the Preprocessing Phase, we do not know yet whether we
+%% will be recursing on the left or right half of the array. One could
+%% also implement the later levels of the Preprocessing Phase to have a
+%% more cache-friendly recursive structure, starting with the final step
+%% of the Preprocessing Phase and recursively working backwards to
+%% perform the entire phase in a depth-first recursive tree. Evaluating
+%% these optimizations would be an interesting direction of future work.
 
-% In this section we consider the performance of the Strided Algorithm
-% and the Recursive Smoothed Striding Algorithm. Past work
-% \cite{Frias08} found that, on large numbers of threads, the Strided
-% Algorithm has performance close to that of other non-EREW state-of-the
-% art partition algorithms (i.e., within 20\% of the best
-% atomic-operation based algorithms). The Strided Algorithm does not
-% offer provable guarantees on span and cache-efficiency, however; and
-% indeed, the reason that the algorithm cannot recurse on the subarray
-% $A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ is that the subarray has been
-% implicitly constructed to be worst-case for the algorithm. In this
-% subsection, we show that, with only a small loss in performance, the
-% Smoothed Striding Algorithm can be used to achieve provable guarantees
-% on arbitrary inputs. We remark that we do not make any attempt to
-% generate worst-case inputs for the Strided Algorithm (in fact the
-% random inputs that we use are among the only inputs for which the
-% Strided Algorithm does exhibit provable guarantees!).
+\paragraph{The Memory-Bandwidth Limitation}
+The comparison of cache misses suggests that performance is
+bottlenecked by memory bandwidth. To evaluate whether this is the
+case, we measure for each $t \in \{1, \ldots, 18\}$ the memory
+throughput of $t$ threads attempting to scan through disjoint portions
+of a large array in parallel. We measure two types of bandwidth, the
+\defn{read-bandwidth}, in which the threads are simply trying to read
+from the array, and the \defn{read/write bandwidth}, in which the
+threads are attempting to immediately overwrite entries to the array
+after reading them. Given read-bandwidth $r$ bytes/second and
+read/write bandwidth $w$ bytes/second, the time needed for the
+low-space algorithm to perform its memory operations on an input of
+$m$ bytes will be roughly $3.5 m / w + .5m / r$ seconds.\footnote{A naive implementation of the algorithm would require roughly $m / r$ time to count the number of predecessors, followed by $2m / w$ time to perform the Preprocessing Phase, followed by roughly $m / r$ time to perform the Parallel Prefix Sum Phase, and then roughly $1.5 m/w$ time for the In-Place Reordering Phase. As described in the previous paragraph, however, the counting of predecessors and the Parallel Prefix Sum phase can both be overlapped with the Preprocessing phase so that their total added contribution to the Memory-Bandwidth Limitation is only $.5 m / r$.}  We call this
+the \defn{bandwidth constraint}. No matter how optimized the
+implementation of the low-space algorithm is, the bandwidth constraint
+serves as a hard lower bound for the running
+time.\footnote{Empirically, on an array of size $n = 2^{28}$, the total number of cache misses is within
+  $8\%$ of what this assumption would predict, suggesting that the
+  bandwidth constraint is within a small amount of the true
+  bandwidth-limited runtime.}
 
-% Figures \ref{tableserial} and \ref{tablecilk} evaluate the performance
-% of the Smoothed Striding and Strided algorithms in serial and in
-% parallel. On a single thread, the Smoothed Striding and Strided
-% algorithms perform approximately 1.5 times slower than the Libc-based
-% serial implementation baseline. When executed on multiple threads, the
-% performances of the Smoothed Striding and Strided Algorithms scale
-% close to linearly in the number of threads. On 18 threads, the
-% Smoothed Striding Algorithm achieves a $9.6 \times $ speedup over the
-% Libc-based Serial Baseline, and the Strided Algorithm achieves an
-% $11.1 \times$ speedup over the same baseline.
+Figure \ref{tablebandwidth} compares the time taken by the low-space
+algorithm to the bandwidth constraint as the number of threads $t$
+varies from $1$ to $18$. As the number of threads grows, the algorithm
+becomes bandwidth limited, achieving its best possible parallel
+performance on the machine. The algorithm scales particularly well on
+the first socket of the machine, achieving a speedup on nine cores of
+roughly six times better than its performance on a single core, and
+then scales more poorly on the second socket as it becomes
+bottlenecked by memory bandwidth.
 
-% The nearly-ideal scaling of the two algorithms can be explained by
-% their cache behavior. Whereas the parallel-prefix-based algorithms
-% were bottlenecked by memory bandwidth, Figure \ref{tablebandwidth}
-% shows that the same is no longer true for the Smoothed Striding
-% Algorithm. The figure compares the performance of the Smoothed
-% Striding Algorithm to the minimum time needed simple to read and overwrite
-% each entry of the input array using $18$ concurrent threads without any other
-% computation (i.e., the memory bandwidth constraint). On 18 threads, the time required by the memory bandwidth
-% constraint constitutes $58\%$ of the algorithm's total running time.
-
-% \paragraph{NUMA Effects}
-% We remark that the use of the Linux \emph{numactl} tool \cite{Kleen05}
-% to spread memory allocation evenly across the nodes of the machine is
-% necessary to prevent the Smoothed Striding Algorithm and the Strided
-% Algorithm from being bandwidth limited. For example, if we replicate
-% the 18-thread column of Figure \ref{tablebandwidth} without using
-% \emph{numactl}, then the speedup of the Smoothed Striding Algorithm is
-% 8.2, whereas the memory-bandwidth bound for maximum possible speedup
-% is only slightly larger at $10.2$.
+\paragraph{Implementation Details}
+In each implementation, the parallelism is achieved through simple
+parallel-for-loops, with one exception at the beginning of the
+low-space implementation, when the number of predecessors in the input
+array is computed. Although CilkPlus Reducers (or OpenMP Reductions)
+could be used to perform this parallel summation within a
+parallel-for-loop \cite{FrigoLe09}, we found a slightly more ad-hoc
+approach to be faster: Using a simple recursive structure, we manually
+implemented a parallel-for-loop with Cilk Spawns and Syncs, allowing
+for the summation to be performed within the recursion.
 
 
-% \paragraph{Implementation Details} Both algorithms use $b = 512$. The Smoothed Striding Algorithm uses
-% slightly tuned $\epsilon, \delta$ parameters similar to those outlined
-% in Corollary \ref{cor:groupedPartitionAlg}. Although $v_{\text{min}}$
-% and $v_{\text{max}}$ could be computed using CilkPlus Reducers
-% \cite{FrigoLe09}, we found it advantageous to instead manually
-% implement the parallel-for-loop  in the Partial Partition step with Cilk Spawns and Syncs, and to
-% compute $v_{\text{min}}$ and $v_{\text{max}}$ within the recursion.
+\subsection{Comparing the Smoothed Striding and Strided Algorithms} \label{subsecstrided}
 
-% \paragraph{Example Application: A Full Quicksort}
-% In Figure \ref{tablesort}, we graph the performance of a parallel
-% quicksort implementation using the low-space parallel-prefix-based
-% algorithm, the Smoothed Striding Algorithm, and the Strided
-% Algorithm. We compare the algorithm performances 
-% with varying numbers of worker threads and input sizes to GNU Libc quicksort; the input
-% array is initially in a random permutation.
+In this section we consider the performance of the Strided Algorithm
+and the Recursive Smoothed Striding Algorithm. Past work
+\cite{Frias08} found that, on large numbers of threads, the Strided
+Algorithm has performance close to that of other non-EREW state-of-the
+art partition algorithms (i.e., within 20\% of the best
+atomic-operation based algorithms). The Strided Algorithm does not
+offer provable guarantees on span and cache-efficiency, however; and
+indeed, the reason that the algorithm cannot recurse on the subarray
+$A[v_{\text{min}} + 1], \ldots, A[v_{\text{max}}]$ is that the subarray has been
+implicitly constructed to be worst-case for the algorithm. In this
+subsection, we show that, with only a small loss in performance, the
+Smoothed Striding Algorithm can be used to achieve provable guarantees
+on arbitrary inputs. We remark that we do not make any attempt to
+generate worst-case inputs for the Strided Algorithm (in fact the
+random inputs that we use are among the only inputs for which the
+Strided Algorithm does exhibit provable guarantees!).
 
-% Our parallel quicksort uses the parallel-partition algorithm at the
-% top levels of recursion, and then swaps to the serial-partitioning
-% algorithm once the input size has been reduced by at least a factor of
-% $8p$, where $p$ is the number of worker threads. By using the
-% serial-partitioning algorithm on the small recursive subproblems we
-% avoid the overhead of the parallel algorithm, while still achieving
-% parallelism between subproblems. Small recursive problems also exhibit
-% better cache behavior than larger ones, reducing the effects of
-% memory-bandwidth limitations on the performance of the parallel
-% quicksort, and further improving the scaling.
+Figures \ref{tableserial} and \ref{tablecilk} evaluate the performance
+of the Smoothed Striding and Strided algorithms in serial and in
+parallel. On a single thread, the Smoothed Striding and Strided
+algorithms perform approximately 1.5 times slower than the Libc-based
+serial implementation baseline. When executed on multiple threads, the
+performances of the Smoothed Striding and Strided Algorithms scale
+close to linearly in the number of threads. On 18 threads, the
+Smoothed Striding Algorithm achieves a $9.6 \times $ speedup over the
+Libc-based Serial Baseline, and the Strided Algorithm achieves an
+$11.1 \times$ speedup over the same baseline.
+
+The nearly-ideal scaling of the two algorithms can be explained by
+their cache behavior. Whereas the parallel-prefix-based algorithms
+were bottlenecked by memory bandwidth, Figure \ref{tablebandwidth}
+shows that the same is no longer true for the Smoothed Striding
+Algorithm. The figure compares the performance of the Smoothed
+Striding Algorithm to the minimum time needed simple to read and overwrite
+each entry of the input array using $18$ concurrent threads without any other
+computation (i.e., the memory bandwidth constraint). On 18 threads, the time required by the memory bandwidth
+constraint constitutes $58\%$ of the algorithm's total running time.
+
+\paragraph{NUMA Effects}
+We remark that the use of the Linux \emph{numactl} tool \cite{Kleen05}
+to spread memory allocation evenly across the nodes of the machine is
+necessary to prevent the Smoothed Striding Algorithm and the Strided
+Algorithm from being bandwidth limited. For example, if we replicate
+the 18-thread column of Figure \ref{tablebandwidth} without using
+\emph{numactl}, then the speedup of the Smoothed Striding Algorithm is
+8.2, whereas the memory-bandwidth bound for maximum possible speedup
+is only slightly larger at $10.2$.
+
+
+\paragraph{Implementation Details} Both algorithms use $b = 512$. The Smoothed Striding Algorithm uses
+slightly tuned $\epsilon, \delta$ parameters similar to those outlined
+in Corollary \ref{cor:groupedPartitionAlg}. Although $v_{\text{min}}$
+and $v_{\text{max}}$ could be computed using CilkPlus Reducers
+\cite{FrigoLe09}, we found it advantageous to instead manually
+implement the parallel-for-loop  in the Partial Partition step with Cilk Spawns and Syncs, and to
+compute $v_{\text{min}}$ and $v_{\text{max}}$ within the recursion.
+
+\paragraph{Example Application: A Full Quicksort}
+In Figure \ref{tablesort}, we graph the performance of a parallel
+quicksort implementation using the low-space parallel-prefix-based
+algorithm, the Smoothed Striding Algorithm, and the Strided
+Algorithm. We compare the algorithm performances 
+with varying numbers of worker threads and input sizes to GNU Libc quicksort; the input
+array is initially in a random permutation.
+
+Our parallel quicksort uses the parallel-partition algorithm at the
+top levels of recursion, and then swaps to the serial-partitioning
+algorithm once the input size has been reduced by at least a factor of
+$8p$, where $p$ is the number of worker threads. By using the
+serial-partitioning algorithm on the small recursive subproblems we
+avoid the overhead of the parallel algorithm, while still achieving
+parallelism between subproblems. Small recursive problems also exhibit
+better cache behavior than larger ones, reducing the effects of
+memory-bandwidth limitations on the performance of the parallel
+quicksort, and further improving the scaling.
 
 
 
@@ -1898,10 +1850,80 @@ future work.
 %% suffering on smaller inputs as the number of cores grows.
 
 
+\section{Figures}\label{sec:figures}
+See figures below.
 
 \section{Pseudocode}\label{sec:pseudocode}
+See figures below.
 
 \begin{figure*}[h]
+  \begin{center}
+    \CILKtable 
+  \end{center}
+    \caption{For a fixed table-size $n = 2^{30}$, we compare each
+      implementation's runtime to the Libc serial baseline, which takes 3.9
+      seconds to complete (averaged over five trials). The $x$-axis
+      plots the number of worker threads being used, and the $y$-axis
+      plots the multiplicative speedup over the serial baseline. Each
+      time (including the serial baseline) is averaged over five trials.}
+      \label{tablecilk}
+\end{figure*}
+
+%% \begin{figure*}
+%%   \begin{center}
+%%     \cilktwotabletwo
+%%   \end{center}
+%%   \caption{We compare the performance of the implementations running
+%%     on eighteen worker threads on varying input sizes. The $x$-axis is
+%%     the log-base-$2$ of the input size, and the $y$-axis is the
+%%     multiplicative speedup when compared to the serial baseline. Each
+%%     time (including each serial baseline) is averaged over five
+%%     trials.}
+%%   \label{tablecilk2}
+%% \end{figure*}
+
+
+\begin{figure*}[h]
+  \begin{center}
+    \serialtable
+  \end{center}
+  \caption{We compare the performance of the implementations in
+    serial, with no scheduling overhead. The $x$-axis is the
+    log-base-$2$ of the input size, and the $y$-axis is the
+    multiplicative slowdown when compared to the Libc serial baseline. Each
+    time (including the baseline) is averaged over five
+    trials.}
+  \label{tableserial}
+\end{figure*}
+
+\begin{figure*}[h]
+  \begin{center}
+    \partitionbandwidthboundtable
+  \end{center}
+  \caption{We compare the performances of the low-space and
+    Smoothed Striding parallel-partition algorithms to their ideal
+    performance determined by memory-bandwidth constraints on inputs
+    of size $2^{30}$. The $x$-axis is the number of worker threads,
+    and the $y$-axis is the multiplicative speedup when compared to
+    the Libc serial baseline (which is computed by an average over five
+    trials). Each data-point is averaged over five trials.}
+  \label{tablebandwidth}
+\end{figure*}
+
+\begin{figure*}[h]
+  \begin{center}
+    \CILKsorttable
+  \end{center}
+  \caption{We compare the performance of the low-space and high-span
+    sorting implementations running on varying numbers of threads and
+    input sizes. The $x$-axis is the number of worker threads and the
+    $y$-axis is the multiplicative speedup when compared to the Libc serial
+    baseline. Each time (including each serial baseline)
+    is averaged over five trials.}
+  \label{tablesort}
+\end{figure*}
+
+\begin{figure*}
   \scriptsize
   \caption{Smoothed Striding Algorithm}
 	\label{alg:parallelPartition_smoothedStriding}
@@ -1967,7 +1989,7 @@ future work.
 
 \begin{figure*}
   \scriptsize
-  \caption{In-Place Sum-and-Swap Algorithm: Helper Functions}
+  \caption{Blocked-Prefix-Sum Partition Algorithm: Helper Functions}
 	\label{alg:parallelPartition_prefixsumbased_helpers}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \Procedure{WriteToBlock}{$A$, $b$, $i$, $v$} \Comment Write value $v$ to the $i$-th block $X_i$ of $A$, where $A = X_1 \circ X_2 \circ \cdots \circ X_{\lfloor n/b \rfloor}$
@@ -2007,7 +2029,7 @@ future work.
 
 \begin{figure*}
   \scriptsize
-  \caption{In-Place Sum-and-Swap Algorithm: Main Functions}
+  \caption{Blocked-Prefix-Sum Partition Algorithm: Main Functions}
 	\label{alg:parallelPartition_prefixsumbased_main}
   \begin{algorithmic} % add [1] to get line numbers (if you want)
     \State \textbf{Require: } Each prefix of $A$ is ``successor heavy''

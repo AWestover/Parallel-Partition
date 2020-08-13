@@ -1,5 +1,8 @@
 \begin{thebibliography}{10}
 
+\bibitem{openbsd}
+{\em {OpenBSD} {C} qsort, version 1.18}, 1992.
+
 \bibitem{AcarBl16}
 {\sc U.~A. Acar and G.~Blelloch}, {\em Algorithm design: Parallel and
   sequential}, 2016.
@@ -9,9 +12,19 @@
   work stealing}, in Proceedings of the twelfth annual ACM symposium on
   Parallel algorithms and architectures, 2000, pp.~1--12.
 
+\bibitem{AggarwalVi88}
+{\sc A.~Aggarwal and S.~Vitter, Jeffrey}, {\em The input/output complexity of
+  sorting and related problems}, Communications of the ACM, 31 (1988),
+  pp.~1116--1127.
+
 \bibitem{AlbersHa97}
 {\sc S.~Albers and T.~Hagerup}, {\em Improved parallel integer sorting without
   concurrent writing}, Information and Computation, 136 (1997), pp.~25--51.
+
+\bibitem{AllenChHa+08}
+{\sc E.~Allen, D.~Chase, J.~Hallett, V.~Luchangco, J.-W. Maessen, S.~Ryu, G.~L.
+  {Steele Jr.}, and S.~Tobin-Hochstadt}, {\em The Fortress Language
+  Specification Version 1.0}, Sun Microsystems, Inc., Mar. 2008.
 
 \bibitem{AlonsoSc96}
 {\sc L.~Alonso and R.~Schott}, {\em A parallel algorithm for the generation of
@@ -23,18 +36,74 @@
   on a shared memory machine}, in Proceedings of the second annual ACM
   Symposium on Parallel Algorithms and Architectures, ACM, 1990, pp.~95--102.
 
+\bibitem{AroraBlPl98}
+{\sc N.~S. Arora, R.~D. Blumofe, and C.~G. Plaxton}, {\em Thread scheduling for
+  multiprogrammed multiprocessors}, in SPAA, 1998, pp.~119--129.
+
+\bibitem{Smoothed6}
+{\sc D.~Arthur, B.~Manthey, and H.~R{\"o}glin}, {\em Smoothed analysis of the
+  k-means method}, Journal of the ACM (JACM), 58 (2011), pp.~1--31.
+
 \bibitem{AxtmannWi17}
 {\sc M.~Axtmann, S.~Witt, D.~Ferizovic, and P.~Sanders}, {\em In-place parallel
   super scalar samplesort}, arXiv preprint arXiv:1705.02257,  (2017).
+
+\bibitem{AyguadeCoDu09}
+{\sc E.~Ayguade, N.~Copty, A.~Duran, J.~Hoeflinger, Y.~Lin, F.~Massaioli,
+  X.~Teruel, P.~Unnikrishnan, and G.~Zhang}, {\em The design of {OpenMP}
+  tasks}, TPDS, 20 (2009), pp.~404--418.
+
+\bibitem{ben2016parallel}
+{\sc N.~Ben-David, G.~E. Blelloch, J.~T. Fineman, P.~B. Gibbons, Y.~Gu,
+  C.~McGuffey, and J.~Shun}, {\em Parallel algorithms for asymmetric read-write
+  costs}, in Proceedings of the 28th ACM Symposium on Parallelism in Algorithms
+  and Architectures, 2016, pp.~145--156.
+
+\bibitem{Smoothed3}
+{\sc M.~A. Bender, M.~Farach-Colton, and W.~Kuszmaul}, {\em Achieving optimal
+  backlog in multi-processor cup games}, in Proceedings of the 51st Annual ACM
+  SIGACT Symposium on Theory of Computing, 2019, pp.~1148--1157.
+
+\bibitem{ParallelCacheAlg6}
+{\sc M.~A. Bender, J.~T. Fineman, S.~Gilbert, and B.~C. Kuszmaul}, {\em
+  Concurrent cache-oblivious b-trees}, in Proceedings of the seventeenth annual
+  ACM symposium on Parallelism in algorithms and architectures, 2005,
+  pp.~228--237.
 
 \bibitem{Blelloch96}
 {\sc G.~E. Blelloch}, {\em Programming parallel algorithms}, Communications of
   the ACM, 39 (1996), pp.~85--97.
 
+\bibitem{blelloch2015sorting}
+{\sc G.~E. Blelloch, J.~T. Fineman, P.~B. Gibbons, Y.~Gu, and J.~Shun}, {\em
+  Sorting with asymmetric read and write costs}, in Proceedings of the 27th ACM
+  symposium on Parallelism in Algorithms and Architectures, 2015, pp.~1--12.
+
 \bibitem{BlellochFi12}
 {\sc G.~E. Blelloch, J.~T. Fineman, P.~B. Gibbons, and J.~Shun}, {\em
   Internally deterministic parallel algorithms can be fast}, in ACM SIGPLAN
   Notices, vol.~47, ACM, 2012, pp.~181--192.
+
+\bibitem{blelloch2018parallel}
+{\sc G.~E. Blelloch, P.~B. Gibbons, Y.~Gu, C.~McGuffey, and J.~Shun}, {\em The
+  parallel persistent memory model}, in Proceedings of the 30th on Symposium on
+  Parallelism in Algorithms and Architectures, 2018, pp.~247--258.
+
+\bibitem{ParallelCacheAlg2}
+{\sc G.~E. Blelloch, P.~B. Gibbons, and H.~V. Simhadri}, {\em Low depth
+  cache-oblivious algorithms}, in Proceedings of the twenty-second annual ACM
+  symposium on Parallelism in algorithms and architectures, 2010, pp.~189--199.
+
+\bibitem{blelloch2020improved}
+{\sc G.~E. Blelloch and Y.~Gu}, {\em Improved parallel cache-oblivious
+  algorithms for dynamic programming [extend abstract]}, in Symposium on
+  Algorithmic Principles of Computer Systems, SIAM, 2020, pp.~105--119.
+
+\bibitem{blelloch2018parallel2}
+{\sc G.~E. Blelloch, Y.~Gu, J.~Shun, and Y.~Sun}, {\em Parallel write-efficient
+  algorithms and data structures for computational geometry}, in Proceedings of
+  the 30th on Symposium on Parallelism in Algorithms and Architectures, 2018,
+  pp.~235--246.
 
 \bibitem{BlellochLe98}
 {\sc G.~E. Blelloch, C.~E. Leiserson, B.~M. Maggs, C.~G. Plaxton, S.~J. Smith,
@@ -55,9 +124,30 @@
 {\sc R.~P. Brent}, {\em The parallel evaluation of general arithmetic
   expressions}, Journal of the ACM (JACM), 21 (1974), pp.~201--206.
 
+\bibitem{ParallelCacheAlg4}
+{\sc G.~S. Brodal and R.~Fagerberg}, {\em Cache oblivious distribution
+  sweeping}, in International Colloquium on Automata, Languages, and
+  Programming, Springer, 2002, pp.~426--438.
+
 \bibitem{CLRS}
 {\sc T.~H. Cormen, C.~E. Leiserson, R.~L. Rivest, and C.~Stein}, {\em
   Introduction to algorithms}, MIT press, 2009.
+
+\bibitem{DeakinPrMa18}
+{\sc T.~Deakin, J.~Price, M.~Martineau, and S.~McIntosh-Smith}, {\em Evaluating
+  attainable memory bandwidth of parallel programming models via babelstream},
+  International Journal of Computational Science and Engineering, 17 (2018),
+  pp.~247--262.
+
+\bibitem{FengLe99}
+{\sc M.~Feng and C.~E. Leiserson}, {\em Efficient detection of determinacy
+  races in {Cilk} programs}, Theory of Computing Systems, 32 (1999),
+  pp.~301--326.
+
+\bibitem{Smoothed1}
+{\sc M.~Fouz, M.~Kufleitner, B.~Manthey, and N.~Z. Jahromi}, {\em On smoothed
+  analysis of quicksort and hoare’s find}, in International Computing and
+  Combinatorics Conference, Springer, 2009, pp.~158--167.
 
 \bibitem{FrancisPa92}
 {\sc R.~S. Francis and L.~Pannan}, {\em A parallel partition for enhanced
@@ -68,15 +158,23 @@
   International Workshop on Experimental and Efficient Algorithms, Springer,
   2008, pp.~142--153.
 
-\bibitem{FrigoLe09}
-{\sc M.~Frigo, P.~Halpern, C.~E. Leiserson, and S.~Lewin-Berlin}, {\em Reducers
-  and other cilk++ hyperobjects}, in Proceedings of the twenty-first annual
-  symposium on Parallelism in algorithms and architectures, ACM, 2009,
-  pp.~79--90.
+\bibitem{FrigoLeRa98}
+{\sc M.~Frigo, C.~E. Leiserson, and K.~H. Randall}, {\em The implementation of
+  the {C}ilk-5 multithreaded language}, in PLDI, 1998, pp.~212--223.
+
+\bibitem{ParallelCacheAlg3}
+{\sc M.~Frigo and V.~Strumpen}, {\em The cache complexity of multithreaded
+  cache oblivious algorithms}, Theory of Computing Systems, 45 (2009),
+  pp.~203--233.
 
 \bibitem{GerbessiotisSi04}
 {\sc A.~V. Gerbessiotis and C.~J. Siniolakis}, {\em Probabilistic integer
   sorting}, Information processing letters, 90 (2004), pp.~187--193.
+
+\bibitem{gu2018survey}
+{\sc Y.~Gu}, {\em Survey: computational models for asymmetric read and write
+  costs}, in 2018 IEEE International Parallel and Distributed Processing
+  Symposium Workshops (IPDPSW), IEEE, 2018, pp.~733--743.
 
 \bibitem{Hagerup89}
 {\sc T.~Hagerup and C.~R{\"u}b}, {\em Optimal merging and sorting on the erew
@@ -97,13 +195,35 @@
   using fetch-and-add}, IEEE Transactions on Computers, 39 (1990),
   pp.~133--138.
 
+\bibitem{IntelCilkPlus10}
+{\sc {Intel Corporation}}, {\em Intel {Cilk} {Plus} Language Specification},
+  2010.
+\newblock Document Number: 324396-001US. Available from
+  \url{http://software.intel.com/sites/products/cilk-plus/cilk_plus_language_specification.pdf}.
+
+\bibitem{Cilkmem}
+{\sc T.~Kaler, W.~Kuszmaul, T.~B. Schardl, and D.~Vettorel}, {\em Cilkmem:
+  Algorithms for analyzing the memory high-water mark of fork-join parallel
+  programs}, in Symposium on Algorithmic Principles of Computer Systems, SIAM,
+  2020, pp.~162--176.
+
 \bibitem{Katajainen93}
 {\sc J.~Katajainen, C.~Levcopoulos, and O.~Petersson}, {\em Space-efficient
   parallel merging}, RAIRO-Theoretical Informatics and Applications, 27 (1993),
   pp.~295--310.
 
-\bibitem{Kleen05}
-{\sc A.~Kleen}, {\em A numa api for linux}, Novel Inc,  (2005).
+\bibitem{Smoothed4}
+{\sc W.~Kuszmaul}, {\em Achieving optimal backlog in the vanilla
+  multi-processor cup game}, in Proceedings of the Fourteenth Annual ACM-SIAM
+  Symposium on Discrete Algorithms, SIAM, 2020, pp.~1558--1577.
+
+\bibitem{Forkjoin2}
+{\sc D.~Lea}, {\em A java fork/join framework}, in Proceedings of the ACM 2000
+  conference on Java Grande, 2000, pp.~36--43.
+
+\bibitem{Leiserson10}
+{\sc C.~E. Leiserson}, {\em The {Cilk++} concurrency platform}, Journal of
+  Supercomputing, 51 (2010), pp.~244--257.
 
 \bibitem{LiuKn05}
 {\sc J.~Liu, C.~Knowles, and A.~B. Davis}, {\em A cost optimal parallel
@@ -111,10 +231,24 @@
   International Symposium on Parallel and Distributed Processing and
   Applications, Springer, 2005, pp.~491--502.
 
-\bibitem{MatiasVi95}
-{\sc E.~Matias and U.~Vishkin}, {\em A note on reducing parallel model
-  simulations to integer sorting}, in Parallel Processing Symposium, 1995.
-  Proceedings., 9th International, IEEE, 1995, pp.~208--212.
+\bibitem{gnu}
+{\sc D.~C.~S. Mike~Haertel}, {\em {GNU} {C} qsort, version 2.28.9}, 1991.
+
+\bibitem{NetzerMi92}
+{\sc R.~H.~B. Netzer and B.~P. Miller}, {\em What are race conditions?},
+  LOPLAS, 1 (1992), pp.~74--88.
+
+\bibitem{NiDME09}
+{\sc J.~Ni and P.~DME}, {\em Enabling technology of multi-core computing for
+  medical imaging}, Consortium of College of Computer Science \& Technology,
+  Harbin Engineering University, China,  (2009).
+
+\bibitem{ForkJoin1}
+{\sc L.~Nyman and M.~Laakso}, {\em Notes on the history of fork and join}, IEEE
+  Annals of the History of Computing, 38 (2016), pp.~84--87.
+
+\bibitem{OpenMP08}
+{\em {OpenMP} Application Program Interface, Version 3.0}, May 2008.
 
 \bibitem{Rajasekaran92}
 {\sc S.~Rajasekaran and S.~Sen}, {\em On parallel integer sorting}, Acta
@@ -131,6 +265,23 @@
 {\sc D.~D. Sleator and R.~E. Tarjan}, {\em Amortized efficiency of list update
   and paging rules}, Communications of the ACM, 28 (1985), pp.~202--208.
 
+\bibitem{Smoothed2}
+{\sc D.~A. Spielman}, {\em The smoothed analysis of algorithms}, in
+  International Symposium on Fundamentals of Computation Theory, Springer,
+  2005, pp.~17--18.
+
+\bibitem{Smoothed5}
+{\sc D.~A. Spielman and S.-H. Teng}, {\em Smoothed analysis of algorithms: Why
+  the simplex algorithm usually takes polynomial time}, Journal of the ACM
+  (JACM), 51 (2004), pp.~385--463.
+
+\bibitem{ParallelCacheAlg5}
+{\sc Y.~Tang, R.~You, H.~Kan, J.~J. Tithi, P.~Ganapathi, and R.~A. Chowdhury},
+  {\em Cache-oblivious wavefront: improving parallelism of recursive dynamic
+  programming algorithms without losing cache-efficiency}, in Proceedings of
+  the 20th ACM SIGPLAN Symposium on Principles and Practice of Parallel
+  Programming, 2015, pp.~205--214.
+
 \bibitem{TsigasZh03}
 {\sc P.~Tsigas and Y.~Zhang}, {\em A simple, fast parallel implementation of
   quicksort and its performance evaluation on sun enterprise 10000}, in
@@ -141,5 +292,11 @@
 {\sc J.~S. Vitter}, {\em Algorithms and data structures for external memory},
   Foundations and Trends{\textregistered} in Theoretical Computer Science, 2
   (2008), pp.~305--474.
+
+\bibitem{ParallelCacheAlg1}
+{\sc T.~Zeiser, G.~Wellein, A.~Nitsure, K.~Iglberger, U.~Rude, and G.~Hager},
+  {\em Introducing a parallel cache oblivious blocking approach for the lattice
+  boltzmann method}, Progress in Computational Fluid Dynamics, an International
+  Journal, 8 (2008), pp.~179--188.
 
 \end{thebibliography}

@@ -3,46 +3,47 @@ Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: writeup.aux
 The style file: siam.bst
 Database file #1: paper.bib
+Warning--to sort, need author or key in openbsd
 Warning--can't use both volume and number fields in BlellochFi12
-You've used 30 entries,
+You've used 62 entries,
             2030 wiz_defined-function locations,
-            716 strings with 8943 characters,
-and the built_in function-call counts, 11786 in all, are:
-= -- 1169
-> -- 469
+            906 strings with 15031 characters,
+and the built_in function-call counts, 25091 in all, are:
+= -- 2468
+> -- 1050
 < -- 0
-+ -- 193
-- -- 154
-* -- 872
-:= -- 1741
-add.period$ -- 30
-call.type$ -- 30
-change.case$ -- 166
++ -- 430
+- -- 352
+* -- 1859
+:= -- 3674
+add.period$ -- 63
+call.type$ -- 62
+change.case$ -- 359
 chr.to.int$ -- 0
-cite$ -- 31
-duplicate$ -- 560
-empty$ -- 919
-format.name$ -- 154
-if$ -- 2588
+cite$ -- 64
+duplicate$ -- 1175
+empty$ -- 1964
+format.name$ -- 352
+if$ -- 5519
 int.to.chr$ -- 0
-int.to.str$ -- 30
-missing$ -- 30
-newline$ -- 93
-num.names$ -- 60
-pop$ -- 168
+int.to.str$ -- 62
+missing$ -- 57
+newline$ -- 190
+num.names$ -- 120
+pop$ -- 394
 preamble$ -- 1
-purify$ -- 137
+purify$ -- 301
 quote$ -- 0
-skip$ -- 485
+skip$ -- 1008
 stack$ -- 0
-substring$ -- 894
-swap$ -- 247
+substring$ -- 1899
+swap$ -- 517
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 118
-warning$ -- 1
-while$ -- 136
-width$ -- 32
-write$ -- 278
-(There was 1 warning)
+type$ -- 246
+warning$ -- 2
+while$ -- 277
+width$ -- 64
+write$ -- 562
+(There were 2 warnings)
