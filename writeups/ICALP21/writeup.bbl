@@ -1,0 +1,376 @@
+\begin{thebibliography}{10}
+
+\bibitem{openbsd}
+{OpenBSD} {C} qsort, version 1.18, 1992.
+\newblock URL:
+  \url{https://github.com/libressl-portable/openbsd/blob/master/src/lib/libc/stdlib/qsort.c}.
+
+\bibitem{AcarBl16}
+Umut~A Acar and Guy Blelloch.
+\newblock Algorithm design: Parallel and sequential, 2016.
+
+\bibitem{AcarBl00}
+Umut~A Acar, Guy~E Blelloch, and Robert~D Blumofe.
+\newblock The data locality of work stealing.
+\newblock In {\em Proceedings of the twelfth annual ACM symposium on Parallel
+  algorithms and architectures}, pages 1--12, 2000.
+
+\bibitem{AggarwalVi88}
+Alok Aggarwal and S.~Vitter, Jeffrey.
+\newblock The input/output complexity of sorting and related problems.
+\newblock {\em Communications of the ACM}, 31(9):1116--1127, September 1988.
+
+\bibitem{AlbersHa97}
+Susanne Albers and Torben Hagerup.
+\newblock Improved parallel integer sorting without concurrent writing.
+\newblock {\em Information and Computation}, 136(1):25--51, 1997.
+
+\bibitem{AllenChHa+08}
+Eric Allen, David Chase, Joe Hallett, Victor Luchangco, Jan-Willem Maessen,
+  Sukyoung Ryu, Guy~L. {Steele Jr.}, and Sam Tobin-Hochstadt.
+\newblock {\em The Fortress Language Specification Version 1.0}.
+\newblock Sun Microsystems, Inc., March 2008.
+
+\bibitem{AlonsoSc96}
+Laurent Alonso and Ren{\'e} Schott.
+\newblock A parallel algorithm for the generation of a permutation and
+  applications.
+\newblock {\em Theoretical Computer Science}, 159(1):15--28, 1996.
+
+\bibitem{Anderson90}
+R\_ Anderson.
+\newblock Parallel algorithms for generating random permutations on a shared
+  memory machine.
+\newblock In {\em Proceedings of the second annual ACM Symposium on Parallel
+  Algorithms and Architectures}, pages 95--102. ACM, 1990.
+
+\bibitem{PEM}
+Lars Arge, Michael~T Goodrich, Michael Nelson, and Nodari Sitchinava.
+\newblock Fundamental parallel algorithms for private-cache chip
+  multiprocessors.
+\newblock In {\em Proceedings of the twentieth annual symposium on Parallelism
+  in algorithms and architectures}, pages 197--206, 2008.
+
+\bibitem{AroraBlPl98}
+Nimar~S. Arora, Robert~D. Blumofe, and C.~Greg Plaxton.
+\newblock Thread scheduling for multiprogrammed multiprocessors.
+\newblock In {\em SPAA}, pages 119--129, 1998.
+
+\bibitem{Smoothed6}
+David Arthur, Bodo Manthey, and Heiko R{\"o}glin.
+\newblock Smoothed analysis of the k-means method.
+\newblock {\em Journal of the ACM (JACM)}, 58(5):1--31, 2011.
+
+\bibitem{AxtmannWi17}
+Michael Axtmann, Sascha Witt, Daniel Ferizovic, and Peter Sanders.
+\newblock In-place parallel super scalar samplesort.
+\newblock {\em arXiv preprint arXiv:1705.02257}, 2017.
+
+\bibitem{AyguadeCoDu09}
+E.~Ayguade, N.~Copty, A.~Duran, J.~Hoeflinger, Yuan Lin, F.~Massaioli,
+  X.~Teruel, P.~Unnikrishnan, and Guansong Zhang.
+\newblock The design of {OpenMP} tasks.
+\newblock {\em TPDS}, 20(3):404--418, 2009.
+
+\bibitem{ben2016parallel}
+Naama Ben-David, Guy~E Blelloch, Jeremy~T Fineman, Phillip~B Gibbons, Yan Gu,
+  Charles McGuffey, and Julian Shun.
+\newblock Parallel algorithms for asymmetric read-write costs.
+\newblock In {\em Proceedings of the 28th ACM Symposium on Parallelism in
+  Algorithms and Architectures}, pages 145--156, 2016.
+
+\bibitem{Smoothed3}
+Michael~A Bender, Mart{\'\i}n Farach-Colton, and William Kuszmaul.
+\newblock Achieving optimal backlog in multi-processor cup games.
+\newblock In {\em Proceedings of the 51st Annual ACM SIGACT Symposium on Theory
+  of Computing}, pages 1148--1157, 2019.
+
+\bibitem{ParallelCacheAlg6}
+Michael~A Bender, Jeremy~T Fineman, Seth Gilbert, and Bradley~C Kuszmaul.
+\newblock Concurrent cache-oblivious b-trees.
+\newblock In {\em Proceedings of the seventeenth annual ACM symposium on
+  Parallelism in algorithms and architectures}, pages 228--237, 2005.
+
+\bibitem{Blelloch96}
+Guy~E Blelloch.
+\newblock Programming parallel algorithms.
+\newblock {\em Communications of the ACM}, 39(3):85--97, 1996.
+
+\bibitem{blelloch2015sorting}
+Guy~E Blelloch, Jeremy~T Fineman, Phillip~B Gibbons, Yan Gu, and Julian Shun.
+\newblock Sorting with asymmetric read and write costs.
+\newblock In {\em Proceedings of the 27th ACM symposium on Parallelism in
+  Algorithms and Architectures}, pages 1--12, 2015.
+
+\bibitem{BlellochFi12}
+Guy~E Blelloch, Jeremy~T Fineman, Phillip~B Gibbons, and Julian Shun.
+\newblock Internally deterministic parallel algorithms can be fast.
+\newblock In {\em ACM SIGPLAN Notices}, volume~47, pages 181--192. ACM, 2012.
+
+\bibitem{blelloch2018parallel}
+Guy~E Blelloch, Phillip~B Gibbons, Yan Gu, Charles McGuffey, and Julian Shun.
+\newblock The parallel persistent memory model.
+\newblock In {\em Proceedings of the 30th on Symposium on Parallelism in
+  Algorithms and Architectures}, pages 247--258, 2018.
+
+\bibitem{ParallelCacheAlg2}
+Guy~E Blelloch, Phillip~B Gibbons, and Harsha~Vardhan Simhadri.
+\newblock Low depth cache-oblivious algorithms.
+\newblock In {\em Proceedings of the twenty-second annual ACM symposium on
+  Parallelism in algorithms and architectures}, pages 189--199, 2010.
+
+\bibitem{blelloch2020improved}
+Guy~E Blelloch and Yan Gu.
+\newblock Improved parallel cache-oblivious algorithms for dynamic programming
+  [extend abstract].
+\newblock In {\em Symposium on Algorithmic Principles of Computer Systems},
+  pages 105--119. SIAM, 2020.
+
+\bibitem{blelloch2018parallel2}
+Guy~E Blelloch, Yan Gu, Julian Shun, and Yihan Sun.
+\newblock Parallel write-efficient algorithms and data structures for
+  computational geometry.
+\newblock In {\em Proceedings of the 30th on Symposium on Parallelism in
+  Algorithms and Architectures}, pages 235--246, 2018.
+
+\bibitem{BlellochLe98}
+Guy~E. Blelloch, Charles~E. Leiserson, Bruce~M Maggs, C~Greg Plaxton, Stephen~J
+  Smith, and Marco Zagha.
+\newblock An experimental analysis of parallel sorting algorithms.
+\newblock {\em Theory of Computing Systems}, 31(2):135--167, 1998.
+
+\bibitem{BlumofeJo96}
+Robert~D Blumofe, Christopher~F Joerg, Bradley~C Kuszmaul, Charles~E Leiserson,
+  Keith~H Randall, and Yuli Zhou.
+\newblock Cilk: An efficient multithreaded runtime system.
+\newblock {\em Journal of parallel and distributed computing}, 37(1):55--69,
+  1996.
+
+\bibitem{BlumofeLe99}
+Robert~D Blumofe and Charles~E Leiserson.
+\newblock Scheduling multithreaded computations by work stealing.
+\newblock {\em Journal of the ACM (JACM)}, 46(5):720--748, 1999.
+
+\bibitem{Brent74}
+Richard~P Brent.
+\newblock The parallel evaluation of general arithmetic expressions.
+\newblock {\em Journal of the ACM (JACM)}, 21(2):201--206, 1974.
+
+\bibitem{ParallelCacheAlg4}
+Gerth~St{\o}lting Brodal and Rolf Fagerberg.
+\newblock Cache oblivious distribution sweeping.
+\newblock In {\em International Colloquium on Automata, Languages, and
+  Programming}, pages 426--438. Springer, 2002.
+
+\bibitem{CLRS}
+Thomas~H Cormen, Charles~E Leiserson, Ronald~L Rivest, and Clifford Stein.
+\newblock {\em Introduction to algorithms}.
+\newblock MIT press, 2009.
+
+\bibitem{DeakinPrMa18}
+Tom Deakin, James Price, Matt Martineau, and Simon McIntosh-Smith.
+\newblock Evaluating attainable memory bandwidth of parallel programming models
+  via babelstream.
+\newblock {\em International Journal of Computational Science and Engineering},
+  17(3):247--262, 2018.
+
+\bibitem{FengLe99}
+Mingdong Feng and Charles~E. Leiserson.
+\newblock Efficient detection of determinacy races in {Cilk} programs.
+\newblock {\em Theory of Computing Systems}, 32(3):301--326, 1999.
+
+\bibitem{Smoothed1}
+Mahmoud Fouz, Manfred Kufleitner, Bodo Manthey, and Nima~Zeini Jahromi.
+\newblock On smoothed analysis of quicksort and hoare’s find.
+\newblock In {\em International Computing and Combinatorics Conference}, pages
+  158--167. Springer, 2009.
+
+\bibitem{FrancisPa92}
+Rhys~S. Francis and LJH Pannan.
+\newblock A parallel partition for enhanced parallel quicksort.
+\newblock {\em Parallel Computing}, 18(5):543--550, 1992.
+
+\bibitem{Frias08}
+Leonor Frias and Jordi Petit.
+\newblock Parallel partition revisited.
+\newblock In {\em International Workshop on Experimental and Efficient
+  Algorithms}, pages 142--153. Springer, 2008.
+
+\bibitem{FrigoLeRa98}
+Matteo Frigo, Charles~E. Leiserson, and Keith~H. Randall.
+\newblock The implementation of the {C}ilk-5 multithreaded language.
+\newblock In {\em PLDI}, pages 212--223, 1998.
+
+\bibitem{ParallelCacheAlg3}
+Matteo Frigo and Volker Strumpen.
+\newblock The cache complexity of multithreaded cache oblivious algorithms.
+\newblock {\em Theory of Computing Systems}, 45(2):203--233, 2009.
+
+\bibitem{GerbessiotisSi04}
+Alexandros~V Gerbessiotis and Constantinos~J Siniolakis.
+\newblock Probabilistic integer sorting.
+\newblock {\em Information processing letters}, 90(4):187--193, 2004.
+
+\bibitem{gu2018survey}
+Yan Gu.
+\newblock Survey: computational models for asymmetric read and write costs.
+\newblock In {\em 2018 IEEE International Parallel and Distributed Processing
+  Symposium Workshops (IPDPSW)}, pages 733--743. IEEE, 2018.
+
+\bibitem{inplace}
+Yan Gu, Omar Obeya, and Julian Shun.
+\newblock Parallel in-place algorithms: Theory and practice.
+\newblock In {\em Symposium on Algorithmic Principles of Computer Systems
+  (APOCS)}, pages 114--128. SIAM, 2021.
+
+\bibitem{Hagerup89}
+Torben Hagerup and Christine R{\"u}b.
+\newblock Optimal merging and sorting on the erew pram.
+\newblock {\em Information Processing Letters}, 33(4):181--185, 1989.
+
+\bibitem{Han01}
+Yijie Han.
+\newblock Improved fast integer sorting in linear space.
+\newblock In {\em Proceedings of the twelfth annual ACM-SIAM symposium on
+  Discrete algorithms}, pages 793--796. Society for Industrial and Applied
+  Mathematics, 2001.
+
+\bibitem{HanHe12}
+Yijie Han and Xin He.
+\newblock More efficient parallel integer sorting.
+\newblock In {\em Frontiers in Algorithmics and Algorithmic Aspects in
+  Information and Management}, pages 279--290. Springer, 2012.
+
+\bibitem{HeidelbergerNo90}
+Philip Heidelberger, Alan Norton, and John~T. Robinson.
+\newblock Parallel quicksort using fetch-and-add.
+\newblock {\em IEEE Transactions on Computers}, 39(1):133--138, 1990.
+
+\bibitem{IntelCilkPlus10}
+{Intel Corporation}.
+\newblock {\em Intel {Cilk} {Plus} Language Specification}, 2010.
+\newblock Document Number: 324396-001US. Available from
+  \url{http://software.intel.com/sites/products/cilk-plus/cilk_plus_language_specification.pdf}.
+
+\bibitem{Cilkmem}
+Tim Kaler, William Kuszmaul, Tao~B Schardl, and Daniele Vettorel.
+\newblock Cilkmem: Algorithms for analyzing the memory high-water mark of
+  fork-join parallel programs.
+\newblock In {\em Symposium on Algorithmic Principles of Computer Systems},
+  pages 162--176. SIAM, 2020.
+
+\bibitem{Katajainen93}
+Jyrki Katajainen, Christos Levcopoulos, and Ola Petersson.
+\newblock Space-efficient parallel merging.
+\newblock {\em RAIRO-Theoretical Informatics and Applications}, 27(4):295--310,
+  1993.
+
+\bibitem{Smoothed4}
+William Kuszmaul.
+\newblock Achieving optimal backlog in the vanilla multi-processor cup game.
+\newblock In {\em Proceedings of the Fourteenth Annual ACM-SIAM Symposium on
+  Discrete Algorithms}, pages 1558--1577. SIAM, 2020.
+
+\bibitem{Forkjoin2}
+Doug Lea.
+\newblock A java fork/join framework.
+\newblock In {\em Proceedings of the ACM 2000 conference on Java Grande}, pages
+  36--43, 2000.
+
+\bibitem{Leiserson10}
+Charles~E. Leiserson.
+\newblock The {Cilk++} concurrency platform.
+\newblock {\em Journal of Supercomputing}, 51(3):244--257, 2010.
+
+\bibitem{LiuKn05}
+Jie Liu, Clinton Knowles, and Adam~Brian Davis.
+\newblock A cost optimal parallel quicksorting and its implementation on a
+  shared memory parallel computer.
+\newblock In {\em International Symposium on Parallel and Distributed
+  Processing and Applications}, pages 491--502. Springer, 2005.
+
+\bibitem{gnu}
+Douglas C.~Schmidt Mike~Haertel.
+\newblock {GNU} {C} qsort, version 2.28.9, 1991.
+\newblock URL:
+  \url{https://github.com/lattera/glibc/blob/master/stdlib/msort.c}.
+
+\bibitem{NetzerMi92}
+Robert H.~B. Netzer and Barton~P. Miller.
+\newblock What are race conditions?
+\newblock {\em LOPLAS}, 1(1):74--88, 1992.
+
+\bibitem{NiDME09}
+Jun Ni and Ph~DME.
+\newblock Enabling technology of multi-core computing for medical imaging.
+\newblock {\em Consortium of College of Computer Science \& Technology, Harbin
+  Engineering University, China}, 2009.
+
+\bibitem{ForkJoin1}
+Linus Nyman and Mikael Laakso.
+\newblock Notes on the history of fork and join.
+\newblock {\em IEEE Annals of the History of Computing}, 38(3):84--87, 2016.
+
+\bibitem{OpenMP08}
+{\em {OpenMP} Application Program Interface, Version 3.0}, May 2008.
+
+\bibitem{Rajasekaran92}
+Sanguthevar Rajasekaran and Sandeep Sen.
+\newblock On parallel integer sorting.
+\newblock {\em Acta Informatica}, 29(1):1--15, 1992.
+
+\bibitem{ShunGu15}
+Julian Shun, Yan Gu, Guy~E Blelloch, Jeremy~T Fineman, and Phillip~B Gibbons.
+\newblock Sequential random permutation, list contraction and tree contraction
+  are highly parallel.
+\newblock In {\em Proceedings of the twenty-sixth annual ACM-SIAM symposium on
+  Discrete algorithms}, pages 431--448. Society for Industrial and Applied
+  Mathematics, 2015.
+
+\bibitem{SleatorTa85}
+Daniel~D Sleator and Robert~E Tarjan.
+\newblock Amortized efficiency of list update and paging rules.
+\newblock {\em Communications of the ACM}, 28(2):202--208, 1985.
+
+\bibitem{Smoothed2}
+Daniel~A Spielman.
+\newblock The smoothed analysis of algorithms.
+\newblock In {\em International Symposium on Fundamentals of Computation
+  Theory}, pages 17--18. Springer, 2005.
+
+\bibitem{Smoothed5}
+Daniel~A Spielman and Shang-Hua Teng.
+\newblock Smoothed analysis of algorithms: Why the simplex algorithm usually
+  takes polynomial time.
+\newblock {\em Journal of the ACM (JACM)}, 51(3):385--463, 2004.
+
+\bibitem{ParallelCacheAlg5}
+Yuan Tang, Ronghui You, Haibin Kan, Jesmin~Jahan Tithi, Pramod Ganapathi, and
+  Rezaul~A Chowdhury.
+\newblock Cache-oblivious wavefront: improving parallelism of recursive dynamic
+  programming algorithms without losing cache-efficiency.
+\newblock In {\em Proceedings of the 20th ACM SIGPLAN Symposium on Principles
+  and Practice of Parallel Programming}, pages 205--214, 2015.
+
+\bibitem{TsigasZh03}
+Philippas Tsigas and Yi~Zhang.
+\newblock A simple, fast parallel implementation of quicksort and its
+  performance evaluation on sun enterprise 10000.
+\newblock In {\em Proceedings of the Eleventh Euromicro Conference on Parallel,
+  Distributed and Network-Based Processing}, page 372. IEEE, 2003.
+
+\bibitem{Vitter08}
+Jeffrey~Scott Vitter.
+\newblock Algorithms and data structures for external memory.
+\newblock {\em Foundations and Trends{\textregistered} in Theoretical Computer
+  Science}, 2(4):305--474, 2008.
+
+\bibitem{ParallelCacheAlg1}
+Thomas Zeiser, Gerhard Wellein, Aditya Nitsure, Klaus Iglberger, U~Rude, and
+  Georg Hager.
+\newblock Introducing a parallel cache oblivious blocking approach for the
+  lattice boltzmann method.
+\newblock {\em Progress in Computational Fluid Dynamics, an International
+  Journal}, 8(1-4):179--188, 2008.
+
+\end{thebibliography}

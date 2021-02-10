@@ -1,0 +1,53 @@
+This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: writeup.aux
+The style file: plainurl.bst
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=20001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: paper.bib
+Warning--to sort, need author or key in openbsd
+Warning--can't use both volume and number fields in BlellochFi12
+You've used 64 entries,
+            2849 wiz_defined-function locations,
+            1033 strings with 16767 characters,
+and the built_in function-call counts, 32080 in all, are:
+= -- 3373
+> -- 1183
+< -- 30
++ -- 446
+- -- 366
+* -- 1735
+:= -- 4444
+add.period$ -- 204
+call.type$ -- 64
+change.case$ -- 372
+chr.to.int$ -- 0
+cite$ -- 66
+duplicate$ -- 1025
+empty$ -- 2941
+format.name$ -- 366
+if$ -- 8222
+int.to.chr$ -- 0
+int.to.str$ -- 64
+missing$ -- 59
+newline$ -- 319
+num.names$ -- 124
+pop$ -- 686
+preamble$ -- 1
+purify$ -- 312
+quote$ -- 0
+skip$ -- 2205
+stack$ -- 0
+substring$ -- 1809
+swap$ -- 345
+text.length$ -- 30
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 254
+warning$ -- 2
+while$ -- 261
+width$ -- 66
+write$ -- 706
+(There were 2 warnings)
